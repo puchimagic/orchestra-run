@@ -1,4 +1,4 @@
-import { SCENE, FONT_SIZE, FONT_FAMILY, BLOCK_SIZE, PLATFORM_HEIGHT_IN_BLOCKS, INSTRUMENT_CONFIG, INITIAL_SCROLL_SPEED } from '../config.js';
+import { SCENE, FONT_SIZE, FONT_FAMILY, BLOCK_SIZE, PLATFORM_HEIGHT_IN_BLOCKS, INSTRUMENT_CONFIG, INITIAL_SCROLL_SPEED, PLAYER_MAX_JUMP_IN_BLOCKS } from '../config.js';
 import { Player } from '../player.js';
 import { Stage } from '../stage.js';
 import { ScaffoldBlock } from '../scaffold.js';
@@ -36,20 +36,41 @@ export class GameScene {
     }
 
     requestScaffold(holeX, holeWidth) {
-        let requiredKeys = [];
-        const availableKeys = this.instrument.keys;
-        const numKeysToPress = (this.instrument.name === 'ギター') 
-            ? 1 + Math.floor(Math.random() * this.instrument.maxChord)
-            : 1;
-        const shuffledKeys = [...availableKeys].sort(() => 0.5 - Math.random());
-        requiredKeys = shuffledKeys.slice(0, numKeysToPress);
-
-        const scaffoldWidthInBlocks = 7;
-        const scaffoldHeightInBlocks = 1;
-        const x = holeX + (holeWidth - (scaffoldWidthInBlocks * BLOCK_SIZE)) / 2;
-        const y = this.game.canvas.height - (PLATFORM_HEIGHT_IN_BLOCKS * BLOCK_SIZE) - (scaffoldHeightInBlocks * BLOCK_SIZE) * 3;
+        const holeWidthInBlocks = holeWidth / BLOCK_SIZE;
         
-        this.scaffolds.push(new ScaffoldBlock(x, y, scaffoldWidthInBlocks, scaffoldHeightInBlocks, requiredKeys));
+        // ★ご指摘に基づき、穴の長さごとに足場の数を明示的に決定するロジックに変更
+        let numScaffolds = 0;
+        if (holeWidthInBlocks > 32) { // 33ブロック以上
+            numScaffolds = 4;
+        } else if (holeWidthInBlocks > 24) { // 25〜32ブロック
+            numScaffolds = 3;
+        } else if (holeWidthInBlocks > 16) { // 17〜24ブロック
+            numScaffolds = 2;
+        } else if (holeWidthInBlocks > PLAYER_MAX_JUMP_IN_BLOCKS) { // 9〜16ブロック
+            numScaffolds = 1;
+        }
+
+        if (numScaffolds <= 0) return;
+
+        const spacing = holeWidth / (numScaffolds + 1);
+        const scaffoldWidthInBlocks = 7;
+        const scaffoldWidthInPixels = scaffoldWidthInBlocks * BLOCK_SIZE;
+
+        for (let i = 0; i < numScaffolds; i++) {
+            let requiredKeys = [];
+            const availableKeys = this.instrument.keys;
+            const numKeysToPress = (this.instrument.name === 'ギター') 
+                ? 1 + Math.floor(Math.random() * this.instrument.maxChord)
+                : 1;
+            const shuffledKeys = [...availableKeys].sort(() => 0.5 - Math.random());
+            requiredKeys = shuffledKeys.slice(0, numKeysToPress);
+
+            const scaffoldX = holeX + (i + 1) * spacing - (scaffoldWidthInPixels / 2);
+            const scaffoldHeightInBlocks = 1;
+            const scaffoldY = this.game.canvas.height - (PLATFORM_HEIGHT_IN_BLOCKS * BLOCK_SIZE) - (scaffoldHeightInBlocks * BLOCK_SIZE) * 3;
+            
+            this.scaffolds.push(new ScaffoldBlock(scaffoldX, scaffoldY, scaffoldWidthInBlocks, scaffoldHeightInBlocks, requiredKeys));
+        }
     }
 
     update() {
@@ -58,9 +79,8 @@ export class GameScene {
         this.lastTime = now;
         const elapsedTimeInSeconds = (now - this.startTime) / 1000;
 
-        // ★スコア計算を「1秒1点」基準に修正
-        const scorePerSecond = 1; // 1秒あたり1点
-        const timeBonus = 1 + (elapsedTimeInSeconds / 120); // 2分でスコア上昇率が2倍になる
+        const scorePerSecond = 1;
+        const timeBonus = 1 + (elapsedTimeInSeconds / 120);
         this.baseScore += scorePerSecond * timeBonus * deltaTime;
         this.score = Math.floor(this.baseScore * this.scoreMultiplier);
 

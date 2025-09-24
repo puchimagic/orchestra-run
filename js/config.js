@@ -17,10 +17,11 @@ export const FONT_SIZE = {
 export const BLOCK_SIZE = 60;
 export const PLATFORM_HEIGHT_IN_BLOCKS = 1;
 
-// ★スクロール速度の初期値を定義
 export const INITIAL_SCROLL_SPEED = 5;
 
-// ★各楽器にスコア倍率(multiplier)を追加
+// ★プレイヤーのジャンプ力を共通設定に
+export const PLAYER_MAX_JUMP_IN_BLOCKS = 8;
+
 export const INSTRUMENT_CONFIG = {
     'トライアングル': { name: 'トライアングル', keys: ['J'], maxChord: 1, multiplier: 1.0 },
     'タンバリン':   { name: 'タンバリン',   keys: ['J', 'L'], maxChord: 1, multiplier: 1.1 },

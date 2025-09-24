@@ -1,13 +1,12 @@
-import { BLOCK_SIZE, PLATFORM_HEIGHT_IN_BLOCKS, INITIAL_SCROLL_SPEED } from './config.js';
+import { BLOCK_SIZE, PLATFORM_HEIGHT_IN_BLOCKS, PLAYER_MAX_JUMP_IN_BLOCKS, INITIAL_SCROLL_SPEED } from './config.js';
 
 const PLATFORM_COLOR = 'black';
 
 const MIN_PLATFORM_WIDTH_IN_BLOCKS = 5;
 const MAX_PLATFORM_WIDTH_IN_BLOCKS = 15;
 const MIN_GAP_IN_BLOCKS = 4;
-const MAX_GAP_IN_BLOCKS = 25;
-
-const PLAYER_MAX_JUMP_IN_BLOCKS = 8;
+// ★穴の最大長を拡大
+const MAX_GAP_IN_BLOCKS = 40; // 25 -> 40
 
 class Platform {
     constructor(x, y, widthInBlocks) {
@@ -49,7 +48,6 @@ export class Stage {
         }
     }
 
-    // ★外部からスクロール速度を変更するためのメソッド
     setScrollSpeed(speed) {
         this.scrollSpeed = speed;
     }
@@ -76,7 +74,6 @@ export class Stage {
     }
 
     update() {
-        // ★動的なスクロール速度を使用
         this.cameraX += this.scrollSpeed;
 
         if (this.lastPlatformX < this.cameraX + this.game.canvas.width + 200) {
