@@ -1,10 +1,12 @@
 import { SCENE, FONT_SIZE, FONT_FAMILY } from '../config.js';
 import { Button } from '../ui/button.js';
 
+const INSTRUMENTS = ['トライアングル', 'タンバリン', 'ピアノ', 'ギター', 'ドラム'];
+
 export class InstrumentSelectScene {
     constructor(game) {
         this.game = game;
-        this.selectedInstrument = 'カスタネット'; // Default selection
+        this.selectedInstrument = INSTRUMENTS[0]; // Default selection
     }
 
     init() {
@@ -12,15 +14,26 @@ export class InstrumentSelectScene {
         const btnHeight = 75;
         const cx = this.game.canvas.width / 2;
         const cy = this.game.canvas.height / 2;
+        const col_margin = 20;
+        const row_margin = 20;
 
-        this.instrumentButtons = {
-            'カスタネット': new Button(cx - btnWidth / 2, cy - 150, btnWidth, btnHeight, 'カスタネット'),
-            'ギター': new Button(cx - btnWidth / 2, cy - 50, btnWidth, btnHeight, 'ギター'),
-            'ピアノ': new Button(cx - btnWidth / 2, cy + 50, btnWidth, btnHeight, 'ピアノ'),
-        };
+        // 2列レイアウト
+        const col1_x = cx - btnWidth - col_margin;
+        const col2_x = cx + col_margin;
+        const y1 = cy - btnHeight - row_margin - 50;
+        const y2 = cy - 50;
+        const y3 = cy + btnHeight + row_margin - 50;
 
-        this.startButton = new Button(cx - 150, cy + 200, btnWidth, btnHeight, 'ゲームスタート', '#4CAF50', '#66BB6A');
-        this.backButton = new Button(cx - 150, cy + 290, btnWidth, btnHeight, 'メインに戻る');
+        this.instrumentButtons = {};
+        this.instrumentButtons[INSTRUMENTS[0]] = new Button(col1_x, y1, btnWidth, btnHeight, INSTRUMENTS[0]);
+        this.instrumentButtons[INSTRUMENTS[1]] = new Button(col1_x, y2, btnWidth, btnHeight, INSTRUMENTS[1]);
+        this.instrumentButtons[INSTRUMENTS[2]] = new Button(col1_x, y3, btnWidth, btnHeight, INSTRUMENTS[2]);
+        this.instrumentButtons[INSTRUMENTS[3]] = new Button(col2_x, y1, btnWidth, btnHeight, INSTRUMENTS[3]);
+        this.instrumentButtons[INSTRUMENTS[4]] = new Button(col2_x, y2, btnWidth, btnHeight, INSTRUMENTS[4]);
+
+        const bottomButtonY = y3 + btnHeight + 80;
+        this.startButton = new Button(cx - btnWidth - col_margin, bottomButtonY, btnWidth, btnHeight, 'ゲームスタート', '#4CAF50', '#66BB6A');
+        this.backButton = new Button(cx + col_margin, bottomButtonY, btnWidth, btnHeight, 'メインに戻る');
     }
 
     update() {
