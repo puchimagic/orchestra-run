@@ -12,6 +12,8 @@ export class GameOverScene {
         this.finalScore = data.score || 0;
         this.lastInstrument = data.instrument || 'なし';
 
+        this.game.scoreManager.addScore(this.finalScore, this.lastInstrument);
+
         const btnWidth = 300;
         const btnHeight = 75;
         const cx = this.game.canvas.width / 2;
