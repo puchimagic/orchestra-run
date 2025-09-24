@@ -35,8 +35,8 @@ export class InstructionsScene {
         ctx.fillText('How to Play', width / 2, 100);
 
         ctx.font = `${FONT_SIZE.SMALL}px ${FONT_FAMILY}`;
-        ctx.fillText('This is a placeholder for instructions.', width / 2, height / 2 - 50);
-        ctx.fillText('Use arrow keys to move and space to jump (in the final game).', width / 2, height / 2);
+        ctx.fillText('Player 1 (Character): Use A (left), S (jump), D (right) keys.', width / 2, height / 2 - 50);
+        ctx.fillText('Player 2 (Music): Use keyboard to create platforms (Not implemented yet).', width / 2, height / 2);
 
         this.nextButton.draw(ctx);
     }

@@ -1,6 +1,3 @@
-import { CANVAS_HEIGHT } from '../config.js';
-
-// ゲーム設定
 const PLAYER_WIDTH = 30;
 const PLAYER_HEIGHT = 50;
 const PLAYER_COLOR = 'blue';
@@ -14,9 +11,9 @@ export class Player {
         this.width = PLAYER_WIDTH;
         this.height = PLAYER_HEIGHT;
         this.x = 50;
-        this.y = CANVAS_HEIGHT - this.height - 50; // 初期位置は地面から少し上
-        this.vx = 0; // X方向の速度
-        this.vy = 0; // Y方向の速度
+        this.y = this.game.canvas.height - this.height - 50;
+        this.vx = 0;
+        this.vy = 0;
         this.isJumping = false;
 
         this.keys = {};
@@ -25,6 +22,11 @@ export class Player {
     }
 
     init() {
+        this.x = 50;
+        this.y = this.game.canvas.height - this.height - 50;
+        this.vx = 0;
+        this.vy = 0;
+        this.isJumping = false;
         document.addEventListener('keydown', this.handleKeyDown);
         document.addEventListener('keyup', this.handleKeyUp);
     }
@@ -44,9 +46,9 @@ export class Player {
 
     update(platforms) {
         // 左右移動
-        if (this.keys['ArrowLeft']) {
+        if (this.keys['KeyA']) {
             this.vx = -MOVE_SPEED;
-        } else if (this.keys['ArrowRight']) {
+        } else if (this.keys['KeyD']) {
             this.vx = MOVE_SPEED;
         } else {
             this.vx = 0;
@@ -54,7 +56,7 @@ export class Player {
         this.x += this.vx;
 
         // ジャンプ
-        if (this.keys['Space'] && !this.isJumping) {
+        if (this.keys['KeyS'] && !this.isJumping) {
             this.vy = -JUMP_POWER;
             this.isJumping = true;
         }
@@ -69,7 +71,7 @@ export class Player {
             if (this.x < platform.x + platform.width &&
                 this.x + this.width > platform.x &&
                 this.y + this.height > platform.y &&
-                this.y + this.height < platform.y + platform.height + 10 && // 少し下にめり込んでもOK
+                this.y + this.height < platform.y + platform.height + 10 &&
                 this.vy >= 0) {
                 this.y = platform.y - this.height;
                 this.vy = 0;
@@ -78,15 +80,14 @@ export class Player {
             }
         });
 
-        // 画面端の制限
-        if (this.x < 0) {
-            this.x = 0;
+        // 画面左端の制限 (カメラ位置を考慮)
+        if (this.x < this.game.currentScene.stage.cameraX) {
+            this.x = this.game.currentScene.stage.cameraX;
         }
-        // 右端はカメラに依存するのでここでは制限しない
     }
 
-    draw() {
-        this.game.ctx.fillStyle = PLAYER_COLOR;
-        this.game.ctx.fillRect(this.x, this.y, this.width, this.height);
+    draw(ctx) {
+        ctx.fillStyle = PLAYER_COLOR;
+        ctx.fillRect(this.x, this.y, this.width, this.height);
     }
 }
