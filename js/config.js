@@ -13,3 +13,7 @@ export const FONT_SIZE = {
     MEDIUM: 72,
     LARGE: 96,
 };
+
+// ★ブロックサイズの定義をここに移動
+export const BLOCK_SIZE = 30;
+export const PLATFORM_HEIGHT_IN_BLOCKS = 1;

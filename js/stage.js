@@ -1,24 +1,30 @@
+import { BLOCK_SIZE, PLATFORM_HEIGHT_IN_BLOCKS } from './config.js';
+
 const SCROLL_SPEED = 3;
 const PLATFORM_COLOR = 'black';
-const PLATFORM_HEIGHT = 30;
-const MIN_PLATFORM_WIDTH = 150;
-const MAX_PLATFORM_WIDTH = 450;
-const MIN_GAP = 120;
-const MAX_GAP = 800; // さらに長い穴ができるように上限を拡大
 
-const PLAYER_MAX_JUMP_DISTANCE = 400; // プレイヤーがジャンプで越えられるおおよその最大距離
+const MIN_PLATFORM_WIDTH_IN_BLOCKS = 5;
+const MAX_PLATFORM_WIDTH_IN_BLOCKS = 15;
+const MIN_GAP_IN_BLOCKS = 4;
+const MAX_GAP_IN_BLOCKS = 25;
+
+const PLAYER_MAX_JUMP_IN_BLOCKS = 14;
 
 class Platform {
-    constructor(x, y, width) {
+    constructor(x, y, widthInBlocks) {
         this.x = x;
         this.y = y;
-        this.width = width;
-        this.height = PLATFORM_HEIGHT;
+        this.width = widthInBlocks * BLOCK_SIZE;
+        this.height = PLATFORM_HEIGHT_IN_BLOCKS * BLOCK_SIZE;
+        this.widthInBlocks = widthInBlocks;
     }
 
     draw(ctx) {
         ctx.fillStyle = PLATFORM_COLOR;
-        ctx.fillRect(this.x, this.y, this.width, this.height);
+        for (let i = 0; i < this.widthInBlocks; i++) {
+            const blockX = this.x + i * BLOCK_SIZE;
+            ctx.fillRect(blockX, this.y, BLOCK_SIZE, BLOCK_SIZE);
+        }
     }
 }
 
@@ -31,30 +37,33 @@ export class Stage {
         this.cameraX = 0;
         this.platforms = [];
         this.lastPlatformX = -50;
-        this.createPlatform(this.lastPlatformX, this.game.canvas.height - PLATFORM_HEIGHT, this.game.canvas.width + 100);
+        const initialPlatformWidth = Math.ceil(this.game.canvas.width / BLOCK_SIZE) + 2;
+        this.createPlatform(this.lastPlatformX, this.game.canvas.height - (PLATFORM_HEIGHT_IN_BLOCKS * BLOCK_SIZE), initialPlatformWidth);
+        
         while (this.lastPlatformX < this.cameraX + this.game.canvas.width * 2) {
             this.generateNext();
         }
     }
 
-    createPlatform(x, y, width) {
-        const platform = new Platform(x, y, width);
+    createPlatform(x, y, widthInBlocks) {
+        const platform = new Platform(x, y, widthInBlocks);
         this.platforms.push(platform);
-        this.lastPlatformX = x + width;
+        this.lastPlatformX = x + platform.width;
     }
 
     generateNext() {
-        const gap = MIN_GAP + Math.random() * (MAX_GAP - MIN_GAP);
-        const width = MIN_PLATFORM_WIDTH + Math.random() * (MAX_PLATFORM_WIDTH - MIN_PLATFORM_WIDTH);
-        const newX = this.lastPlatformX + gap;
-        const newY = this.game.canvas.height - PLATFORM_HEIGHT;
+        const gapInBlocks = MIN_GAP_IN_BLOCKS + Math.floor(Math.random() * (MAX_GAP_IN_BLOCKS - MIN_GAP_IN_BLOCKS + 1));
+        const widthInBlocks = MIN_PLATFORM_WIDTH_IN_BLOCKS + Math.floor(Math.random() * (MAX_PLATFORM_WIDTH_IN_BLOCKS - MIN_PLATFORM_WIDTH_IN_BLOCKS + 1));
+        
+        const gapInPixels = gapInBlocks * BLOCK_SIZE;
+        const newX = this.lastPlatformX + gapInPixels;
+        const newY = this.game.canvas.height - (PLATFORM_HEIGHT_IN_BLOCKS * BLOCK_SIZE);
 
-        // ★ご要望の反映箇所: 穴が長すぎる場合、イベントを通知する
-        if (gap > PLAYER_MAX_JUMP_DISTANCE) {
-            this.game.currentScene.requestScaffold(this.lastPlatformX, gap);
+        if (gapInBlocks > PLAYER_MAX_JUMP_IN_BLOCKS) {
+            this.game.currentScene.requestScaffold(this.lastPlatformX, gapInPixels);
         }
 
-        this.createPlatform(newX, newY, width);
+        this.createPlatform(newX, newY, widthInBlocks);
     }
 
     update() {

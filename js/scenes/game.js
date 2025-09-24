@@ -1,4 +1,4 @@
-import { SCENE, FONT_SIZE, FONT_FAMILY } from '../config.js';
+import { SCENE, FONT_SIZE, FONT_FAMILY, BLOCK_SIZE, PLATFORM_HEIGHT_IN_BLOCKS } from '../config.js';
 import { Player } from '../player.js';
 import { Stage } from '../stage.js';
 import { ScaffoldBlock } from '../scaffold.js';
@@ -25,33 +25,29 @@ export class GameScene {
 
         this.player = new Player(this.game);
         this.stage = new Stage(this.game);
-        this.scaffolds = []; // 足場ブロックを管理する配列
+        this.scaffolds = [];
 
         this.player.init();
         this.stage.init();
         this.player2Input.init();
     }
 
-    // Stageから足場生成のリクエストを受ける
     requestScaffold(holeX, holeWidth) {
         const key = SCAFFOLD_KEYS[Math.floor(Math.random() * SCAFFOLD_KEYS.length)];
-        const scaffoldWidth = 200;
-        const scaffoldHeight = 30;
-        const x = holeX + (holeWidth - scaffoldWidth) / 2;
-        const y = this.game.canvas.height - PLATFORM_HEIGHT - scaffoldHeight * 2; // 少し高めに設置
+        const scaffoldWidthInBlocks = 7;
+        const scaffoldHeightInBlocks = 1;
+        const x = holeX + (holeWidth - (scaffoldWidthInBlocks * BLOCK_SIZE)) / 2;
+        const y = this.game.canvas.height - (PLATFORM_HEIGHT_IN_BLOCKS * BLOCK_SIZE) - (scaffoldHeightInBlocks * BLOCK_SIZE) * 3;
         
-        this.scaffolds.push(new ScaffoldBlock(x, y, scaffoldWidth, scaffoldHeight, key));
+        this.scaffolds.push(new ScaffoldBlock(x, y, scaffoldWidthInBlocks, scaffoldHeightInBlocks, key));
     }
 
     update() {
         this.score = Math.floor((Date.now() - this.startTime) / 1000);
 
         this.stage.update();
-
-        // 足場ブロックの状態を更新
         this.scaffolds.forEach(s => s.update());
 
-        // プレイヤー2の入力を処理
         this.scaffolds.forEach(s => {
             if (s.state === 'ACTIVE') {
                 const action = `ACTION_${s.key}`;
@@ -61,12 +57,10 @@ export class GameScene {
             }
         });
 
-        // プレイヤー1の更新 (固まった足場も当たり判定に含める)
         const solidScaffolds = this.scaffolds.filter(s => s.state === 'SOLID');
         const allPlatforms = [...this.stage.platforms, ...solidScaffolds];
         this.player.update(allPlatforms);
 
-        // 不要になった足場を削除
         this.scaffolds = this.scaffolds.filter(s => s.state !== 'EXPIRED' && s.x + s.width > this.stage.cameraX);
 
         this.checkGameOver();
@@ -112,6 +106,3 @@ export class GameScene {
         ctx.fillText(`楽器: ${this.selectedInstrument}`, 20, 100);
     }
 }
-
-// game.jsにPLATFORM_HEIGHTの定義がないので、stage.jsから持ってくる必要がある
-const PLATFORM_HEIGHT = 30;
