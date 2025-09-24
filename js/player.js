@@ -75,7 +75,7 @@ export class Player {
             }
         });
 
-        if (this.keys['KeyS'] && this.onGround) {
+        if (this.keys['Space'] && this.onGround) {
             this.vy = -JUMP_POWER;
             this.onGround = false;
         }
