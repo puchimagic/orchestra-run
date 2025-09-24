@@ -96,21 +96,22 @@ export class Stage {
         this.platforms.push(platform);
         this.lastPlatformX = x + platform.width;
 
-        if (widthInBlocks > 8 && Math.random() < 0.7) {
+        // ★出現頻度を調整
+        if (widthInBlocks > 8 && Math.random() < 0.8) { // 70% -> 80%
             const obstacleType = Math.random();
-            if (obstacleType < 0.4) {
+            if (obstacleType < 0.45) { // 40% -> 45% (Wall)
                 const isHighWall = Math.random() < 0.5;
-                // ★高い壁の高さを修正 (4 -> 6)
                 const wallHeight = isHighWall ? BLOCK_SIZE * 6 : BLOCK_SIZE * 2.5;
                 const wall = new Wall(x + platform.width / 2, y - wallHeight, BLOCK_SIZE, wallHeight, isHighWall);
                 this.walls.push(wall);
                 if (isHighWall) {
                     this.game.currentScene.requestWallBreakEvent(wall);
                 }
-            } else if (obstacleType < 0.7) {
+            } else if (obstacleType < 0.9) { // 30% -> 45% (Enemy)
                 const enemy = new Enemy(x + platform.width / 2, y - BLOCK_SIZE * 1.5, platform.width / 4);
                 this.enemies.push(enemy);
             }
+            // 10% for nothing
         }
     }
 
