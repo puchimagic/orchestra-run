@@ -5,10 +5,12 @@ export class GameOverScene {
     constructor(game) {
         this.game = game;
         this.finalScore = 0;
+        this.lastInstrument = null;
     }
 
     init(data) {
         this.finalScore = data.score || 0;
+        this.lastInstrument = data.instrument || 'なし';
 
         const btnWidth = 300;
         const btnHeight = 75;
@@ -21,7 +23,7 @@ export class GameOverScene {
 
     update() {
         if (this.continueButton.update(this.game.mouse)) {
-            this.game.changeScene(SCENE.INSTRUMENT_SELECT);
+            this.game.changeScene(SCENE.GAME, { instrument: this.lastInstrument });
         }
         if (this.backButton.update(this.game.mouse)) {
             this.game.changeScene(SCENE.MAIN);

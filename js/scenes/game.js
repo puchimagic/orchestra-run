@@ -40,7 +40,7 @@ export class GameScene {
 
     gameOver() {
         this.player.destroy();
-        this.game.changeScene(SCENE.GAME_OVER, { score: this.score });
+        this.game.changeScene(SCENE.GAME_OVER, { score: this.score, instrument: this.selectedInstrument });
     }
 
     draw() {
