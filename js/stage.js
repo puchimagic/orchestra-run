@@ -1,6 +1,7 @@
 import { BLOCK_SIZE, PLATFORM_HEIGHT_IN_BLOCKS } from './config.js';
 
-const SCROLL_SPEED = 3;
+// ★スクロール速度を調整
+const SCROLL_SPEED = 5; // 3 -> 5
 const PLATFORM_COLOR = 'black';
 
 const MIN_PLATFORM_WIDTH_IN_BLOCKS = 5;
@@ -8,7 +9,6 @@ const MAX_PLATFORM_WIDTH_IN_BLOCKS = 15;
 const MIN_GAP_IN_BLOCKS = 4;
 const MAX_GAP_IN_BLOCKS = 25;
 
-// ★バランス調整: 14 -> 8
 const PLAYER_MAX_JUMP_IN_BLOCKS = 8;
 
 class Platform {
@@ -23,13 +23,11 @@ class Platform {
     draw(ctx) {
         for (let i = 0; i < this.widthInBlocks; i++) {
             const blockX = this.x + i * BLOCK_SIZE;
-            // 塗りつぶし
             ctx.fillStyle = PLATFORM_COLOR;
-            ctx.fillRect(blockX, this.y, this.height, this.height);
-            // ★見た目の変更: 白い枠線を追加
+            ctx.fillRect(blockX, this.y, BLOCK_SIZE, BLOCK_SIZE);
             ctx.strokeStyle = '#fff';
             ctx.lineWidth = 1;
-            ctx.strokeRect(blockX, this.y, this.height, this.height);
+            ctx.strokeRect(blockX, this.y, BLOCK_SIZE, BLOCK_SIZE);
         }
     }
 }

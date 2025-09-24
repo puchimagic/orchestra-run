@@ -3,9 +3,10 @@ import { BLOCK_SIZE } from './config.js';
 const PLAYER_WIDTH_IN_BLOCKS = 1.5;
 const PLAYER_HEIGHT_IN_BLOCKS = 2.5;
 const PLAYER_COLOR = 'blue';
-const MOVE_SPEED = 7;
-const JUMP_POWER = 24;
-const GRAVITY = 1.2;
+// ★物理パラメータを調整
+const MOVE_SPEED = 11;       // 7 -> 11
+const JUMP_POWER = 34;       // 24 -> 34
+const GRAVITY = 1.7;         // 1.2 -> 1.7
 
 export class Player {
     constructor(game) {
