@@ -8,7 +8,8 @@ const MAX_PLATFORM_WIDTH_IN_BLOCKS = 15;
 const MIN_GAP_IN_BLOCKS = 4;
 const MAX_GAP_IN_BLOCKS = 25;
 
-const PLAYER_MAX_JUMP_IN_BLOCKS = 14;
+// ★バランス調整: 14 -> 8
+const PLAYER_MAX_JUMP_IN_BLOCKS = 8;
 
 class Platform {
     constructor(x, y, widthInBlocks) {
@@ -20,10 +21,15 @@ class Platform {
     }
 
     draw(ctx) {
-        ctx.fillStyle = PLATFORM_COLOR;
         for (let i = 0; i < this.widthInBlocks; i++) {
             const blockX = this.x + i * BLOCK_SIZE;
-            ctx.fillRect(blockX, this.y, BLOCK_SIZE, BLOCK_SIZE);
+            // 塗りつぶし
+            ctx.fillStyle = PLATFORM_COLOR;
+            ctx.fillRect(blockX, this.y, this.height, this.height);
+            // ★見た目の変更: 白い枠線を追加
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(blockX, this.y, this.height, this.height);
         }
     }
 }
