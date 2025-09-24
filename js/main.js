@@ -5,6 +5,7 @@ import { RankingScene } from './scenes/ranking.js';
 import { InstrumentSelectScene } from './scenes/instrument_select.js';
 import { GameScene } from './scenes/game.js';
 import { GameOverScene } from './scenes/game_over.js';
+import { ScoreManager } from './score_manager.js'; // ★インポート
 
 class Game {
     constructor() {
@@ -13,6 +14,8 @@ class Game {
         this.scenes = {};
         this.currentScene = null;
         this.mouse = { x: 0, y: 0, clicked: false };
+
+        this.scoreManager = new ScoreManager(); // ★インスタンス化
 
         this.resizeCanvas();
         window.addEventListener('resize', () => this.resizeCanvas());

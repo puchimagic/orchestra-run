@@ -132,6 +132,7 @@ export class GameScene {
     gameOver() {
         this.player.destroy();
         this.player2Input.destroy();
+        this.game.scoreManager.addScore(this.score, this.instrumentName); // ★スコアを記録
         this.game.changeScene(SCENE.GAME_OVER, { score: this.score, instrument: this.instrumentName });
     }
 
