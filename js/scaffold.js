@@ -1,14 +1,14 @@
-import { FONT_SIZE, FONT_FAMILY, BLOCK_SIZE } from './config.js';
+import { FONT_FAMILY, BLOCK_SIZE } from './config.js';
 
-const SOLID_DURATION = 5000; // 足場が固まっている時間 (5秒)
+const SOLID_DURATION = 5000;
 
 export class ScaffoldBlock {
-    constructor(x, y, widthInBlocks, heightInBlocks, key) {
+    constructor(x, y, widthInBlocks, heightInBlocks, requiredKeys) {
         this.x = x;
         this.y = y;
         this.width = widthInBlocks * BLOCK_SIZE;
         this.height = heightInBlocks * BLOCK_SIZE;
-        this.key = key;
+        this.requiredKeys = requiredKeys; // e.g., ['J'] or ['J', 'L']
 
         this.state = 'ACTIVE';
         this.solidUntil = 0;
@@ -38,10 +38,12 @@ export class ScaffoldBlock {
             ctx.strokeRect(this.x, this.y, this.width, this.height);
 
             ctx.fillStyle = '#f0ad4e';
-            ctx.font = `${this.height * 0.8}px ${FONT_FAMILY}`;
+            ctx.font = `${this.height * 0.7}px ${FONT_FAMILY}`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(this.key, this.x + this.width / 2, this.y + this.height / 2);
+            // 複数のキーを並べて表示
+            const keyText = this.requiredKeys.join(' + ');
+            ctx.fillText(keyText, this.x + this.width / 2, this.y + this.height / 2);
 
         } else if (this.state === 'SOLID') {
             ctx.fillStyle = '#f0ad4e';

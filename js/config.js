@@ -14,6 +14,18 @@ export const FONT_SIZE = {
     LARGE: 96,
 };
 
-// ★ブロックサイズを2倍に変更
-export const BLOCK_SIZE = 60; // 30 -> 60
+export const BLOCK_SIZE = 60;
 export const PLATFORM_HEIGHT_IN_BLOCKS = 1;
+
+// ★楽器ごとの設定を定義
+export const INSTRUMENT_CONFIG = {
+    'トライアングル': { name: 'トライアングル', keys: ['J'], maxChord: 1 },
+    'タンバリン':   { name: 'タンバリン',   keys: ['J', 'L'], maxChord: 1 },
+    '太鼓':         { name: '太鼓',         keys: ['J', 'K', 'L'], maxChord: 1 },
+    'ドラム':       { name: 'ドラム',       keys: ['U', 'I', 'J', 'K', 'L'], maxChord: 1 },
+    'ピアノ':       { name: 'ピアノ',       keys: ['U', 'I', 'O', 'J', 'K', 'L', ';'], maxChord: 1 },
+    'ギター':       { name: 'ギター',       keys: ['U', 'I', 'O', 'J', 'K', 'L'], maxChord: 4 },
+};
+
+// 指定された順番
+export const INSTRUMENT_ORDER = ['トライアングル', 'タンバリン', '太鼓', 'ドラム', 'ピアノ', 'ギター'];

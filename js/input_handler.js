@@ -1,25 +1,31 @@
 export class InputHandler {
-    constructor(keyMap) {
-        this.keyMap = keyMap; // e.g., { 'KeyJ': 'ACTION_1', 'KeyK': 'ACTION_2' }
-        this.pressedKeys = new Set();
-        this.actionsDown = new Set(); // 現在フレームで押されたアクション
+    constructor() {
+        this.keyMap = {};
+        this.pressedKeys = new Set(); // 現在押されているキー
+        this.actionsDown = new Set();   // このフレームで押されたアクション
+        this.actionMap = {}; // 逆引き用
+    }
 
-        this.handleKeyDown = this.handleKeyDown.bind(this);
-        this.handleKeyUp = this.handleKeyUp.bind(this);
+    setKeyMap(keyMap) {
+        this.keyMap = keyMap;
+        this.actionMap = {};
+        for (const key in keyMap) {
+            this.actionMap[keyMap[key]] = key;
+        }
     }
 
     init() {
-        document.addEventListener('keydown', this.handleKeyDown);
-        document.addEventListener('keyup', this.handleKeyUp);
+        document.addEventListener('keydown', this.handleKeyDown.bind(this));
+        document.addEventListener('keyup', this.handleKeyUp.bind(this));
     }
 
     destroy() {
-        document.removeEventListener('keydown', this.handleKeyDown);
-        document.removeEventListener('keyup', this.handleKeyUp);
+        document.removeEventListener('keydown', this.handleKeyDown.bind(this));
+        document.removeEventListener('keyup', this.handleKeyUp.bind(this));
     }
 
     handleKeyDown(e) {
-        if (this.pressedKeys.has(e.code)) return; // 長押しによる連続発火を防ぐ
+        if (this.pressedKeys.has(e.code)) return;
         this.pressedKeys.add(e.code);
 
         const action = this.keyMap[e.code];
@@ -32,12 +38,17 @@ export class InputHandler {
         this.pressedKeys.delete(e.code);
     }
 
-    // アクションがこのフレームで押されたか？
+    // ★このフレームで押されたか？
     isActionPressed(action) {
         return this.actionsDown.has(action);
     }
 
-    // ゲームループの最後に呼ぶ
+    // ★現在押されている状態か？ (新設)
+    isActionDown(action) {
+        const physicalKey = this.actionMap[action];
+        return this.pressedKeys.has(physicalKey);
+    }
+
     clearPressedActions() {
         this.actionsDown.clear();
     }
