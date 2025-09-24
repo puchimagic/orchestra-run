@@ -8,18 +8,18 @@ export class InstrumentSelectScene {
     }
 
     init() {
-        const btnWidth = 200;
-        const btnHeight = 50;
+        const btnWidth = 300;  // 200 -> 300
+        const btnHeight = 75; // 50 -> 75
         const cx = this.game.canvas.width / 2;
         const cy = this.game.canvas.height / 2;
 
         this.instrumentButtons = {
-            'カスタネット': new Button(cx - btnWidth / 2, cy - 100, btnWidth, btnHeight, 'カスタネット'),
-            'ギター': new Button(cx - btnWidth / 2, cy - 30, btnWidth, btnHeight, 'ギター'),
-            'ピアノ': new Button(cx - btnWidth / 2, cy + 40, btnWidth, btnHeight, 'ピアノ'),
+            'カスタネット': new Button(cx - btnWidth / 2, cy - 150, btnWidth, btnHeight, 'カスタネット'),
+            'ギター': new Button(cx - btnWidth / 2, cy - 50, btnWidth, btnHeight, 'ギター'),
+            'ピアノ': new Button(cx - btnWidth / 2, cy + 50, btnWidth, btnHeight, 'ピアノ'),
         };
 
-        this.startButton = new Button(cx - btnWidth / 2, cy + 150, btnWidth, btnHeight, 'Start Game', '#4CAF50', '#66BB6A');
+        this.startButton = new Button(cx - btnWidth / 2, cy + 200, btnWidth, btnHeight, 'Start Game', '#4CAF50', '#66BB6A');
     }
 
     update() {
@@ -45,7 +45,7 @@ export class InstrumentSelectScene {
         ctx.fillStyle = 'black';
         ctx.textAlign = 'center';
         ctx.font = `${FONT_SIZE.MEDIUM}px ${FONT_FAMILY}`;
-        ctx.fillText('Select an Instrument', width / 2, 100);
+        ctx.fillText('Select an Instrument', width / 2, 150);
 
         for (const [instrument, button] of Object.entries(this.instrumentButtons)) {
             // Highlight selected button

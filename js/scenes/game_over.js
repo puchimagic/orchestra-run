@@ -10,13 +10,13 @@ export class GameOverScene {
     init(data) {
         this.finalScore = data.score || 0;
 
-        const btnWidth = 200;
-        const btnHeight = 50;
+        const btnWidth = 300;  // 200 -> 300
+        const btnHeight = 75; // 50 -> 75
         const cx = this.game.canvas.width / 2;
         const cy = this.game.canvas.height / 2;
 
-        this.continueButton = new Button(cx - btnWidth / 2, cy + 20, btnWidth, btnHeight, 'CONTINUE');
-        this.exitButton = new Button(cx - btnWidth / 2, cy + 90, btnWidth, btnHeight, 'EXIT');
+        this.continueButton = new Button(cx - btnWidth / 2, cy + 50, btnWidth, btnHeight, 'CONTINUE');
+        this.exitButton = new Button(cx - btnWidth / 2, cy + 140, btnWidth, btnHeight, 'EXIT');
     }
 
     update() {
@@ -39,10 +39,10 @@ export class GameOverScene {
         ctx.fillStyle = 'white';
         ctx.font = `${FONT_SIZE.LARGE}px ${FONT_FAMILY}`;
         ctx.textAlign = 'center';
-        ctx.fillText('GAME OVER', width / 2, height / 2 - 80);
+        ctx.fillText('GAME OVER', width / 2, height / 2 - 120);
 
         ctx.font = `${FONT_SIZE.MEDIUM}px ${FONT_FAMILY}`;
-        ctx.fillText(`Score: ${this.finalScore}`, width / 2, height / 2 - 20);
+        ctx.fillText(`Score: ${this.finalScore}`, width / 2, height / 2 - 30);
 
         this.continueButton.draw(ctx);
         this.exitButton.draw(ctx);

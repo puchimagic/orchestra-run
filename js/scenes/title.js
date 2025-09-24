@@ -7,10 +7,10 @@ export class TitleScene {
     }
 
     init() {
-        const buttonWidth = 200;
-        const buttonHeight = 50;
+        const buttonWidth = 300;  // 200 -> 300
+        const buttonHeight = 75; // 50 -> 75
         const x = (this.game.canvas.width - buttonWidth) / 2;
-        const y = this.game.canvas.height / 2 + 50;
+        const y = this.game.canvas.height / 2 + 75; // 50 -> 75
         this.startButton = new Button(x, y, buttonWidth, buttonHeight, 'START');
     }
 
@@ -31,7 +31,7 @@ export class TitleScene {
         ctx.fillStyle = 'black';
         ctx.font = `${FONT_SIZE.LARGE}px ${FONT_FAMILY}`;
         ctx.textAlign = 'center';
-        ctx.fillText('Super Gemini Runner', width / 2, height / 2 - 50);
+        ctx.fillText('Super Gemini Runner', width / 2, height / 2 - 75);
 
         this.startButton.draw(ctx);
     }

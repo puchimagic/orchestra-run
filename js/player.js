@@ -1,9 +1,9 @@
-const PLAYER_WIDTH = 30;
-const PLAYER_HEIGHT = 50;
+const PLAYER_WIDTH = 45;     // 30 -> 45
+const PLAYER_HEIGHT = 75;    // 50 -> 75
 const PLAYER_COLOR = 'blue';
-const MOVE_SPEED = 5;
-const JUMP_POWER = 15;
-const GRAVITY = 0.8;
+const MOVE_SPEED = 7;        // 5 -> 7
+const JUMP_POWER = 22;       // 15 -> 22
+const GRAVITY = 1.2;         // 0.8 -> 1.2
 
 export class Player {
     constructor(game) {
@@ -71,7 +71,7 @@ export class Player {
             if (this.x < platform.x + platform.width &&
                 this.x + this.width > platform.x &&
                 this.y + this.height > platform.y &&
-                this.y + this.height < platform.y + platform.height + 10 &&
+                this.y + this.height < platform.y + platform.height + 20 && // マージン調整
                 this.vy >= 0) {
                 this.y = platform.y - this.height;
                 this.vy = 0;

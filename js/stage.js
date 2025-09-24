@@ -1,10 +1,10 @@
-const SCROLL_SPEED = 2;
+const SCROLL_SPEED = 3;          // 2 -> 3
 const PLATFORM_COLOR = 'black';
-const PLATFORM_HEIGHT = 20;
-const MIN_PLATFORM_WIDTH = 100;
-const MAX_PLATFORM_WIDTH = 300;
-const MIN_GAP = 80;
-const MAX_GAP = 250;
+const PLATFORM_HEIGHT = 30;      // 20 -> 30
+const MIN_PLATFORM_WIDTH = 150;  // 100 -> 150
+const MAX_PLATFORM_WIDTH = 450;  // 300 -> 450
+const MIN_GAP = 120;             // 80 -> 120
+const MAX_GAP = 375;             // 250 -> 375
 
 class Platform {
     constructor(x, y, width) {

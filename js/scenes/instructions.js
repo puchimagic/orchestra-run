@@ -7,10 +7,10 @@ export class InstructionsScene {
     }
 
     init() {
-        const btnWidth = 300;
-        const btnHeight = 50;
+        const btnWidth = 450; // 300 -> 450
+        const btnHeight = 75; // 50 -> 75
         const x = (this.game.canvas.width - btnWidth) / 2;
-        const y = this.game.canvas.height - btnHeight - 50;
+        const y = this.game.canvas.height - btnHeight - 75; // 50 -> 75
         this.nextButton = new Button(x, y, btnWidth, btnHeight, 'Go to Instrument Select');
     }
 
@@ -32,10 +32,10 @@ export class InstructionsScene {
         ctx.textAlign = 'center';
 
         ctx.font = `${FONT_SIZE.MEDIUM}px ${FONT_FAMILY}`;
-        ctx.fillText('How to Play', width / 2, 100);
+        ctx.fillText('How to Play', width / 2, 150);
 
         ctx.font = `${FONT_SIZE.SMALL}px ${FONT_FAMILY}`;
-        ctx.fillText('Player 1 (Character): Use A (left), S (jump), D (right) keys.', width / 2, height / 2 - 50);
+        ctx.fillText('Player 1 (Character): Use A (left), S (jump), D (right) keys.', width / 2, height / 2 - 75);
         ctx.fillText('Player 2 (Music): Use keyboard to create platforms (Not implemented yet).', width / 2, height / 2);
 
         this.nextButton.draw(ctx);

@@ -8,7 +8,7 @@ export const SCENE = {
 
 export const FONT_FAMILY = 'Arial';
 export const FONT_SIZE = {
-    SMALL: 24,
-    MEDIUM: 48,
-    LARGE: 64,
+    SMALL: 36,   // 24 -> 36
+    MEDIUM: 72,  // 48 -> 72
+    LARGE: 96,   // 64 -> 96
 };
