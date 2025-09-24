@@ -48,14 +48,30 @@ export class GameScene {
         this.stage.update();
         this.scaffolds.forEach(s => s.update());
 
-        this.scaffolds.forEach(s => {
-            if (s.state === 'ACTIVE') {
-                const action = `ACTION_${s.key}`;
-                if (this.player2Input.isActionPressed(action)) {
-                    s.solidify();
-                }
+        // ★★★ 足場入力ロジックの修正 ★★★
+        // 1. 画面内でアクティブな足場候補をすべて見つける
+        const activeScaffoldsOnScreen = this.scaffolds.filter(s => 
+            s.state === 'ACTIVE' &&
+            s.x < this.stage.cameraX + this.game.canvas.width &&
+            s.x + s.width > this.stage.cameraX
+        );
+
+        // 2. 候補の中から一番手前（x座標が最小）のものをターゲットとして選ぶ
+        let targetScaffold = null;
+        if (activeScaffoldsOnScreen.length > 0) {
+            targetScaffold = activeScaffoldsOnScreen.reduce((prev, curr) => 
+                prev.x < curr.x ? prev : curr
+            );
+        }
+
+        // 3. ターゲットが存在する場合のみ、入力処理を行う
+        if (targetScaffold) {
+            const action = `ACTION_${targetScaffold.key}`;
+            if (this.player2Input.isActionPressed(action)) {
+                targetScaffold.solidify();
             }
-        });
+        }
+        // ★★★ ここまで ★★★
 
         const solidScaffolds = this.scaffolds.filter(s => s.state === 'SOLID');
         const allPlatforms = [...this.stage.platforms, ...solidScaffolds];
