@@ -1,10 +1,12 @@
-const SCROLL_SPEED = 3;          // 2 -> 3
+const SCROLL_SPEED = 3;
 const PLATFORM_COLOR = 'black';
-const PLATFORM_HEIGHT = 30;      // 20 -> 30
-const MIN_PLATFORM_WIDTH = 150;  // 100 -> 150
-const MAX_PLATFORM_WIDTH = 450;  // 300 -> 450
-const MIN_GAP = 120;             // 80 -> 120
-const MAX_GAP = 375;             // 250 -> 375
+const PLATFORM_HEIGHT = 30;
+const MIN_PLATFORM_WIDTH = 150;
+const MAX_PLATFORM_WIDTH = 450;
+const MIN_GAP = 120;
+const MAX_GAP = 800; // さらに長い穴ができるように上限を拡大
+
+const PLAYER_MAX_JUMP_DISTANCE = 400; // プレイヤーがジャンプで越えられるおおよその最大距離
 
 class Platform {
     constructor(x, y, width) {
@@ -46,6 +48,11 @@ export class Stage {
         const width = MIN_PLATFORM_WIDTH + Math.random() * (MAX_PLATFORM_WIDTH - MIN_PLATFORM_WIDTH);
         const newX = this.lastPlatformX + gap;
         const newY = this.game.canvas.height - PLATFORM_HEIGHT;
+
+        // ★ご要望の反映箇所: 穴が長すぎる場合、イベントを通知する
+        if (gap > PLAYER_MAX_JUMP_DISTANCE) {
+            this.game.currentScene.requestScaffold(this.lastPlatformX, gap);
+        }
 
         this.createPlatform(newX, newY, width);
     }
