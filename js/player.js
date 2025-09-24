@@ -3,10 +3,9 @@ import { BLOCK_SIZE } from './config.js';
 const PLAYER_WIDTH_IN_BLOCKS = 1.5;
 const PLAYER_HEIGHT_IN_BLOCKS = 2.5;
 const PLAYER_COLOR = 'blue';
-// ★物理パラメータを調整
-const MOVE_SPEED = 11;       // 7 -> 11
-const JUMP_POWER = 34;       // 24 -> 34
-const GRAVITY = 1.7;         // 1.2 -> 1.7
+const MOVE_SPEED = 11;
+const JUMP_POWER = 34;
+const GRAVITY = 1.7;
 
 export class Player {
     constructor(game) {
@@ -47,7 +46,7 @@ export class Player {
         this.keys[e.code] = false;
     }
 
-    update(platforms) {
+    update(platforms, walls) {
         // 左右移動
         if (this.keys['KeyA']) {
             this.vx = -MOVE_SPEED;
@@ -58,18 +57,32 @@ export class Player {
         }
         this.x += this.vx;
 
+        // 壁との衝突判定 (横)
+        walls.forEach(wall => {
+            if (this.x < wall.x + wall.width && this.x + this.width > wall.x &&
+                this.y < wall.y + wall.height && this.y + this.height > wall.y) {
+                if (this.vx > 0) { 
+                    this.x = wall.x - this.width;
+                } else if (this.vx < 0) { 
+                    this.x = wall.x + wall.width;
+                }
+            }
+        });
+
         // 重力
         this.vy += GRAVITY;
         this.y += this.vy;
 
         this.onGround = false;
-        platforms.forEach(platform => {
-            if (this.x < platform.x + platform.width &&
-                this.x + this.width > platform.x &&
-                this.y + this.height > platform.y &&
-                this.y + this.height < platform.y + platform.height + 20 &&
+        const allGrounds = [...platforms, ...walls];
+        allGrounds.forEach(ground => {
+            if (this.x < ground.x + ground.width &&
+                this.x + this.width > ground.x &&
+                this.y + this.height > ground.y &&
+                // ★着地判定の条件を修正 (より寛容に)
+                this.y + this.height < ground.y + ground.height &&
                 this.vy >= 0) {
-                this.y = platform.y - this.height;
+                this.y = ground.y - this.height;
                 this.vy = 0;
                 this.onGround = true;
             }
