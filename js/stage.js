@@ -9,7 +9,6 @@ const MAX_PLATFORM_WIDTH_IN_BLOCKS = 15;
 const MIN_GAP_IN_BLOCKS = 4;
 const MAX_GAP_IN_BLOCKS = 40;
 
-// ★Wallクラスをエクスポート
 export class Wall {
     constructor(x, y, width, height, isBreakable = false) {
         this.x = x;
@@ -101,7 +100,8 @@ export class Stage {
             const obstacleType = Math.random();
             if (obstacleType < 0.4) {
                 const isHighWall = Math.random() < 0.5;
-                const wallHeight = isHighWall ? BLOCK_SIZE * 4 : BLOCK_SIZE * 2.5;
+                // ★高い壁の高さを修正 (4 -> 6)
+                const wallHeight = isHighWall ? BLOCK_SIZE * 6 : BLOCK_SIZE * 2.5;
                 const wall = new Wall(x + platform.width / 2, y - wallHeight, BLOCK_SIZE, wallHeight, isHighWall);
                 this.walls.push(wall);
                 if (isHighWall) {
