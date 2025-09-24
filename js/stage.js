@@ -1,7 +1,5 @@
-import { BLOCK_SIZE, PLATFORM_HEIGHT_IN_BLOCKS } from './config.js';
+import { BLOCK_SIZE, PLATFORM_HEIGHT_IN_BLOCKS, INITIAL_SCROLL_SPEED } from './config.js';
 
-// ★スクロール速度を調整
-const SCROLL_SPEED = 5; // 3 -> 5
 const PLATFORM_COLOR = 'black';
 
 const MIN_PLATFORM_WIDTH_IN_BLOCKS = 5;
@@ -35,9 +33,11 @@ class Platform {
 export class Stage {
     constructor(game) {
         this.game = game;
+        this.scrollSpeed = INITIAL_SCROLL_SPEED;
     }
 
     init() {
+        this.scrollSpeed = INITIAL_SCROLL_SPEED;
         this.cameraX = 0;
         this.platforms = [];
         this.lastPlatformX = -50;
@@ -47,6 +47,11 @@ export class Stage {
         while (this.lastPlatformX < this.cameraX + this.game.canvas.width * 2) {
             this.generateNext();
         }
+    }
+
+    // ★外部からスクロール速度を変更するためのメソッド
+    setScrollSpeed(speed) {
+        this.scrollSpeed = speed;
     }
 
     createPlatform(x, y, widthInBlocks) {
@@ -71,7 +76,8 @@ export class Stage {
     }
 
     update() {
-        this.cameraX += SCROLL_SPEED;
+        // ★動的なスクロール速度を使用
+        this.cameraX += this.scrollSpeed;
 
         if (this.lastPlatformX < this.cameraX + this.game.canvas.width + 200) {
             this.generateNext();
