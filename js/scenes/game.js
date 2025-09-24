@@ -11,7 +11,7 @@ export class GameScene {
     init(data) {
         this.startTime = Date.now();
         this.score = 0;
-        this.selectedInstrument = data.instrument || 'None';
+        this.selectedInstrument = data.instrument || 'なし';
 
         this.player = new Player(this.game);
         this.stage = new Stage(this.game);
@@ -30,12 +30,9 @@ export class GameScene {
     }
 
     checkGameOver() {
-        // 1. 穴に落ちたか
         if (this.player.y > this.game.canvas.height) {
             this.gameOver();
         }
-
-        // 2. 画面左端に押し出されたか (player.xは絶対座標なのでcameraXと比較)
         if (this.player.x < this.stage.cameraX) {
             this.gameOver();
         }
@@ -54,7 +51,6 @@ export class GameScene {
         ctx.fillStyle = '#d0d0d0';
         ctx.fillRect(0, 0, width, height);
 
-        // 描画の基準点をカメラに合わせて移動
         ctx.save();
         ctx.translate(-this.stage.cameraX, 0);
 
@@ -63,11 +59,10 @@ export class GameScene {
 
         ctx.restore();
 
-        // UI要素はカメラ位置に関係なく固定で表示
         ctx.fillStyle = 'black';
         ctx.textAlign = 'left';
         ctx.font = `${FONT_SIZE.SMALL}px ${FONT_FAMILY}`;
-        ctx.fillText(`Score: ${this.score}`, 20, 40);
-        ctx.fillText(`Instrument: ${this.selectedInstrument}`, 20, 70);
+        ctx.fillText(`スコア: ${this.score}`, 20, 50);
+        ctx.fillText(`楽器: ${this.selectedInstrument}`, 20, 100);
     }
 }

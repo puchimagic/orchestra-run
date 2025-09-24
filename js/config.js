@@ -1,6 +1,7 @@
 export const SCENE = {
-    TITLE: 'title',
-    INSTRUCTIONS: 'instructions',
+    MAIN: 'main',
+    GAME_DESCRIPTION: 'game_description',
+    RANKING: 'ranking',
     INSTRUMENT_SELECT: 'instrument_select',
     GAME: 'game',
     GAME_OVER: 'game_over',
@@ -8,7 +9,7 @@ export const SCENE = {
 
 export const FONT_FAMILY = 'Arial';
 export const FONT_SIZE = {
-    SMALL: 36,   // 24 -> 36
-    MEDIUM: 72,  // 48 -> 72
-    LARGE: 96,   // 64 -> 96
+    SMALL: 36,
+    MEDIUM: 72,
+    LARGE: 96,
 };

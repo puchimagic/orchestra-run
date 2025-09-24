@@ -1,6 +1,7 @@
 import { SCENE } from './config.js';
-import { TitleScene } from './scenes/title.js';
-import { InstructionsScene } from './scenes/instructions.js';
+import { MainScene } from './scenes/main.js';
+import { GameDescriptionScene } from './scenes/game_description.js';
+import { RankingScene } from './scenes/ranking.js';
 import { InstrumentSelectScene } from './scenes/instrument_select.js';
 import { GameScene } from './scenes/game.js';
 import { GameOverScene } from './scenes/game_over.js';
@@ -39,12 +40,13 @@ class Game {
     }
 
     init() {
-        this.scenes[SCENE.TITLE] = new TitleScene(this);
-        this.scenes[SCENE.INSTRUCTIONS] = new InstructionsScene(this);
+        this.scenes[SCENE.MAIN] = new MainScene(this);
+        this.scenes[SCENE.GAME_DESCRIPTION] = new GameDescriptionScene(this);
+        this.scenes[SCENE.RANKING] = new RankingScene(this);
         this.scenes[SCENE.INSTRUMENT_SELECT] = new InstrumentSelectScene(this);
         this.scenes[SCENE.GAME] = new GameScene(this);
         this.scenes[SCENE.GAME_OVER] = new GameOverScene(this);
-        this.changeScene(SCENE.TITLE);
+        this.changeScene(SCENE.MAIN);
         this.gameLoop();
     }
 
@@ -62,7 +64,6 @@ class Game {
         if (this.currentScene && this.currentScene.draw) {
             this.currentScene.draw();
         }
-        // Reset click state
         this.mouse.clicked = false;
         requestAnimationFrame(() => this.gameLoop());
     }
