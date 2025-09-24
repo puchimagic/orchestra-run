@@ -23,7 +23,7 @@ export const INSTRUMENT_CONFIG = {
     'タンバリン':   { name: 'タンバリン',   keys: ['J', 'L'], maxChord: 1 },
     '太鼓':         { name: '太鼓',         keys: ['J', 'K', 'L'], maxChord: 1 },
     'ドラム':       { name: 'ドラム',       keys: ['U', 'I', 'J', 'K', 'L'], maxChord: 1 },
-    'ピアノ':       { name: 'ピアノ',       keys: ['U', 'I', 'O', 'J', 'K', 'L', ';'], maxChord: 1 },
+    'ピアノ':       { name: 'ピアノ',       keys: ['U', 'I', 'O', 'J', 'K', 'L', 'P'], maxChord: 1 },
     'ギター':       { name: 'ギター',       keys: ['U', 'I', 'O', 'J', 'K', 'L'], maxChord: 4 },
 };
 
