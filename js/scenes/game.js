@@ -37,26 +37,25 @@ export class GameScene {
 
     requestScaffold(holeX, holeWidth) {
         const holeWidthInBlocks = holeWidth / BLOCK_SIZE;
-        
-        // ★ご指摘に基づき、穴の長さごとに足場の数を明示的に決定するロジックに変更
-        let numScaffolds = 0;
-        if (holeWidthInBlocks > 32) { // 33ブロック以上
-            numScaffolds = 4;
-        } else if (holeWidthInBlocks > 24) { // 25〜32ブロック
-            numScaffolds = 3;
-        } else if (holeWidthInBlocks > 16) { // 17〜24ブロック
-            numScaffolds = 2;
-        } else if (holeWidthInBlocks > PLAYER_MAX_JUMP_IN_BLOCKS) { // 9〜16ブロック
-            numScaffolds = 1;
-        }
+        const numScaffolds = Math.ceil(holeWidthInBlocks / PLAYER_MAX_JUMP_IN_BLOCKS) - 1;
 
         if (numScaffolds <= 0) return;
 
-        const spacing = holeWidth / (numScaffolds + 1);
+        // ★新しい配置アルゴリズム
         const scaffoldWidthInBlocks = 7;
-        const scaffoldWidthInPixels = scaffoldWidthInBlocks * BLOCK_SIZE;
+        const totalScaffoldWidthInBlocks = numScaffolds * scaffoldWidthInBlocks;
+        const totalGapWidthInBlocks = holeWidthInBlocks - totalScaffoldWidthInBlocks;
+        const gapWidthInBlocks = totalGapWidthInBlocks / (numScaffolds + 1);
+
+        let currentX = holeX;
+        const scaffoldHeightInBlocks = 1;
+        const scaffoldY = this.game.canvas.height - (PLATFORM_HEIGHT_IN_BLOCKS * BLOCK_SIZE) - (scaffoldHeightInBlocks * BLOCK_SIZE) * 3;
 
         for (let i = 0; i < numScaffolds; i++) {
+            // 隙間のぶんだけ進む
+            currentX += gapWidthInBlocks * BLOCK_SIZE;
+
+            // 足場を生成
             let requiredKeys = [];
             const availableKeys = this.instrument.keys;
             const numKeysToPress = (this.instrument.name === 'ギター') 
@@ -64,12 +63,11 @@ export class GameScene {
                 : 1;
             const shuffledKeys = [...availableKeys].sort(() => 0.5 - Math.random());
             requiredKeys = shuffledKeys.slice(0, numKeysToPress);
-
-            const scaffoldX = holeX + (i + 1) * spacing - (scaffoldWidthInPixels / 2);
-            const scaffoldHeightInBlocks = 1;
-            const scaffoldY = this.game.canvas.height - (PLATFORM_HEIGHT_IN_BLOCKS * BLOCK_SIZE) - (scaffoldHeightInBlocks * BLOCK_SIZE) * 3;
             
-            this.scaffolds.push(new ScaffoldBlock(scaffoldX, scaffoldY, scaffoldWidthInBlocks, scaffoldHeightInBlocks, requiredKeys));
+            this.scaffolds.push(new ScaffoldBlock(currentX, scaffoldY, scaffoldWidthInBlocks, scaffoldHeightInBlocks, requiredKeys));
+
+            // 足場のぶんだけ進む
+            currentX += scaffoldWidthInBlocks * BLOCK_SIZE;
         }
     }
 
@@ -132,7 +130,6 @@ export class GameScene {
     gameOver() {
         this.player.destroy();
         this.player2Input.destroy();
-        this.game.scoreManager.addScore(this.score, this.instrumentName); // ★スコアを記録
         this.game.changeScene(SCENE.GAME_OVER, { score: this.score, instrument: this.instrumentName });
     }
 
