@@ -24,7 +24,7 @@ export class Wall {
 }
 
 class Enemy {
-    constructor(x, y, moveRange) {
+    constructor(x, y, moveRange, enemyImage) {
         this.x = x;
         this.y = y;
         this.width = BLOCK_SIZE * 1.5;
@@ -32,6 +32,7 @@ class Enemy {
         this.vx = -2;
         this.minX = x - moveRange;
         this.maxX = x + moveRange;
+        this.enemyImage = enemyImage;
     }
     update() {
         this.x += this.vx;
@@ -40,8 +41,7 @@ class Enemy {
         }
     }
     draw(ctx) {
-        ctx.fillStyle = ENEMY_COLOR;
-        ctx.fillRect(this.x, this.y, this.width, this.height);
+        ctx.drawImage(this.enemyImage, this.x, this.y, this.width, this.height);
     }
 }
 
@@ -72,6 +72,8 @@ export class Stage {
         this.scrollSpeed = INITIAL_SCROLL_SPEED;
         this.groundImage = new Image();
         this.groundImage.src = '../img/ground.png';
+        this.enemyImage = new Image();
+        this.enemyImage.src = '../img/teki.png';
     }
 
     init() {
@@ -110,7 +112,7 @@ export class Stage {
                     this.game.currentScene.requestWallBreakEvent(wall);
                 }
             } else if (obstacleType < 0.9) { // 30% -> 45% (Enemy)
-                const enemy = new Enemy(x + platform.width / 2, y - BLOCK_SIZE * 1.5, platform.width / 4);
+                const enemy = new Enemy(x + platform.width / 2, y - BLOCK_SIZE * 1.5, platform.width / 4, this.enemyImage);
                 this.enemies.push(enemy);
             }
             // 10% for nothing
