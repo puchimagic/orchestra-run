@@ -1,19 +1,23 @@
-import { SCENE, FONT_SIZE, FONT_FAMILY, BLOCK_SIZE, PLATFORM_HEIGHT_IN_BLOCKS, KEYBOARD_INSTRUMENT_CONFIG, GAMEPAD_INSTRUMENT_CONFIG, INITIAL_SCROLL_SPEED, PLAYER_MAX_JUMP_IN_BLOCKS } from '../config.js';
+import { 
+    SCENE, FONT_SIZE, FONT_FAMILY, BLOCK_SIZE, PLATFORM_HEIGHT_IN_BLOCKS, 
+    KEYBOARD_INSTRUMENT_CONFIG, GAMEPAD_INSTRUMENT_CONFIG, 
+    INITIAL_SCROLL_SPEED, PLAYER_MAX_JUMP_IN_BLOCKS 
+} from '../config.js';
 import { Player } from '../player.js';
-import { Stage, Wall } from '../stage.js'; // ★Wallクラスをインポート
+import { Stage, Wall } from '../stage.js'; 
 import { ScaffoldBlock } from '../scaffold.js';
 import { InputHandler } from '../input_handler.js';
 
 export class GameScene {
     constructor(game) {
         this.game = game;
-        this.playerInput = new InputHandler(); // プレイヤー1用のInputHandler
-        this.player2Input = new InputHandler(); // 足場・壁操作用のInputHandler
-        this.activeInstrumentConfig = null; // To store the currently active instrument config (keyboard or gamepad)
+        this.playerInput = new InputHandler(); 
+        this.player2Input = new InputHandler(); 
+        this.activeInstrumentConfig = null; 
 
         // 背景画像を読み込む
         this.backgroundImage = new Image();
-        this.backgroundImage.src = 'img/mein.png'; // ここで画像パスを指定
+        this.backgroundImage.src = 'img/mein.png';
         this.isBackgroundLoaded = false;
         this.backgroundImage.onload = () => {
             this.isBackgroundLoaded = true;
@@ -21,20 +25,19 @@ export class GameScene {
         this.backgroundImage.onerror = () => {
             console.error('Failed to load background image: img/mein.png');
         };
+
+        // 楽器アイコン画像用
+        this.instrumentImage = null;
+        this.isInstrumentLoaded = false;
     }
 
     init(data) {
         this.instrumentName = data.instrument || 'トライアングル';
         this.player2Input.setInstrumentKeyMaps(KEYBOARD_INSTRUMENT_CONFIG, GAMEPAD_INSTRUMENT_CONFIG);
 
-        // Initialize activeInstrumentConfig based on current gamepad status
         const isGamepadConnected = this.player2Input.isGamepadConnected();
         this.activeInstrumentConfig = isGamepadConnected ? GAMEPAD_INSTRUMENT_CONFIG : KEYBOARD_INSTRUMENT_CONFIG;
         this.instrument = this.activeInstrumentConfig[this.instrumentName];
-
-        // The keyMap is now managed internally by player2Input, but we need to ensure
-        // the initial instrument is correctly set for generateRequiredKeys
-        // The actual keyMap for player2Input is set by setInstrumentKeyMaps
 
         this.startTime = Date.now();
         this.lastTime = this.startTime;
@@ -47,9 +50,25 @@ export class GameScene {
         this.breakableWalls = new Map();
 
         this.stage.init();
-        this.player = new Player(this.game, this.playerInput, this.stage.playerWaitImage, this.stage.playerJumpImage, this.stage.playerWalkImage);
+        this.player = new Player(
+            this.game, 
+            this.playerInput, 
+            this.stage.playerWaitImage, 
+            this.stage.playerJumpImage, 
+            this.stage.playerWalkImage
+        );
         this.player.init();
         this.player2Input.init();
+
+        // 楽器アイコンをロード
+        this.instrumentImage = new Image();
+        this.instrumentImage.src = `img/${this.instrumentName}.png`;
+        this.instrumentImage.onload = () => {
+            this.isInstrumentLoaded = true;
+        };
+        this.instrumentImage.onerror = () => {
+            console.error(`Failed to load instrument image: img/${this.instrumentName}.png`);
+        };
     }
 
     requestScaffold(holeX, holeWidth) {
@@ -79,7 +98,6 @@ export class GameScene {
     }
 
     generateRequiredKeys() {
-        let requiredKeys = [];
         const availableKeys = this.instrument.keys;
         const numKeysToPress = (this.instrument.name === 'ギター') 
             ? 1 + Math.floor(Math.random() * this.instrument.maxChord)
@@ -89,25 +107,24 @@ export class GameScene {
     }
 
     update() {
-        // Check if the active instrument config needs to be updated (due to gamepad connection change)
         const isGamepadConnected = this.player2Input.isGamepadConnected();
         const currentInputConfig = isGamepadConnected ? GAMEPAD_INSTRUMENT_CONFIG : KEYBOARD_INSTRUMENT_CONFIG;
 
         if (this.activeInstrumentConfig !== currentInputConfig) {
             this.activeInstrumentConfig = currentInputConfig;
             this.instrument = this.activeInstrumentConfig[this.instrumentName];
-            // player2Input's internal keyMap is already updated by its own updateGamepads/pollGamepads
-            // We just need to ensure this.instrument reflects the current config for generateRequiredKeys
         }
 
         const now = Date.now();
         const deltaTime = (now - this.lastTime) / 1000;
         this.lastTime = now;
         const elapsedTimeInSeconds = (now - this.startTime) / 1000;
+
         const scorePerSecond = 1;
         const timeBonus = 1 + (elapsedTimeInSeconds / 120);
         this.baseScore += scorePerSecond * timeBonus * deltaTime;
         this.score = Math.floor(this.baseScore * this.scoreMultiplier);
+
         const speedIncreaseInterval = 30;
         const speedIncreaseAmount = 0.5;
         const newScrollSpeed = INITIAL_SCROLL_SPEED + Math.floor(elapsedTimeInSeconds / speedIncreaseInterval) * speedIncreaseAmount;
@@ -116,7 +133,6 @@ export class GameScene {
         this.stage.update();
         this.scaffolds.forEach(s => s.update());
 
-        // ★入力処理を単一ターゲット方式に修正
         this.handlePlayer2Input();
 
         const solidScaffolds = this.scaffolds.filter(s => s.state === 'SOLID');
@@ -130,26 +146,32 @@ export class GameScene {
     }
 
     handlePlayer2Input() {
-        // 画面上の全インタラクティブオブジェクトをリストアップ
-        const activeScaffolds = this.scaffolds.filter(s => s.state === 'ACTIVE' && s.x < this.stage.cameraX + this.game.canvas.width && s.x + s.width > this.stage.cameraX);
-        const activeWalls = Array.from(this.breakableWalls.keys()).filter(w => w.x < this.stage.cameraX + this.game.canvas.width && w.x + w.width > this.stage.cameraX);
+        const activeScaffolds = this.scaffolds.filter(s => 
+            s.state === 'ACTIVE' && 
+            s.x < this.stage.cameraX + this.game.canvas.width && 
+            s.x + s.width > this.stage.cameraX
+        );
+        const activeWalls = Array.from(this.breakableWalls.keys()).filter(w => 
+            w.x < this.stage.cameraX + this.game.canvas.width && 
+            w.x + w.width > this.stage.cameraX
+        );
         const allInteractiveObjects = [...activeScaffolds, ...activeWalls];
 
         if (allInteractiveObjects.length === 0) return;
 
-        // 一番手前のターゲットを一つだけ選ぶ
         const target = allInteractiveObjects.reduce((prev, curr) => prev.x < curr.x ? prev : curr);
 
-        // ターゲットの種類に応じて入力処理
         if (target instanceof ScaffoldBlock) {
             const requiredActions = target.requiredKeys.map(key => `ACTION_${key}`);
-            if (requiredActions.every(action => this.player2Input.isActionDown(action)) && requiredActions.some(action => this.player2Input.isActionPressed(action))) {
+            if (requiredActions.every(action => this.player2Input.isActionDown(action)) && 
+                requiredActions.some(action => this.player2Input.isActionPressed(action))) {
                 target.solidify();
             }
         } else if (target instanceof Wall) {
             const wallData = this.breakableWalls.get(target);
             const requiredActions = wallData.requiredKeys.map(key => `ACTION_${key}`);
-            if (requiredActions.every(action => this.player2Input.isActionDown(action)) && requiredActions.some(action => this.player2Input.isActionPressed(action))) {
+            if (requiredActions.every(action => this.player2Input.isActionDown(action)) && 
+                requiredActions.some(action => this.player2Input.isActionPressed(action))) {
                 this.stage.walls = this.stage.walls.filter(w => w !== target);
                 this.breakableWalls.delete(target);
             }
@@ -177,12 +199,9 @@ export class GameScene {
         const ctx = this.game.ctx;
         const { width, height } = this.game.canvas;
 
-        // 背景画像をまず描画
         if (this.isBackgroundLoaded) {
-            // 背景画像をキャンバス全体に引き伸ばして描画
             ctx.drawImage(this.backgroundImage, 0, 0, width, height);
         } else {
-            // 画像が読み込まれていない場合は、既存の単色背景を描画
             ctx.clearRect(0, 0, width, height);
             ctx.fillStyle = '#d0d0d0';
             ctx.fillRect(0, 0, width, height);
@@ -210,6 +229,12 @@ export class GameScene {
         ctx.textAlign = 'left';
         ctx.font = `${FONT_SIZE.SMALL}px ${FONT_FAMILY}`;
         ctx.fillText(`スコア: ${this.score}`, 20, 50);
-        ctx.fillText(`楽器: ${this.instrumentName}`, 20, 100);
+
+        // 楽器アイコンを右上に描画
+        if (this.isInstrumentLoaded) {
+            const x = width - 100 - 10;
+            const y = 10;
+            ctx.drawImage(this.instrumentImage, x, y, 100, 110);
+        }
     }
 }
