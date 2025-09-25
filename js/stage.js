@@ -46,22 +46,22 @@ class Enemy {
 }
 
 class Platform {
-    constructor(x, y, widthInBlocks) {
+    constructor(x, y, widthInBlocks, groundImage) {
         this.x = x;
         this.y = y;
         this.width = widthInBlocks * BLOCK_SIZE;
         this.height = PLATFORM_HEIGHT_IN_BLOCKS * BLOCK_SIZE;
         this.widthInBlocks = widthInBlocks;
+        this.groundImage = groundImage;
     }
 
     draw(ctx) {
         for (let i = 0; i < this.widthInBlocks; i++) {
-            const blockX = this.x + i * BLOCK_SIZE;
-            ctx.fillStyle = PLATFORM_COLOR;
-            ctx.fillRect(blockX, this.y, BLOCK_SIZE, BLOCK_SIZE);
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 1;
-            ctx.strokeRect(blockX, this.y, BLOCK_SIZE, BLOCK_SIZE);
+            for (let j = 0; j < PLATFORM_HEIGHT_IN_BLOCKS; j++) {
+                const blockX = this.x + i * BLOCK_SIZE;
+                const blockY = this.y + j * BLOCK_SIZE;
+                ctx.drawImage(this.groundImage, blockX, blockY, BLOCK_SIZE, BLOCK_SIZE);
+            }
         }
     }
 }
@@ -70,6 +70,8 @@ export class Stage {
     constructor(game) {
         this.game = game;
         this.scrollSpeed = INITIAL_SCROLL_SPEED;
+        this.groundImage = new Image();
+        this.groundImage.src = '../img/ground.png';
     }
 
     init() {
@@ -92,7 +94,7 @@ export class Stage {
     }
 
     createPlatform(x, y, widthInBlocks) {
-        const platform = new Platform(x, y, widthInBlocks);
+        const platform = new Platform(x, y, widthInBlocks, this.groundImage);
         this.platforms.push(platform);
         this.lastPlatformX = x + platform.width;
 
