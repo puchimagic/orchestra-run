@@ -62,12 +62,12 @@ export class GameScene {
 
         // 楽器名ごとに対応する画像URLをマッピング
         const instrumentImageMap = {
-            "トライアングル": "https://github.com/puchimagic/oic_hack/blob/main/img/%E3%83%88%E3%83%A9%E3%82%A4%E3%82%A2%E3%83%B3%E3%82%B0%E3%83%AB.png?raw=true",
-            "タンバリン": "https://github.com/puchimagic/oic_hack/blob/main/img/%E3%82%BF%E3%83%B3%E3%83%90%E3%83%AA%E3%83%B3.png?raw=true",
-            "太鼓": "https://github.com/puchimagic/oic_hack/blob/main/img/%E5%A4%AA%E9%BC%93.png?raw=true",
-            "ドラム": "https://github.com/puchimagic/oic_hack/blob/main/img/%E3%83%89%E3%83%A9%E3%83%A0.png?raw=true",
-            "ピアノ": "https://github.com/puchimagic/oic_hack/blob/main/img/%E3%83%94%E3%82%A2%E3%83%8E.png?raw=true",
-            "ギター": "https://github.com/puchimagic/oic_hack/blob/main/img/%E3%82%AE%E3%82%BF%E3%83%BC.png?raw=true"
+            "トライアングル": "https://github.com/puchimagic/oic_hack/blob/main/img/toraianguru.png?raw=true",
+            "タンバリン": "https://github.com/puchimagic/oic_hack/blob/main/img/tanbarin.png?raw=true",
+            "太鼓": "https://github.com/puchimagic/oic_hack/blob/main/img/taiko.png?raw=true",
+            "ドラム": "https://github.com/puchimagic/oic_hack/blob/main/img/doramu.png?raw=true",
+            "ピアノ": "https://github.com/puchimagic/oic_hack/blob/main/img/piano.png?raw=true",
+            "ギター": "https://github.com/puchimagic/oic_hack/blob/main/img/gita.png?raw=true"
         };
 
         // 楽器アイコンをロード
