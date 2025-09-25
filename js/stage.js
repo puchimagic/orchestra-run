@@ -1,5 +1,8 @@
 import { BLOCK_SIZE, PLATFORM_HEIGHT_IN_BLOCKS, PLAYER_MAX_JUMP_IN_BLOCKS, INITIAL_SCROLL_SPEED } from './config.js';
 
+const STUMP_HEIGHT_IN_BLOCKS = 4.4;
+const STUMP_WIDTH_IN_BLOCKS = 3.4;
+
 const MIN_PLATFORM_WIDTH_IN_BLOCKS = 5;
 const MAX_PLATFORM_WIDTH_IN_BLOCKS = 15;
 const MIN_GAP_IN_BLOCKS = 4;
@@ -18,9 +21,8 @@ export class Wall {
 
     break() {
         if (!this.isBreakable) return;
-        
-        const newHeight = BLOCK_SIZE * 2.45;
-        const newWidth = BLOCK_SIZE * 2.1;
+        const newHeight = BLOCK_SIZE * STUMP_HEIGHT_IN_BLOCKS;
+        const newWidth = BLOCK_SIZE * STUMP_WIDTH_IN_BLOCKS;
 
         const centerX = this.x + this.width / 2;
         this.x = centerX - (newWidth / 2);
@@ -145,8 +147,8 @@ export class Stage {
 
                 if (isHighWall) {
                     // Tree
-                    const wallHeight = BLOCK_SIZE * 12; // 8ブロック分の高さ
-                    const aspectRatio = 0.77; // 幅を高さの半分に
+                    const wallHeight = BLOCK_SIZE * 11; // 8ブロック分の高さ
+                    const aspectRatio = 0.8; // 幅を高さの半分に
                     const wallWidth = wallHeight * aspectRatio;
                     const wallImage = this.treeImage;
                     const wallX = (x + platform.width / 2) - (wallWidth / 2);
@@ -156,8 +158,8 @@ export class Stage {
                     this.game.currentScene.requestWallBreakEvent(wall);
                 } else {
                     // Stump
-                    const wallHeight = BLOCK_SIZE * 2.45;
-                    const wallWidth = BLOCK_SIZE * 2.1;
+                    const wallHeight = BLOCK_SIZE * STUMP_HEIGHT_IN_BLOCKS;
+                    const wallWidth = BLOCK_SIZE * STUMP_WIDTH_IN_BLOCKS;
                     const wallImage = this.stumpImage;
                     const wallX = (x + platform.width / 2) - (wallWidth / 2);
 
