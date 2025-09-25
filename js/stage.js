@@ -74,6 +74,12 @@ export class Stage {
         this.groundImage.src = '../img/ground.png';
         this.enemyImage = new Image();
         this.enemyImage.src = '../img/teki.png';
+        this.playerWaitImage = new Image();
+        this.playerWaitImage.src = '../img/character_wait.png';
+        this.playerJumpImage = new Image();
+        this.playerJumpImage.src = '../img/character_jump.png';
+        this.playerWalkImage = new Image();
+        this.playerWalkImage.src = '../img/character_woke.png';
     }
 
     init() {

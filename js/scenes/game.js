@@ -31,13 +31,13 @@ export class GameScene {
         this.score = 0;
         this.scoreMultiplier = this.instrument.multiplier;
 
-        this.player = new Player(this.game, this.playerInput); // PlayerにInputHandlerを渡す
         this.stage = new Stage(this.game);
         this.scaffolds = [];
         this.breakableWalls = new Map();
 
-        this.player.init();
         this.stage.init();
+        this.player = new Player(this.game, this.playerInput, this.stage.playerWaitImage, this.stage.playerJumpImage, this.stage.playerWalkImage);
+        this.player.init();
         this.player2Input.init();
     }
 

@@ -8,7 +8,7 @@ const JUMP_POWER = 34;
 const GRAVITY = 1.7;
 
 export class Player {
-    constructor(game, inputHandler) { // InputHandlerのインスタンスを受け取る
+    constructor(game, inputHandler, waitImage, jumpImage, walkImage) { // InputHandlerのインスタンスを受け取る
         this.game = game;
         this.input = inputHandler; // InputHandlerのインスタンスを保持
         this.width = PLAYER_WIDTH_IN_BLOCKS * BLOCK_SIZE;
@@ -18,6 +18,14 @@ export class Player {
         this.vx = 0;
         this.vy = 0;
         this.onGround = false;
+
+        this.waitImage = waitImage;
+        this.jumpImage = jumpImage;
+        this.walkImage = walkImage;
+
+        this.isJumping = false;
+        this.isMoving = false;
+        this.facingDirection = 1; // 1 for right, -1 for left
 
         this.keys = {}; // 既存のキーボード入力処理を残す
         this.handleKeyDown = this.handleKeyDown.bind(this);
@@ -84,6 +92,14 @@ export class Player {
 
         this.x += this.vx;
 
+        if (this.vx > 0) {
+            this.facingDirection = 1;
+        } else if (this.vx < 0) {
+            this.facingDirection = -1;
+        }
+
+        this.isMoving = this.vx !== 0;
+
         // 壁との衝突判定 (横)
         walls.forEach(wall => {
             if (this.x < wall.x + wall.width && this.x + this.width > wall.x &&
@@ -115,13 +131,31 @@ export class Player {
             }
         });
 
+        this.isJumping = !this.onGround;
+
         if (this.x < this.game.currentScene.stage.cameraX) {
             this.x = this.game.currentScene.stage.cameraX;
         }
     }
 
     draw(ctx) {
-        ctx.fillStyle = PLAYER_COLOR;
-        ctx.fillRect(this.x, this.y, this.width, this.height);
+        let currentImage;
+        if (this.isJumping) {
+            currentImage = this.jumpImage;
+        } else if (this.isMoving) {
+            currentImage = this.walkImage;
+        } else {
+            currentImage = this.waitImage;
+        }
+
+        ctx.save();
+        if (this.facingDirection === -1) {
+            ctx.translate(this.x + this.width, this.y);
+            ctx.scale(-1, 1);
+            ctx.drawImage(currentImage, 0, 0, this.width, this.height);
+        } else {
+            ctx.drawImage(currentImage, this.x, this.y, this.width, this.height);
+        }
+        ctx.restore();
     }
 }
