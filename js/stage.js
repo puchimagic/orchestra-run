@@ -146,7 +146,7 @@ export class Stage {
                 if (isHighWall) {
                     // Tree
                     const wallHeight = BLOCK_SIZE * 12; // 8ブロック分の高さ
-                    const aspectRatio = 0.7; // 幅を高さの半分に
+                    const aspectRatio = 0.77; // 幅を高さの半分に
                     const wallWidth = wallHeight * aspectRatio;
                     const wallImage = this.treeImage;
                     const wallX = (x + platform.width / 2) - (wallWidth / 2);
