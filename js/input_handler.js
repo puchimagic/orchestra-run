@@ -106,4 +106,9 @@ export class InputHandler {
         this.updateGamepads();
         requestAnimationFrame(() => this.pollGamepads());
     }
+
+    // ゲームパッドが1つでも接続されているか
+    isGamepadConnected() {
+        return this.gamepads.some(gamepad => gamepad !== undefined && gamepad !== null);
+    }
 }

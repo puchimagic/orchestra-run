@@ -48,19 +48,38 @@ export class Player {
     }
 
     update(platforms, walls) {
-        // 左右移動 (キーボード)
-        if (this.keys['KeyA']) {
-            this.vx = -MOVE_SPEED;
-        } else if (this.keys['KeyD']) {
-            this.vx = MOVE_SPEED;
-        } else {
-            this.vx = 0;
-        }
+        // コントローラーが接続されているか確認
+        const isGamepadConnected = this.input.isGamepadConnected();
 
-        // 左右移動 (ゲームパッド - プレイヤー1を想定しplayerIndex 0)
-        const gamepadXAxis = this.input.getGamepadAxis(0, 0); // 左スティックのX軸
-        if (gamepadXAxis !== 0) {
-            this.vx = MOVE_SPEED * gamepadXAxis;
+        if (isGamepadConnected) {
+            // 左右移動 (ゲームパッド - プレイヤー1を想定しplayerIndex 0)
+            const gamepadXAxis = this.input.getGamepadAxis(0, 0); // 左スティックのX軸
+            if (gamepadXAxis !== 0) {
+                this.vx = MOVE_SPEED * gamepadXAxis;
+            } else {
+                this.vx = 0;
+            }
+
+            // ジャンプ (ゲームパッド - プレイヤー1を想定しplayerIndex 0, ボタン3)
+            if (this.input.isGamepadButtonPressed(0, 3) && this.onGround) { // ボタン3をジャンプに割り当て
+                this.vy = -JUMP_POWER;
+                this.onGround = false;
+            }
+        } else {
+            // 左右移動 (キーボード)
+            if (this.keys['KeyA']) {
+                this.vx = -MOVE_SPEED;
+            } else if (this.keys['KeyD']) {
+                this.vx = MOVE_SPEED;
+            } else {
+                this.vx = 0;
+            }
+
+            // ジャンプ (キーボード)
+            if (this.keys['Space'] && this.onGround) {
+                this.vy = -JUMP_POWER;
+                this.onGround = false;
+            }
         }
 
         this.x += this.vx;
@@ -95,18 +114,6 @@ export class Player {
                 this.onGround = true;
             }
         });
-
-        // ジャンプ (キーボード)
-        if (this.keys['Space'] && this.onGround) {
-            this.vy = -JUMP_POWER;
-            this.onGround = false;
-        }
-
-        // ジャンプ (ゲームパッド - プレイヤー1を想定しplayerIndex 0, ボタン3)
-        if (this.input.isGamepadButtonPressed(0, 3) && this.onGround) { // ボタン3をジャンプに割り当て
-            this.vy = -JUMP_POWER;
-            this.onGround = false;
-        }
 
         if (this.x < this.game.currentScene.stage.cameraX) {
             this.x = this.game.currentScene.stage.cameraX;
