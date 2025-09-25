@@ -2,7 +2,7 @@ import { FONT_FAMILY, BLOCK_SIZE } from './config.js';
 
 const SOLID_DURATION = 5000;
 const scaffoldImage = new Image();
-scaffoldImage.src = 'img/gakufu.png';
+scaffoldImage.src = 'https://github.com/puchimagic/oic_hack/blob/main/img/gakufu.png?raw=true';
 
 export class ScaffoldBlock {
     constructor(x, y, widthInBlocks, heightInBlocks, requiredKeys) {
