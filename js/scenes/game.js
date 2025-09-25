@@ -60,14 +60,24 @@ export class GameScene {
         this.player.init();
         this.player2Input.init();
 
+        // 楽器名ごとに対応する画像URLをマッピング
+        const instrumentImageMap = {
+            "トライアングル": "https://github.com/puchimagic/oic_hack/blob/main/img/%E3%83%88%E3%83%A9%E3%82%A4%E3%82%A2%E3%83%B3%E3%82%B0%E3%83%AB.png?raw=true",
+            "タンバリン": "https://github.com/puchimagic/oic_hack/blob/main/img/%E3%82%BF%E3%83%B3%E3%83%90%E3%83%AA%E3%83%B3.png?raw=true",
+            "太鼓": "https://github.com/puchimagic/oic_hack/blob/main/img/%E5%A4%AA%E9%BC%93.png?raw=true",
+            "ドラム": "https://github.com/puchimagic/oic_hack/blob/main/img/%E3%83%89%E3%83%A9%E3%83%A0.png?raw=true",
+            "ピアノ": "https://github.com/puchimagic/oic_hack/blob/main/img/%E3%83%94%E3%82%A2%E3%83%8E.png?raw=true",
+            "ギター": "https://github.com/puchimagic/oic_hack/blob/main/img/%E3%82%AE%E3%82%BF%E3%83%BC.png?raw=true"
+        };
+
         // 楽器アイコンをロード
         this.instrumentImage = new Image();
-        this.instrumentImage.src = `img/${this.instrumentName}.png`;
+        this.instrumentImage.src = instrumentImageMap[this.instrumentName] || "";
         this.instrumentImage.onload = () => {
             this.isInstrumentLoaded = true;
         };
         this.instrumentImage.onerror = () => {
-            console.error(`Failed to load instrument image: img/${this.instrumentName}.png`);
+            console.error(`Failed to load instrument image for: ${this.instrumentName}`);
         };
     }
 
