@@ -42,7 +42,7 @@ export class MainScene {
         ctx.fillStyle = 'black';
         ctx.font = `${FONT_SIZE.LARGE}px ${FONT_FAMILY}`;
         ctx.textAlign = 'center';
-        ctx.fillText('スーパー ジェミニ ランナー', width / 2, height / 2 - 250);
+        ctx.fillText('オケラン', width / 2, height / 2 - 250);
 
         this.startButton.draw(ctx);
         this.rankingButton.draw(ctx);
