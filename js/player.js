@@ -8,7 +8,7 @@ const JUMP_POWER = 34;
 const GRAVITY = 1.7;
 
 export class Player {
-    constructor(game, inputHandler, waitImage, jumpImage, walkImage) {
+    constructor(game, inputHandler, waitImage, jumpImage, walkImage, walkImage2) {
         this.game = game;
         this.input = inputHandler;
         this.width = PLAYER_WIDTH_IN_BLOCKS * BLOCK_SIZE;
@@ -22,6 +22,9 @@ export class Player {
         this.waitImage = waitImage;
         this.jumpImage = jumpImage;
         this.walkImage = walkImage;
+        this.walkImage2 = walkImage2;
+        this.walkFrame = 0;
+        this.walkAnimationSpeed = 10;
 
         this.isJumping = false;
         this.isMoving = false;
@@ -144,9 +147,15 @@ export class Player {
         if (this.isJumping) {
             currentImage = this.jumpImage;
         } else if (this.isMoving) {
-            currentImage = this.walkImage;
+            this.walkFrame++;
+            if (Math.floor(this.walkFrame / this.walkAnimationSpeed) % 2 === 0) {
+                currentImage = this.walkImage;
+            } else {
+                currentImage = this.walkImage2;
+            }
         } else {
             currentImage = this.waitImage;
+            this.walkFrame = 0;
         }
 
         ctx.save();

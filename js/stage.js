@@ -100,6 +100,8 @@ export class Stage {
         this.playerJumpImage.src = 'https://github.com/puchimagic/oic_hack/blob/main/img/character_jump.png?raw=true';
         this.playerWalkImage = new Image();
         this.playerWalkImage.src = 'https://github.com/puchimagic/oic_hack/blob/main/img/character_woke.png?raw=true';
+        this.playerWalkImage2 = new Image();
+        this.playerWalkImage2.src = 'https://github.com/puchimagic/oic_hack/blob/main/img/character_woke2.png?raw=true';
         
         this.treeImage = new Image();
         this.treeImage.src = 'img/ki.png';

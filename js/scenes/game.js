@@ -55,7 +55,8 @@ export class GameScene {
             this.playerInput, 
             this.stage.playerWaitImage, 
             this.stage.playerJumpImage, 
-            this.stage.playerWalkImage
+            this.stage.playerWalkImage,
+            this.stage.playerWalkImage2
         );
         this.player.init();
         this.player2Input.init();
