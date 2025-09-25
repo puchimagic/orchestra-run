@@ -71,15 +71,15 @@ export class Stage {
         this.game = game;
         this.scrollSpeed = INITIAL_SCROLL_SPEED;
         this.groundImage = new Image();
-        this.groundImage.src = '../img/ground.png';
+        this.groundImage.src = 'https://github.com/puchimagic/oic_hack/blob/main/img/ground.png?raw=true';
         this.enemyImage = new Image();
-        this.enemyImage.src = '../img/teki.png';
+        this.enemyImage.src = 'https://github.com/puchimagic/oic_hack/blob/main/img/teki.png?raw=true';
         this.playerWaitImage = new Image();
-        this.playerWaitImage.src = '../img/character_wait.png';
+        this.playerWaitImage.src = 'https://github.com/puchimagic/oic_hack/blob/main/img/character_wait.png?raw=true';
         this.playerJumpImage = new Image();
-        this.playerJumpImage.src = '../img/character_jump.png';
+        this.playerJumpImage.src = 'https://github.com/puchimagic/oic_hack/blob/main/img/character_jump.png?raw=true';
         this.playerWalkImage = new Image();
-        this.playerWalkImage.src = '../img/character_woke.png';
+        this.playerWalkImage.src = 'https://github.com/puchimagic/oic_hack/blob/main/img/character_woke.png?raw=true';
     }
 
     init() {
