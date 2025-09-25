@@ -1,6 +1,6 @@
 import { BLOCK_SIZE } from './config.js';
 
-const PLAYER_WIDTH_IN_BLOCKS = 2.5;
+const PLAYER_WIDTH_IN_BLOCKS = 2.0;
 const PLAYER_HEIGHT_IN_BLOCKS = 2.5;
 const PLAYER_COLOR = 'blue';
 const MOVE_SPEED = 11;
