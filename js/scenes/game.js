@@ -189,6 +189,10 @@ export class GameScene {
     }
 
     checkGameOver() {
+        if (this.player.isCrushed) {
+            this.gameOver();
+            return;
+        }
         if (this.player.y > this.game.canvas.height) this.gameOver();
         if (this.player.x < this.stage.cameraX) this.gameOver();
         this.stage.enemies.forEach(enemy => {
