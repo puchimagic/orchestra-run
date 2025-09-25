@@ -7,7 +7,8 @@ import { InputHandler } from '../input_handler.js';
 export class GameScene {
     constructor(game) {
         this.game = game;
-        this.player2Input = new InputHandler();
+        this.playerInput = new InputHandler(); // プレイヤー1用のInputHandler
+        this.player2Input = new InputHandler(); // 足場・壁操作用のInputHandler
     }
 
     init(data) {
@@ -26,7 +27,7 @@ export class GameScene {
         this.score = 0;
         this.scoreMultiplier = this.instrument.multiplier;
 
-        this.player = new Player(this.game);
+        this.player = new Player(this.game, this.playerInput); // PlayerにInputHandlerを渡す
         this.stage = new Stage(this.game);
         this.scaffolds = [];
         this.breakableWalls = new Map();
