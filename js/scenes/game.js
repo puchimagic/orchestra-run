@@ -10,6 +10,17 @@ export class GameScene {
         this.playerInput = new InputHandler(); // プレイヤー1用のInputHandler
         this.player2Input = new InputHandler(); // 足場・壁操作用のInputHandler
         this.activeInstrumentConfig = null; // To store the currently active instrument config (keyboard or gamepad)
+
+        // 背景画像を読み込む
+        this.backgroundImage = new Image();
+        this.backgroundImage.src = 'img/mein.png'; // ここで画像パスを指定
+        this.isBackgroundLoaded = false;
+        this.backgroundImage.onload = () => {
+            this.isBackgroundLoaded = true;
+        };
+        this.backgroundImage.onerror = () => {
+            console.error('Failed to load background image: img/mein.png');
+        };
     }
 
     init(data) {
@@ -166,9 +177,16 @@ export class GameScene {
         const ctx = this.game.ctx;
         const { width, height } = this.game.canvas;
 
-        ctx.clearRect(0, 0, width, height);
-        ctx.fillStyle = '#d0d0d0';
-        ctx.fillRect(0, 0, width, height);
+        // 背景画像をまず描画
+        if (this.isBackgroundLoaded) {
+            // 背景画像をキャンバス全体に引き伸ばして描画
+            ctx.drawImage(this.backgroundImage, 0, 0, width, height);
+        } else {
+            // 画像が読み込まれていない場合は、既存の単色背景を描画
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#d0d0d0';
+            ctx.fillRect(0, 0, width, height);
+        }
 
         ctx.save();
         ctx.translate(-this.stage.cameraX, 0);
