@@ -183,7 +183,7 @@ export class GameScene {
             const requiredActions = wallData.requiredKeys.map(key => `ACTION_${key}`);
             if (requiredActions.every(action => this.player2Input.isActionDown(action)) && 
                 requiredActions.some(action => this.player2Input.isActionPressed(action))) {
-                this.stage.walls = this.stage.walls.filter(w => w !== target);
+                target.break();
                 this.breakableWalls.delete(target);
             }
         }
@@ -231,10 +231,16 @@ export class GameScene {
 
         this.breakableWalls.forEach((data, wall) => {
             const keyText = data.requiredKeys.join(' + ');
-            ctx.fillStyle = '#f0ad4e';
             ctx.font = `${BLOCK_SIZE}px ${FONT_FAMILY}`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
+
+            // テキストに黒い縁取りを追加
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 4;
+            ctx.strokeText(keyText, wall.x + wall.width / 2, wall.y + wall.height / 2);
+            
+            ctx.fillStyle = 'white';
             ctx.fillText(keyText, wall.x + wall.width / 2, wall.y + wall.height / 2);
         });
 

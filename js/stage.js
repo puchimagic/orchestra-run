@@ -1,23 +1,44 @@
 import { BLOCK_SIZE, PLATFORM_HEIGHT_IN_BLOCKS, PLAYER_MAX_JUMP_IN_BLOCKS, INITIAL_SCROLL_SPEED } from './config.js';
 
-const WALL_COLOR = '#555';
-
 const MIN_PLATFORM_WIDTH_IN_BLOCKS = 5;
 const MAX_PLATFORM_WIDTH_IN_BLOCKS = 15;
 const MIN_GAP_IN_BLOCKS = 4;
 const MAX_GAP_IN_BLOCKS = 40;
 
 export class Wall {
-    constructor(x, y, width, height, isBreakable = false) {
+    constructor(x, y, width, height, image, isBreakable = false, stumpImage = null) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
+        this.image = image;
         this.isBreakable = isBreakable;
+        this.stumpImage = stumpImage;
     }
+
+    break() {
+        if (!this.isBreakable) return;
+        
+        const newHeight = BLOCK_SIZE * 2.5;
+        const newWidth = BLOCK_SIZE * 2;
+
+        const centerX = this.x + this.width / 2;
+        this.x = centerX - (newWidth / 2);
+        
+        this.y = this.y + this.height - newHeight;
+        this.height = newHeight;
+        this.width = newWidth;
+        this.image = this.stumpImage;
+        this.isBreakable = false;
+    }
+
     draw(ctx) {
-        ctx.fillStyle = WALL_COLOR;
-        ctx.fillRect(this.x, this.y, this.width, this.height);
+        if (this.image && this.image.complete && this.image.naturalHeight !== 0) {
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        } else {
+            ctx.fillStyle = '#555';
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+        }
     }
 }
 
@@ -68,7 +89,7 @@ export class Stage {
     constructor(game) {
         this.game = game;
         this.scrollSpeed = INITIAL_SCROLL_SPEED;
-        this.elapsedTimeInSeconds = 0; // 経過時間を保持
+        this.elapsedTimeInSeconds = 0;
         this.groundImage = new Image();
         this.groundImage.src = 'https://github.com/puchimagic/oic_hack/blob/main/img/ground.png?raw=true';
         this.enemyImage = new Image();
@@ -79,6 +100,11 @@ export class Stage {
         this.playerJumpImage.src = 'https://github.com/puchimagic/oic_hack/blob/main/img/character_jump.png?raw=true';
         this.playerWalkImage = new Image();
         this.playerWalkImage.src = 'https://github.com/puchimagic/oic_hack/blob/main/img/character_woke.png?raw=true';
+        
+        this.treeImage = new Image();
+        this.treeImage.src = 'img/ki.png';
+        this.stumpImage = new Image();
+        this.stumpImage.src = 'img/kirikabu.png';
     }
 
     init() {
@@ -106,20 +132,30 @@ export class Stage {
         this.platforms.push(platform);
         this.lastPlatformX = x + platform.width;
 
-        // 8ブロックより大きい足場に障害物を生成
-        if (widthInBlocks > 8 && Math.random() < 0.8) { // 80%の確率で何らかの障害物を生成
+        if (widthInBlocks > 8 && Math.random() < 0.8) {
             const t = this.elapsedTimeInSeconds;
-            const wallThreshold = 0.45; // 壁の出現確率は45%で固定
-            // 敵の出現率は45%からスタートし、30秒ごとに約10%上昇(最大80%)
+            const wallThreshold = 0.45;
             const enemyChance = Math.min(0.8, 0.45 + (t / 150));
-            
-            const obstacleType = Math.random(); // 0-1の乱数
+            const obstacleType = Math.random();
 
             if (obstacleType < wallThreshold) {
                 const isHighWall = Math.random() < 0.5;
                 const wallHeight = isHighWall ? BLOCK_SIZE * 6 : BLOCK_SIZE * 2.5;
-                const wall = new Wall(x + platform.width / 2, y - wallHeight, BLOCK_SIZE, wallHeight, isHighWall);
+                const wallWidth = isHighWall ? BLOCK_SIZE * 1.5 : BLOCK_SIZE * 2;
+                const wallImage = isHighWall ? this.treeImage : this.stumpImage;
+                const wallX = (x + platform.width / 2) - (wallWidth / 2);
+                
+                const wall = new Wall(
+                    wallX, 
+                    y - wallHeight, 
+                    wallWidth, 
+                    wallHeight, 
+                    wallImage,
+                    isHighWall,
+                    this.stumpImage
+                );
                 this.walls.push(wall);
+
                 if (isHighWall) {
                     this.game.currentScene.requestWallBreakEvent(wall);
                 }
@@ -132,7 +168,6 @@ export class Stage {
 
     generateNext() {
         const t = this.elapsedTimeInSeconds;
-        // 穴の最大幅を時間経過で狭くする (40 -> 8)
         const currentMaxGap = Math.max(PLAYER_MAX_JUMP_IN_BLOCKS, MAX_GAP_IN_BLOCKS - (t / 10));
         const gapInBlocks = MIN_GAP_IN_BLOCKS + Math.floor(Math.random() * (currentMaxGap - MIN_GAP_IN_BLOCKS + 1));
         
