@@ -19,8 +19,8 @@ export class Wall {
     break() {
         if (!this.isBreakable) return;
         
-        const newHeight = BLOCK_SIZE * 2.5;
-        const newWidth = BLOCK_SIZE * 2;
+        const newHeight = BLOCK_SIZE * 3.5;
+        const newWidth = BLOCK_SIZE * 3;
 
         const centerX = this.x + this.width / 2;
         this.x = centerX - (newWidth / 2);
@@ -140,24 +140,27 @@ export class Stage {
 
             if (obstacleType < wallThreshold) {
                 const isHighWall = Math.random() < 0.5;
-                const wallHeight = isHighWall ? BLOCK_SIZE * 6 : BLOCK_SIZE * 2.5;
-                const wallWidth = isHighWall ? BLOCK_SIZE * 1.5 : BLOCK_SIZE * 2;
-                const wallImage = isHighWall ? this.treeImage : this.stumpImage;
-                const wallX = (x + platform.width / 2) - (wallWidth / 2);
-                
-                const wall = new Wall(
-                    wallX, 
-                    y - wallHeight, 
-                    wallWidth, 
-                    wallHeight, 
-                    wallImage,
-                    isHighWall,
-                    this.stumpImage
-                );
-                this.walls.push(wall);
 
                 if (isHighWall) {
+                    // Tree
+                    const wallHeight = BLOCK_SIZE * 8; // 8ブロック分の高さ
+                    const aspectRatio = 0.5; // 幅を高さの半分に
+                    const wallWidth = wallHeight * aspectRatio;
+                    const wallImage = this.treeImage;
+                    const wallX = (x + platform.width / 2) - (wallWidth / 2);
+                    
+                    const wall = new Wall(wallX, y - wallHeight, wallWidth, wallHeight, wallImage, true, this.stumpImage);
+                    this.walls.push(wall);
                     this.game.currentScene.requestWallBreakEvent(wall);
+                } else {
+                    // Stump
+                    const wallHeight = BLOCK_SIZE * 3.5;
+                    const wallWidth = BLOCK_SIZE * 3;
+                    const wallImage = this.stumpImage;
+                    const wallX = (x + platform.width / 2) - (wallWidth / 2);
+
+                    const wall = new Wall(wallX, y - wallHeight, wallWidth, wallHeight, wallImage, false, this.stumpImage);
+                    this.walls.push(wall);
                 }
             } else if (obstacleType < wallThreshold + enemyChance) {
                 const enemy = new Enemy(x + platform.width / 2, y - BLOCK_SIZE * 1.5, platform.width / 4, this.enemyImage);
