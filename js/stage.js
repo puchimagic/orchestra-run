@@ -19,8 +19,8 @@ export class Wall {
     break() {
         if (!this.isBreakable) return;
         
-        const newHeight = BLOCK_SIZE * 3.5;
-        const newWidth = BLOCK_SIZE * 3;
+        const newHeight = BLOCK_SIZE * 2.45;
+        const newWidth = BLOCK_SIZE * 2.1;
 
         const centerX = this.x + this.width / 2;
         this.x = centerX - (newWidth / 2);
@@ -143,8 +143,8 @@ export class Stage {
 
                 if (isHighWall) {
                     // Tree
-                    const wallHeight = BLOCK_SIZE * 8; // 8ブロック分の高さ
-                    const aspectRatio = 0.5; // 幅を高さの半分に
+                    const wallHeight = BLOCK_SIZE * 12; // 8ブロック分の高さ
+                    const aspectRatio = 0.7; // 幅を高さの半分に
                     const wallWidth = wallHeight * aspectRatio;
                     const wallImage = this.treeImage;
                     const wallX = (x + platform.width / 2) - (wallWidth / 2);
@@ -154,8 +154,8 @@ export class Stage {
                     this.game.currentScene.requestWallBreakEvent(wall);
                 } else {
                     // Stump
-                    const wallHeight = BLOCK_SIZE * 3.5;
-                    const wallWidth = BLOCK_SIZE * 3;
+                    const wallHeight = BLOCK_SIZE * 2.45;
+                    const wallWidth = BLOCK_SIZE * 2.1;
                     const wallImage = this.stumpImage;
                     const wallX = (x + platform.width / 2) - (wallWidth / 2);
 
