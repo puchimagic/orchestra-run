@@ -1,6 +1,8 @@
 import { FONT_FAMILY, BLOCK_SIZE } from './config.js';
 
 const SOLID_DURATION = 5000;
+const scaffoldImage = new Image();
+scaffoldImage.src = 'img/gakufu.png';
 
 export class ScaffoldBlock {
     constructor(x, y, widthInBlocks, heightInBlocks, requiredKeys) {
@@ -8,7 +10,7 @@ export class ScaffoldBlock {
         this.y = y;
         this.width = widthInBlocks * BLOCK_SIZE;
         this.height = heightInBlocks * BLOCK_SIZE;
-        this.requiredKeys = requiredKeys; // e.g., ['J'] or ['J', 'L']
+        this.requiredKeys = requiredKeys; // e.g., ['J'] or ['L']
 
         this.state = 'ACTIVE';
         this.solidUntil = 0;
@@ -46,8 +48,13 @@ export class ScaffoldBlock {
             ctx.fillText(keyText, this.x + this.width / 2, this.y + this.height / 2);
 
         } else if (this.state === 'SOLID') {
-            ctx.fillStyle = '#f0ad4e';
-            ctx.fillRect(this.x, this.y, this.width, this.height);
+            if (scaffoldImage.complete && scaffoldImage.naturalHeight !== 0) {
+                ctx.drawImage(scaffoldImage, this.x, this.y, this.width, this.height);
+            } else {
+                // 画像が読み込まれるまでのフォールバック
+                ctx.fillStyle = '#f0ad4e';
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+            }
         }
     }
 }
