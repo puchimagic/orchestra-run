@@ -140,6 +140,7 @@ export class GameScene {
         const newScrollSpeed = INITIAL_SCROLL_SPEED + Math.floor(elapsedTimeInSeconds / speedIncreaseInterval) * speedIncreaseAmount;
         this.stage.setScrollSpeed(newScrollSpeed);
 
+        this.stage.elapsedTimeInSeconds = elapsedTimeInSeconds; // 経過時間をStageに渡す
         this.stage.update();
         this.scaffolds.forEach(s => s.update());
 
