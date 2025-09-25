@@ -1,4 +1,4 @@
-import { SCENE, FONT_SIZE, FONT_FAMILY, BLOCK_SIZE, PLATFORM_HEIGHT_IN_BLOCKS, INSTRUMENT_CONFIG, INITIAL_SCROLL_SPEED, PLAYER_MAX_JUMP_IN_BLOCKS } from '../config.js';
+import { SCENE, FONT_SIZE, FONT_FAMILY, BLOCK_SIZE, PLATFORM_HEIGHT_IN_BLOCKS, KEYBOARD_INSTRUMENT_CONFIG, GAMEPAD_INSTRUMENT_CONFIG, INITIAL_SCROLL_SPEED, PLAYER_MAX_JUMP_IN_BLOCKS } from '../config.js';
 import { Player } from '../player.js';
 import { Stage, Wall } from '../stage.js'; // ★Wallクラスをインポート
 import { ScaffoldBlock } from '../scaffold.js';
@@ -9,17 +9,21 @@ export class GameScene {
         this.game = game;
         this.playerInput = new InputHandler(); // プレイヤー1用のInputHandler
         this.player2Input = new InputHandler(); // 足場・壁操作用のInputHandler
+        this.activeInstrumentConfig = null; // To store the currently active instrument config (keyboard or gamepad)
     }
 
     init(data) {
         this.instrumentName = data.instrument || 'トライアングル';
-        this.instrument = INSTRUMENT_CONFIG[this.instrumentName];
+        this.player2Input.setInstrumentKeyMaps(KEYBOARD_INSTRUMENT_CONFIG, GAMEPAD_INSTRUMENT_CONFIG);
 
-        const keyMap = {};
-        this.instrument.keys.forEach(key => {
-            keyMap[`Key${key}`] = `ACTION_${key}`;
-        });
-        this.player2Input.setKeyMap(keyMap);
+        // Initialize activeInstrumentConfig based on current gamepad status
+        const isGamepadConnected = this.player2Input.isGamepadConnected();
+        this.activeInstrumentConfig = isGamepadConnected ? GAMEPAD_INSTRUMENT_CONFIG : KEYBOARD_INSTRUMENT_CONFIG;
+        this.instrument = this.activeInstrumentConfig[this.instrumentName];
+
+        // The keyMap is now managed internally by player2Input, but we need to ensure
+        // the initial instrument is correctly set for generateRequiredKeys
+        // The actual keyMap for player2Input is set by setInstrumentKeyMaps
 
         this.startTime = Date.now();
         this.lastTime = this.startTime;
@@ -74,6 +78,17 @@ export class GameScene {
     }
 
     update() {
+        // Check if the active instrument config needs to be updated (due to gamepad connection change)
+        const isGamepadConnected = this.player2Input.isGamepadConnected();
+        const currentInputConfig = isGamepadConnected ? GAMEPAD_INSTRUMENT_CONFIG : KEYBOARD_INSTRUMENT_CONFIG;
+
+        if (this.activeInstrumentConfig !== currentInputConfig) {
+            this.activeInstrumentConfig = currentInputConfig;
+            this.instrument = this.activeInstrumentConfig[this.instrumentName];
+            // player2Input's internal keyMap is already updated by its own updateGamepads/pollGamepads
+            // We just need to ensure this.instrument reflects the current config for generateRequiredKeys
+        }
+
         const now = Date.now();
         const deltaTime = (now - this.lastTime) / 1000;
         this.lastTime = now;

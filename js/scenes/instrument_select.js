@@ -1,4 +1,4 @@
-import { SCENE, FONT_SIZE, FONT_FAMILY, INSTRUMENT_CONFIG, INSTRUMENT_ORDER } from '../config.js';
+import { SCENE, FONT_SIZE, FONT_FAMILY, KEYBOARD_INSTRUMENT_CONFIG, INSTRUMENT_ORDER } from '../config.js';
 import { Button } from '../ui/button.js';
 
 export class InstrumentSelectScene {
@@ -75,7 +75,7 @@ export class InstrumentSelectScene {
 
         for (const name of INSTRUMENT_ORDER) {
             const button = this.instrumentButtons[name];
-            const instrument = INSTRUMENT_CONFIG[name];
+            const instrument = KEYBOARD_INSTRUMENT_CONFIG[name]; // Use KEYBOARD_INSTRUMENT_CONFIG for display
 
             if (this.selectedInstrument === name) {
                 button.color = '#333';

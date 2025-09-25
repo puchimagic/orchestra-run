@@ -1,9 +1,11 @@
 import { SCENE, FONT_SIZE, FONT_FAMILY } from '../config.js';
 import { Button } from '../ui/button.js';
+import { InputHandler } from '../input_handler.js'; // Import InputHandler
 
 export class MainScene {
     constructor(game) {
         this.game = game;
+        this.inputHandler = new InputHandler(); // Create an instance of InputHandler
     }
 
     init() {
@@ -45,5 +47,13 @@ export class MainScene {
         this.startButton.draw(ctx);
         this.rankingButton.draw(ctx);
         this.descButton.draw(ctx);
+
+        // Display gamepad connection status
+        if (this.inputHandler.isGamepadConnected()) {
+            ctx.fillStyle = 'green';
+            ctx.font = `${FONT_SIZE.SMALL / 2}px ${FONT_FAMILY}`;
+            ctx.textAlign = 'right';
+            ctx.fillText('コントローラー接続済み', width - 20, height - 20);
+        }
     }
 }
