@@ -7,8 +7,8 @@ export class RankingScene {
         this.scores = [];
     }
 
-    init() {
-        this.scores = this.game.scoreManager.getScores();
+    async init() {
+        this.scores = await this.game.scoreManager.getScores();
 
         const btnWidth = 300;
         const btnHeight = 75;
@@ -18,7 +18,7 @@ export class RankingScene {
     }
 
     update() {
-        if (this.backButton.update(this.game.mouse)) {
+        if (this.backButton && this.backButton.update(this.game.mouse)) {
             this.game.changeScene(SCENE.MAIN);
         }
     }
@@ -41,7 +41,7 @@ export class RankingScene {
         const lineHeight = 60;
         let currentY = 250;
 
-        if (this.scores.length === 0) {
+        if (!this.scores || this.scores.length === 0) {
             ctx.textAlign = 'center';
             ctx.fillText('まだ記録がありません', width / 2, height / 2);
         } else {
@@ -78,6 +78,8 @@ export class RankingScene {
         }
 
         ctx.textAlign = 'center';
-        this.backButton.draw(ctx);
+        if (this.backButton) {
+            this.backButton.draw(ctx);
+        }
     }
 }

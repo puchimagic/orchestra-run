@@ -4,15 +4,15 @@ const MAX_SCORES = 5; // ランキングに保存する最大数
 export class ScoreManager {
     constructor() {}
 
-    getScores() {
-        const scoresJSON = localStorage.getItem(STORAGE_KEY);
-        const scores = scoresJSON ? JSON.parse(scoresJSON) : [];
+    async getScores() {
+        const response = await fetch("https://ocherun.s3.ap-southeast-2.amazonaws.com/test.json");
+        const scores = await response.json();
         // 念のためスコアで降順ソートして返す
         return scores.sort((a, b) => b.score - a.score);
     }
 
-    addScore(score, instrument) {
-        const scores = this.getScores();
+    async addScore(score, instrument) {
+        const scores = await this.getScores();
         const newScore = {
             score: score,
             instrument: instrument,
@@ -25,7 +25,28 @@ export class ScoreManager {
         // 上位5件だけを残す
         const topScores = scores.slice(0, MAX_SCORES);
 
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(topScores));
+        this.sendJson(JSON.stringify(topScores));
+    }
+
+    async sendJson(jsonData) {
+      // ① 署名付きURLを取得（Node.jsなどのAPIから）
+      const res = await fetch('https://xy4mb3of79.execute-api.ap-southeast-2.amazonaws.com/getSignedUrl?key=test.json');
+      const { url } = await res.json();
+
+      // ② JSONをPUT送信
+      const putRes = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: jsonData
+      });
+
+        if (putRes.ok) {      
+        alert('JSON送信成功！');
+      } else {
+        alert('送信失敗: ' + putRes.status);
+      }
     }
 
     getFormattedDate() {
