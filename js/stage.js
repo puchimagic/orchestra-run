@@ -26,8 +26,9 @@ class TemporaryAnimation {
         if (this.animationTimer > this.animationSpeed) {
             this.animationTimer = 0;
             this.animationFrame++;
-            if (this.animationFrame >= this.images.length) {
-                this.isFinished = true;
+            if (this.animationFrame >= this.images.length - 1) {
+                this.animationFrame = this.images.length - 1; // Stay on the last frame
+                this.isFinished = true; // Mark as finished
             }
         }
     }
@@ -40,32 +41,54 @@ class TemporaryAnimation {
             const drawWidth = this.width; // アニメーション生成時に渡された元の木の幅
             const drawHeight = this.height; // アニメーション生成時に渡された元の木の高さ
 
-            // 切り株の上辺を軸にするためのオフセット計算
-            const pivotX = this.x + this.width / 2;
-            const pivotY = this.y + this.height; // 元の木の底辺Y座標
+            // 切り株の上辺中央を起点として計算
+            const stumpHeightPixels = BLOCK_SIZE * STUMP_HEIGHT_IN_BLOCKS;
+            const stumpPivotX = this.x + this.width / 2; // 元の木の中心X座標
+            const stumpPivotY = this.y + this.height - stumpHeightPixels; // 切り株の上辺Y座標
 
-            // フレーム毎の描画位置とサイズの調整
-            if (this.animationFrame === 0) { // ki2
-                // 少し右にずらす
-                drawX = pivotX - drawWidth / 2 + drawWidth * 0.1;
-                drawY = pivotY - drawHeight; // 根元を固定
-            } else if (this.animationFrame === 1) { // ki3
-                // 中央付近に
-                drawX = pivotX - drawWidth / 2 + drawWidth * 0.0; // 中央
-                drawY = pivotY - drawHeight + drawHeight * 0.1; // 少し上にずらす
-            } else if (this.animationFrame === 2) { // ki4
-                // 左にずらす
-                // ki4.pngは横倒しになっているので、元の木の高さが横幅、元の木の幅が高さになる
-                const fallenLogVisualWidth = drawHeight * 0.9; // 元の木の高さが横幅に
-                const fallenLogVisualHeight = drawWidth * 0.8; // 元の木の幅が高さに
-                
-                drawX = pivotX - fallenLogVisualWidth / 2 - drawWidth * 0.1; // 左に寄せる
-                drawY = pivotY - fallenLogVisualHeight; // 地面に配置
-                
+            let offsetX = 0;
+            let offsetY = 0;
+
+            if (this.animationFrame === 0) { // ki2 (初期の傾き)
+                // 画像の描画開始位置を切り株のピボットに合わせる
+                drawX = stumpPivotX - drawWidth / 2;
+                drawY = stumpPivotY - drawHeight;
+
+                // わずかに右下へ移動
+                offsetX = BLOCK_SIZE * 0.2;
+                offsetY = BLOCK_SIZE * 0.2;
+
+            } else if (this.animationFrame === 1) { // ki3 (さらに傾く)
+                // 画像の描画開始位置を切り株のピボットに合わせる
+                drawX = stumpPivotX - drawWidth / 2;
+                drawY = stumpPivotY - drawHeight;
+
+                // さらに右下へ移動
+                offsetX = BLOCK_SIZE * 0.8;
+                offsetY = BLOCK_SIZE * 0.8;
+
+            } else if (this.animationFrame === 2) { // ki4 (倒れた丸太)
+                // ki4.pngは横倒しになっているため、元の木の高さが横幅、元の木の幅が高さになる
+                const fallenLogVisualWidth = drawHeight * 0.9;
+                const fallenLogVisualHeight = drawWidth * 0.8;
+
+                // 地面に着地する位置を計算 (元の木の地面の高さ)
+                const groundLevelY = this.y + this.height;
+
+                // 最終的な右下への移動量
+                offsetX = BLOCK_SIZE * 2.5;
+                offsetY = BLOCK_SIZE * 2.5;
+
+                // 描画位置を調整
+                drawX = stumpPivotX + offsetX - fallenLogVisualWidth / 2;
+                drawY = groundLevelY - fallenLogVisualHeight; // 地面に着地
+
                 ctx.drawImage(frameImage, drawX, drawY, fallenLogVisualWidth, fallenLogVisualHeight);
                 return; // このフレームは個別に描画したので、デフォルトの描画はスキップ
             }
-            ctx.drawImage(frameImage, drawX, drawY, drawWidth, drawHeight);
+
+            // フレーム0と1にオフセットを適用して描画
+            ctx.drawImage(frameImage, drawX + offsetX, drawY + offsetY, drawWidth, drawHeight);
         }
     }
 }
@@ -253,7 +276,7 @@ export class Stage {
         this.enemies.forEach(e => e.update());
 
         this.animations.forEach(a => a.update(deltaTime));
-        this.animations = this.animations.filter(a => !a.isFinished);
+        // this.animations = this.animations.filter(a => !a.isFinished); // Keep finished animations to display their last frame
     }
 
     draw(ctx) {
