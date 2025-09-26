@@ -7,6 +7,8 @@ export class SoundPlayer {
       game_bgm: new Audio("./sound/game/game_bgm.mp3"),
       gameover_bgm: new Audio("./sound/game/gameover_bgm.mp3"),
       home_bgm: new Audio("./sound/game/home_bgm.mp3"),
+      tree_fall: new Audio("./sound/game/木が倒れる音.wav"),
+      tree_fall: new Audio("./sound/game/木が倒れる音.wav"),
       ki_patan: new Audio("./sound/game/木が倒れる音.wav"),
     };
     this.gameSounds.score.volume = 0.3; // スコア音の音量を調整

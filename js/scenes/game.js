@@ -214,7 +214,7 @@ export class GameScene {
         this.stage.setScrollSpeed(newScrollSpeed);
 
         this.stage.elapsedTimeInSeconds = elapsedTimeInSeconds; // 経過時間をStageに渡す
-        this.stage.update();
+        this.stage.update(deltaTime);
         this.scaffolds.forEach(s => s.update());
 
         this.handlePlayer2Input();

@@ -74,12 +74,14 @@ class Game {
     }
 
     changeScene(sceneName, data = {}) {
-        // ★BGM管理をここに集約
-        const targetBGM = SCENE_BGM_MAP[sceneName];
-        if (targetBGM) {
-            soundPlayer.playBGM(targetBGM);
-        } else {
-            soundPlayer.stopBGM();
+        // ★BGM管理をここに集約 (ゲームがアクティブな時のみ再生)
+        if (this.isGameActive) {
+            const targetBGM = SCENE_BGM_MAP[sceneName];
+            if (targetBGM) {
+                soundPlayer.playBGM(targetBGM);
+            } else {
+                soundPlayer.stopBGM();
+            }
         }
 
         if (sceneName === SCENE.GAME) {
