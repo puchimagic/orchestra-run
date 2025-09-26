@@ -305,8 +305,8 @@ export class GameScene {
             const requiredActions = wallData.requiredKeys.map(key => `ACTION_${key}`);
             if (requiredActions.every(action => this.player2Input.isActionDown(action)) && 
                 requiredActions.some(action => this.player2Input.isActionPressed(action))) {
-                target.break();
-                this.stage.spawnFallingTreeAnimation(target); // ★アニメーションを生成
+                this.stage.spawnFallingTreeAnimation(target); // ★先にアニメーションを生成
+                target.break(); // ★その後に当たり判定を切り株に変化させる
                 this.breakableWalls.delete(target);
             }
         }

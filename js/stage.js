@@ -37,19 +37,35 @@ class TemporaryAnimation {
         if (frameImage && frameImage.complete) {
             let drawX = this.x;
             let drawY = this.y;
+            const drawWidth = this.width; // アニメーション生成時に渡された元の木の幅
+            const drawHeight = this.height; // アニメーション生成時に渡された元の木の高さ
 
+            // 切り株の上辺を軸にするためのオフセット計算
+            const pivotX = this.x + this.width / 2;
+            const pivotY = this.y + this.height; // 元の木の底辺Y座標
+
+            // フレーム毎の描画位置とサイズの調整
             if (this.animationFrame === 0) { // ki2
-                drawX -= this.width * 0.2;
+                // 少し右にずらす
+                drawX = pivotX - drawWidth / 2 + drawWidth * 0.1;
+                drawY = pivotY - drawHeight; // 根元を固定
             } else if (this.animationFrame === 1) { // ki3
-                drawX -= this.width * 0.2;
-                drawY += this.height * 0.1;
+                // 中央付近に
+                drawX = pivotX - drawWidth / 2 + drawWidth * 0.0; // 中央
+                drawY = pivotY - drawHeight + drawHeight * 0.1; // 少し上にずらす
             } else if (this.animationFrame === 2) { // ki4
-                const logWidth = this.height * 0.9;
-                const logHeight = this.width * 1.2;
-                drawX -= this.width * 0.1;
-                drawY = this.y + this.height - logHeight;
+                // 左にずらす
+                // ki4.pngは横倒しになっているので、元の木の高さが横幅、元の木の幅が高さになる
+                const fallenLogVisualWidth = drawHeight * 0.9; // 元の木の高さが横幅に
+                const fallenLogVisualHeight = drawWidth * 0.8; // 元の木の幅が高さに
+                
+                drawX = pivotX - fallenLogVisualWidth / 2 - drawWidth * 0.1; // 左に寄せる
+                drawY = pivotY - fallenLogVisualHeight; // 地面に配置
+                
+                ctx.drawImage(frameImage, drawX, drawY, fallenLogVisualWidth, fallenLogVisualHeight);
+                return; // このフレームは個別に描画したので、デフォルトの描画はスキップ
             }
-            ctx.drawImage(frameImage, drawX, drawY, this.width, this.height);
+            ctx.drawImage(frameImage, drawX, drawY, drawWidth, drawHeight);
         }
     }
 }
