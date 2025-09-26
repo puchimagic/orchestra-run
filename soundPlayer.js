@@ -14,8 +14,9 @@ export class SoundPlayer {
     this.sounds = {}; // loadSoundでロードした音源を格納するオブジェクト
     this.currentBGM = null; // 現在再生中のBGMを追跡
 
-    // home_bgmはループ再生
+    // BGMのループ設定
     this.gameSounds.home_bgm.loop = true;
+    this.gameSounds.game_bgm.loop = true;
   }
 
   playBGM(bgmName) {
