@@ -281,8 +281,12 @@ export class Stage {
 
     draw(ctx) {
         this.platforms.forEach(p => p.draw(ctx));
-        this.walls.forEach(w => w.draw(ctx));
-        this.enemies.forEach(e => e.draw(ctx));
+        this.enemies.forEach(e => e.draw(ctx)); // 敵は手前で良い
+        
+        // 倒れた木のアニメーションを先に描画する
         this.animations.forEach(a => a.draw(ctx));
+
+        // その後に壁（切り株を含む）を描画する
+        this.walls.forEach(w => w.draw(ctx));
     }
 }
