@@ -21,7 +21,6 @@ export class RankingScene {
 
     async init() {
         this.scores = await this.game.scoreManager.getScores();
-        soundPlayer.playBGM('home_bgm');
 
         const btnWidth = 300;
         const btnHeight = 75;

@@ -24,7 +24,6 @@ export class GameDescriptionScene {
         const x = (this.game.canvas.width - btnWidth) / 2;
         const y = this.game.canvas.height - btnHeight - 75;
         this.backButton = new Button(x, y, btnWidth, btnHeight, 'メインに戻る');
-        soundPlayer.playBGM('home_bgm');
     }
 
     update() {

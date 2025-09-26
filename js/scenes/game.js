@@ -327,7 +327,6 @@ export class GameScene {
     }
 
     gameOver() {
-        soundPlayer.playBGM('gameover_bgm');
         soundPlayer.playGameSound("gameOver"); // ゲームオーバー音を再生
         this.player.destroy();
         this.player2Input.destroy();

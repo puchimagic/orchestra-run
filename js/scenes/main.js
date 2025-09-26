@@ -1,14 +1,13 @@
 import { SCENE, FONT_SIZE, FONT_FAMILY } from '../config.js';
 import { Button } from '../ui/button.js';
-import { InputHandler } from '../input_handler.js'; // Import InputHandler
+import { InputHandler } from '../input_handler.js';
 import { soundPlayer } from '../../soundPlayer.js';
 
 export class MainScene {
     constructor(game) {
         this.game = game;
-        this.inputHandler = new InputHandler(); // Create an instance of InputHandler
+        this.inputHandler = this.game.inputHandler;
 
-        // 背景画像を読み込む
         this.backgroundImage = new Image();
         this.backgroundImage.src = 'img/title_rank_select.png';
         this.isBackgroundLoaded = false;
@@ -18,10 +17,13 @@ export class MainScene {
         this.backgroundImage.onerror = () => {
             console.error('Failed to load background image: img/title_rank_select.png');
         };
-        this.inputHandler = this.game.inputHandler; // Create an instance of InputHandler
     }
 
     init() {
+        this.onResize();
+    }
+
+    onResize() {
         const btnWidth = 400;
         const btnHeight = 75;
         const cx = this.game.canvas.width / 2;
@@ -30,12 +32,21 @@ export class MainScene {
         this.startButton = new Button(cx - btnWidth / 2, cy - 100, btnWidth, btnHeight, 'ゲームスタート');
         this.rankingButton = new Button(cx - btnWidth / 2, cy, btnWidth, btnHeight, 'ランキング');
         this.descButton = new Button(cx - btnWidth / 2, cy + 100, btnWidth, btnHeight, 'あそびかた');
-        soundPlayer.playBGM('home_bgm');
     }
 
     update() {
+        if (!this.game.isGameActive) {
+            if (this.inputHandler.isKeyPressed('KeyF')) {
+                this.game.isGameActive = true;
+                soundPlayer.playBGM('home_bgm');
+                if (this.game.canvas.requestFullscreen) {
+                    this.game.canvas.requestFullscreen();
+                }
+            }
+            return; // Fキーが押されるまで他の操作をブロック
+        }
+
         if (this.startButton.update(this.game.mouse)) {
-            // ゲーム開始時にゲームパッドの接続状態を確定
             this.game.isGamepadConnectedAtStart = this.inputHandler.isGamepadConnected();
             this.game.changeScene(SCENE.INSTRUMENT_SELECT);
         }
@@ -50,7 +61,7 @@ export class MainScene {
     draw() {
         const ctx = this.game.ctx;
         const { width, height } = this.game.canvas;
-        //背景設定
+
         if (this.isBackgroundLoaded) {
             ctx.drawImage(this.backgroundImage, 0, 0, width, height);
         } else {
@@ -68,7 +79,13 @@ export class MainScene {
         this.rankingButton.draw(ctx);
         this.descButton.draw(ctx);
 
-        // Display gamepad connection status
+        if (!this.game.isGameActive) {
+            ctx.fillStyle = 'black';
+            ctx.font = `${FONT_SIZE.MEDIUM}px ${FONT_FAMILY}`;
+            ctx.textAlign = 'center';
+            ctx.fillText('Fキーを押してください。', width / 2, this.descButton.y + this.descButton.height + 60);
+        }
+
         if (this.inputHandler.isGamepadConnected()) {
             ctx.fillStyle = 'green';
             ctx.font = `${FONT_SIZE.SMALL / 2}px ${FONT_FAMILY}`;

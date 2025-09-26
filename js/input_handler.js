@@ -112,6 +112,11 @@ export class InputHandler {
         return this.pressedKeys.has(physicalKey);
     }
 
+    // ★特定のキーが押されているか？ (新設)
+    isKeyPressed(keyCode) {
+        return this.pressedKeys.has(keyCode);
+    }
+
     clearPressedActions() {
         this.actionsDown.clear();
     }

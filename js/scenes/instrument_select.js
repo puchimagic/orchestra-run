@@ -51,7 +51,6 @@ export class InstrumentSelectScene {
             }
             this.instrumentButtons[name] = new Button(x, y, btnWidth, btnHeight, name);
         });
-        soundPlayer.playBGM('home_bgm');
 
         const bottomButtonY = y3 + btnHeight + 80;
         this.startButton = new Button(cx - btnWidth / 2 - 170, bottomButtonY, btnWidth, btnHeight, 'ゲームスタート', '#4CAF50', '#66BB6A');
