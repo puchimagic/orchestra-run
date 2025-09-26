@@ -96,8 +96,7 @@ export class InputHandler {
         const action = this.activeKeyMap[e.code]; // Use activeKeyMap
         if (action) {
             // If a key is released, ensure its action is no longer considered "down"
-            // This is important for actions that might be held down
-            // this.actionsDown.delete(action); // This is handled by clearPressedActions
+            // This is handled by clearPressedActions
         }
     }
 
@@ -115,6 +114,16 @@ export class InputHandler {
     // ★特定のキーが押されているか？ (新設)
     isKeyPressed(keyCode) {
         return this.pressedKeys.has(keyCode);
+    }
+
+    // 現在選択されている楽器のアクションキーに対応する物理キーのSetを返す
+    getInstrumentPhysicalKeys() {
+        const instrumentPhysicalKeys = new Set();
+        // activeKeyMapのキーは物理キーコードなので、そのまま追加
+        for (const physicalKey in this.activeKeyMap) {
+            instrumentPhysicalKeys.add(physicalKey);
+        }
+        return instrumentPhysicalKeys;
     }
 
     clearPressedActions() {

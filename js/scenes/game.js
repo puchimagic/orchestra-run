@@ -251,8 +251,43 @@ export class GameScene {
 
         if (target instanceof ScaffoldBlock) {
             const requiredActions = target.requiredKeys.map(key => `ACTION_${key}`);
+            
+            let isPerfectMatch = true;
+            const requiredPhysicalKeys = new Set();
+            requiredActions.forEach(action => {
+                const physicalKey = this.player2Input.actionMap[action];
+                if (physicalKey) {
+                    requiredPhysicalKeys.add(physicalKey);
+                }
+            });
+
+            const instrumentPhysicalKeys = this.player2Input.getInstrumentPhysicalKeys(); // 楽器のアクションキーに対応する物理キーを取得
+
+            // 押されているキーの中で、楽器のアクションキーに対応するものだけをフィルタリング
+            const currentlyPressedInstrumentKeys = new Set();
+            for (const pressedKey of this.player2Input.pressedKeys) {
+                if (instrumentPhysicalKeys.has(pressedKey)) {
+                    currentlyPressedInstrumentKeys.add(pressedKey);
+                }
+            }
+
+            // 押されている楽器キーの数がrequiredPhysicalKeysの数と一致しない場合
+            if (currentlyPressedInstrumentKeys.size !== requiredPhysicalKeys.size) {
+                isPerfectMatch = false;
+            } else {
+                // 押されている楽器キーがrequiredPhysicalKeysと完全に一致するかチェック
+                for (const requiredKey of requiredPhysicalKeys) {
+                    if (!currentlyPressedInstrumentKeys.has(requiredKey)) {
+                        isPerfectMatch = false;
+                        break;
+                    }
+                }
+            }
+
             if (requiredActions.every(action => this.player2Input.isActionDown(action)) && 
-                requiredActions.some(action => this.player2Input.isActionPressed(action))) {
+                requiredActions.some(action => this.player2Input.isActionPressed(action)) &&
+                isPerfectMatch
+            ) {
                 target.solidify();
                 // 足場が生成されたときに音を鳴らす
                 if (this.instrumentName === 'ピアノ') {
@@ -312,8 +347,43 @@ export class GameScene {
         else if (target instanceof Wall) {
             const wallData = this.breakableWalls.get(target);
             const requiredActions = wallData.requiredKeys.map(key => `ACTION_${key}`);
+
+            let isPerfectMatch = true;
+            const requiredPhysicalKeys = new Set();
+            requiredActions.forEach(action => {
+                const physicalKey = this.player2Input.actionMap[action];
+                if (physicalKey) {
+                    requiredPhysicalKeys.add(physicalKey);
+                }
+            });
+
+            const instrumentPhysicalKeys = this.player2Input.getInstrumentPhysicalKeys(); // 楽器のアクションキーに対応する物理キーを取得
+
+            // 押されているキーの中で、楽器のアクションキーに対応するものだけをフィルタリング
+            const currentlyPressedInstrumentKeys = new Set();
+            for (const pressedKey of this.player2Input.pressedKeys) {
+                if (instrumentPhysicalKeys.has(pressedKey)) {
+                    currentlyPressedInstrumentKeys.add(pressedKey);
+                }
+            }
+
+            // 押されている楽器キーの数がrequiredPhysicalKeysの数と一致しない場合
+            if (currentlyPressedInstrumentKeys.size !== requiredPhysicalKeys.size) {
+                isPerfectMatch = false;
+            } else {
+                // 押されている楽器キーがrequiredPhysicalKeysと完全に一致するかチェック
+                for (const requiredKey of requiredPhysicalKeys) {
+                    if (!currentlyPressedInstrumentKeys.has(requiredKey)) {
+                        isPerfectMatch = false;
+                        break;
+                    }
+                }
+            }
+
             if (requiredActions.every(action => this.player2Input.isActionDown(action)) && 
-                requiredActions.some(action => this.player2Input.isActionPressed(action))) {
+                requiredActions.some(action => this.player2Input.isActionPressed(action)) &&
+                isPerfectMatch
+            ) {
                 this.stage.spawnFallingTreeAnimation(target); // ★先にアニメーションを生成
                 target.break(); // ★その後に当たり判定を切り株に変化させる
                 this.breakableWalls.delete(target);
