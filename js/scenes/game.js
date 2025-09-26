@@ -7,14 +7,29 @@ import { Player } from '../player.js';
 import { Stage, Wall } from '../stage.js'; 
 import { ScaffoldBlock } from '../scaffold.js';
 import { InputHandler } from '../input_handler.js';
-import { soundPlayer } from '../../soundPlayer.js';
+import { SoundPlayer, soundPlayer } from '../../soundPlayer.js';
 
 export class GameScene {
-    constructor(game) {
+    constructor(game, selectedInstrument) {
         this.game = game;
+        this.selectedInstrument = selectedInstrument;
         this.playerInput = new InputHandler(); 
         this.player2Input = new InputHandler(); 
         this.activeInstrumentConfig = null; 
+
+        // SoundPlayerのインスタンスを生成
+        this.instrumentSoundPlayer = new SoundPlayer();
+
+        // 日本語の楽器名と英語のディレクトリ名のマッピングをプロパティとして保持
+        this.instrumentDirMap = {
+            "トライアングル": "triangle",
+            "タンバリン": "tambourie",
+            "太鼓": "taiko",
+            "ドラム": "drum",
+            "ピアノ": "piano",
+            "ギター": "guitar"
+        };
+        this.instrumentDirName = null; // 初期化
 
         // 背景画像を読み込む
         this.backgroundImage = new Image();
@@ -33,7 +48,7 @@ export class GameScene {
     }
 
     init(data) {
-        this.instrumentName = data.instrument || 'トライアングル';
+        this.instrumentName = this.selectedInstrument || 'トライアングル';
         this.player2Input.setInstrumentKeyMaps(KEYBOARD_INSTRUMENT_CONFIG, GAMEPAD_INSTRUMENT_CONFIG);
 
         const isGamepadConnected = this.player2Input.isGamepadConnected();
@@ -86,6 +101,30 @@ export class GameScene {
         this.instrumentImage.onerror = () => {
             console.error(`Failed to load instrument image for: ${this.instrumentName}`);
         };
+
+        this.loadInstrumentSounds(); // 楽器の音源をロード
+    }
+
+    // 楽器の音源をロードするメソッド
+    loadInstrumentSounds() {
+        const instrumentConfig = KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName];
+        if (!instrumentConfig) {
+            console.warn(`Instrument config not found for: ${this.instrumentName}`);
+            return;
+        }
+
+        this.instrumentDirName = this.instrumentDirMap[this.instrumentName]; // プロパティに設定
+        if (!this.instrumentDirName) {
+            console.warn(`Instrument directory name not found for: ${this.instrumentName}`);
+            return;
+        }
+
+        instrumentConfig.keys.forEach((key, index) => {
+            // 例: piano_track01, piano_track02
+            const soundName = `${this.instrumentDirName}_track${index + 1}`;
+            const soundPath = `sound/${this.instrumentDirName}/track0${index + 1}.wav`; // track01.wav, track02.wav...
+            this.instrumentSoundPlayer.loadSound(soundName, soundPath);
+        });
     }
 
     requestScaffold(holeX, holeWidth) {
@@ -199,6 +238,17 @@ export class GameScene {
             if (requiredActions.every(action => this.player2Input.isActionDown(action)) && 
                 requiredActions.some(action => this.player2Input.isActionPressed(action))) {
                 target.solidify();
+                // 足場が生成されたときに音を鳴らす
+                requiredActions.forEach(action => {
+                    const key = action.replace('ACTION_', '');
+                    const instrumentConfig = KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName];
+                    const keyIndex = instrumentConfig.keys.indexOf(key);
+                    if (keyIndex !== -1) {
+                        const soundName = `${this.instrumentDirName}_track${keyIndex + 1}`;
+                        console.log(`Attempting to play sound: ${soundName}`); // ★追加
+                        this.instrumentSoundPlayer.playSound(soundName);
+                    }
+                });
             }
         } else if (target instanceof Wall) {
             const wallData = this.breakableWalls.get(target);

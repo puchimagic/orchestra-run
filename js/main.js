@@ -16,6 +16,7 @@ class Game {
         this.mouse = { x: 0, y: 0, clicked: false };
 
         this.scoreManager = new ScoreManager(); // ★インスタンス化
+        this.selectedInstrument = null; // 選択された楽器を保持
 
         this.resizeCanvas();
         window.addEventListener('resize', () => this.resizeCanvas());
@@ -47,14 +48,20 @@ class Game {
         this.scenes[SCENE.GAME_DESCRIPTION] = new GameDescriptionScene(this);
         this.scenes[SCENE.RANKING] = new RankingScene(this);
         this.scenes[SCENE.INSTRUMENT_SELECT] = new InstrumentSelectScene(this);
-        this.scenes[SCENE.GAME] = new GameScene(this);
+        // this.scenes[SCENE.GAME] = new GameScene(this); // GameSceneはchangeSceneで毎回生成するため削除
         this.scenes[SCENE.GAME_OVER] = new GameOverScene(this);
         this.changeScene(SCENE.MAIN);
         this.gameLoop();
     }
 
     changeScene(sceneName, data = {}) {
-        this.currentScene = this.scenes[sceneName];
+        if (sceneName === SCENE.GAME) {
+            // GameSceneは毎回新しいインスタンスを生成し、選択された楽器を渡す
+            this.currentScene = new GameScene(this, this.selectedInstrument);
+        } else {
+            this.currentScene = this.scenes[sceneName];
+        }
+
         if (this.currentScene.init) {
             this.currentScene.init(data);
         }

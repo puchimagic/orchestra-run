@@ -53,7 +53,8 @@ export class InstrumentSelectScene {
         }
 
         if (this.startButton.update(this.game.mouse)) {
-            this.game.changeScene(SCENE.GAME, { instrument: this.selectedInstrument });
+            this.game.selectedInstrument = this.selectedInstrument; // Gameクラスに選択された楽器を保存
+            this.game.changeScene(SCENE.GAME); // GameSceneのコンストラクタでselectedInstrumentを受け取るため、dataは不要
         }
         if (this.backButton.update(this.game.mouse)) {
             this.game.changeScene(SCENE.MAIN);
