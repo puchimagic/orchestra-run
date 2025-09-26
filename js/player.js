@@ -58,8 +58,8 @@ export class Player {
     handleKeyUp(e) { this.keys[e.code] = false; }
 
     update(platforms, walls) {
-        const isGamepadConnected = this.input.isGamepadConnected();
-        if (isGamepadConnected) {
+        const useGamepadForPlayer = this.game.isGamepadConnectedAtStart;
+        if (useGamepadForPlayer) {
             const gamepadXAxis = this.input.getGamepadAxis(0, 0);
             this.vx = gamepadXAxis !== 0 ? MOVE_SPEED * gamepadXAxis : 0;
             if (this.input.isGamepadButtonPressed(0, 3) && this.onGround) {

@@ -21,6 +21,8 @@ export class MainScene {
 
     update() {
         if (this.startButton.update(this.game.mouse)) {
+            // ゲーム開始時にゲームパッドの接続状態を確定
+            this.game.isGamepadConnectedAtStart = this.inputHandler.isGamepadConnected();
             this.game.changeScene(SCENE.INSTRUMENT_SELECT);
         }
         if (this.rankingButton.update(this.game.mouse)) {

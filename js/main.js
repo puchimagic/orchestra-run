@@ -19,6 +19,7 @@ class Game {
 
         this.scoreManager = new ScoreManager(); // ★インスタンス化
         this.selectedInstrument = null; // 選択された楽器を保持
+        this.isGamepadConnectedAtStart = false; // ゲーム開始時のゲームパッド接続状態を保持
 
         this.resizeCanvas();
         window.addEventListener('resize', () => this.resizeCanvas());
