@@ -1,4 +1,5 @@
 import { BLOCK_SIZE } from './config.js';
+import { soundPlayer } from "../soundPlayer.js";
 
 const PLAYER_WIDTH_IN_BLOCKS = 2.0;
 const PLAYER_HEIGHT_IN_BLOCKS = 2.5;
@@ -70,6 +71,7 @@ export class Player {
             else if (this.keys['KeyD']) this.vx = MOVE_SPEED;
             else this.vx = 0;
             if (this.keys['Space'] && this.onGround) {
+                soundPlayer.playGameSound("jump"); // ジャンプ音
                 this.vy = -JUMP_POWER;
                 this.onGround = false;
             }

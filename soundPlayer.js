@@ -1,50 +1,60 @@
-/**
- * 楽器別の効果音再生関数群
- * 各関数は楽器名と番号を受け取り、共通関数に渡す
- */
-
-function playPianoSound(num) {
-  playInstrumentSound('piano', num);
-}
-
-function playDrumSound(num) {
-  playInstrumentSound('drum', num);
-}
-
-function playTambourineSound(num) {
-  playInstrumentSound('tambourine', num);
-}
-
-function playTriangleSound(num) {
-  playInstrumentSound('triangle', num);
-}
-
-function playGuitarSound(num) {
-  playInstrumentSound('guitar', num);
-}
-function playtaikoSound(num) {
-  playInstrumentSound('taiko', num);
-}
-function playgameSound(num) {
-  playInstrumentSound('game', num);
-}
-
-
-/**
- * 共通処理：楽器名と番号に応じて音声ファイルを再生
- * @param {string} instrument - 楽器名（フォルダ名）
- * @param {number} num - 1〜１０の番号
- */
-function playInstrumentSound(instrument, num) {
-  if (isNaN(num) || num < 1 || num > 10) {
-    alert('エラー');
-    return;
+class SoundPlayer {
+  constructor() {
+    this.gameSounds = {
+      jump: new Audio("./sound/game/track01.wav"),
+      score: new Audio("./sound/game/track02.wav"),
+      gameOver: new Audio("./sound/game/track03.wav"),
+    };
+    this.instrumentSounds = {
+      piano: [
+        new Audio("./sound/piano/track01.wav"),
+        new Audio("./sound/piano/track02.wav"),
+        new Audio("./sound/piano/track03.wav"),
+        new Audio("./sound/piano/track04.wav"),
+        new Audio("./sound/piano/track05.wav"),
+        new Audio("./sound/piano/track06.wav"),
+        new Audio("./sound/piano/track07.wav"),
+      ],
+      guitar: [
+        new Audio("./sound/guitar/track01.wav"),
+        new Audio("./sound/guitar/track02.wav"),
+        new Audio("./sound/guitar/track03.wav"),
+        new Audio("./sound/guitar/track04.wav"),
+      ],
+      drum: [
+        new Audio("./sound/drum/track01.wav"),
+        new Audio("./sound/drum/track02.wav"),
+        new Audio("./sound/drum/track03.wav"),
+        new Audio("./sound/drum/track04.wav"),
+        new Audio("./sound/drum/track05.wav"),
+        new Audio("./sound/drum/track06.wav"),
+      ],
+      taiko: [
+        new Audio("./sound/taiko/track01.wav"),
+        new Audio("./sound/taiko/track02.wav"),
+        new Audio("./sound/taiko/track03.wav"),
+      ],
+      tambourine: [new Audio("./sound/tambourie/track01.wav")],
+      triangle: [new Audio("./sound/triangle/track01.wav")],
+    };
   }
 
-  const paddedNum = String(num).padStart(2, '0'); 
-  const soundPath = `sound/${instrument}/track${paddedNum}.wav`;
-  //音のファイル名は楽器ごとにtrack01から連番で扱う
-  //gameは１がジャンプ、２が決定、３がゲームオーバー
-  const audio = new Audio(soundPath);
-  audio.play();
+  playGameSound(key) {
+    if (this.gameSounds[key]) {
+      this.gameSounds[key].currentTime = 0;
+      this.gameSounds[key].play();
+    }
+  }
+
+  playInstrumentSound(instrument, index) {
+    if (
+      this.instrumentSounds[instrument] &&
+      this.instrumentSounds[instrument][index]
+    ) {
+      this.instrumentSounds[instrument][index].currentTime = 0;
+      this.instrumentSounds[instrument][index].play();
+    }
+  }
 }
+
+export const soundPlayer = new SoundPlayer();
