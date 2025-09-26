@@ -19,6 +19,10 @@ export class GameDescriptionScene {
     }
 
     init() {
+        this.onResize();
+    }
+
+    onResize() {
         const btnWidth = 300;
         const btnHeight = 75;
         const x = (this.game.canvas.width - btnWidth) / 2;
@@ -57,7 +61,9 @@ export class GameDescriptionScene {
         ctx.textAlign = 'left';
         const lineHeight = 45; // 行間を詰める
         let currentY = 180;    // さらに開始位置を上げる
-        const startX = width / 2 - 600;
+
+        const maxTextWidth = 1200; // Maximum width for the text block
+        const startX = (width - maxTextWidth) / 2; // Center the text block
 
         ctx.fillText('このゲームは、2人で協力してハイスコアを目指すゲームです。', startX, currentY);
         currentY += lineHeight * 2;

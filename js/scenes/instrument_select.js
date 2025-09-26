@@ -20,20 +20,24 @@ export class InstrumentSelectScene {
     }
 
     init() {
+        this.onResize();
+    }
+
+    onResize() {
         const btnWidth = 300;
         const btnHeight = 75;
         const cx = this.game.canvas.width / 2;
         const cy = this.game.canvas.height / 2;
         const row_margin = 20;
+        const col_gap = 40; // Gap between columns of instrument buttons
+        const infoTextWidth = 250; // Approximate width for info text next to buttons
 
-        // ★中央揃えの計算方法を修正
-        const infoTextWidth = 250; // 説明テキスト用のおおよその幅
-        const gap = 40; // ボタンとボタンの間の隙間
-        const totalWidth = btnWidth + infoTextWidth + gap + btnWidth + infoTextWidth;
-        const startX = cx - totalWidth / 2;
-        
-        const col1_x = startX;
-        const col2_x = startX + btnWidth + infoTextWidth + gap;
+        // Calculate total width for the two columns of instrument buttons + info text + gap
+        const instrumentBlockWidth = (btnWidth + infoTextWidth) * 2 + col_gap;
+        const instrumentBlockStartX = cx - instrumentBlockWidth / 2;
+
+        const col1_x = instrumentBlockStartX;
+        const col2_x = instrumentBlockStartX + btnWidth + infoTextWidth + col_gap;
 
         const y1 = cy - btnHeight - row_margin - 80;
         const y2 = cy - 80;
@@ -52,9 +56,13 @@ export class InstrumentSelectScene {
             this.instrumentButtons[name] = new Button(x, y, btnWidth, btnHeight, name);
         });
 
+        // Center start and back buttons as a group
         const bottomButtonY = y3 + btnHeight + 80;
-        this.startButton = new Button(cx - btnWidth / 2 - 170, bottomButtonY, btnWidth, btnHeight, 'ゲームスタート', '#4CAF50', '#66BB6A');
-        this.backButton = new Button(cx - btnWidth / 2 + 170, bottomButtonY, btnWidth, btnHeight, 'メインに戻る');
+        const buttonGroupWidth = btnWidth * 2 + col_gap; // Two buttons + gap
+        const buttonGroupStartX = cx - buttonGroupWidth / 2;
+
+        this.startButton = new Button(buttonGroupStartX, bottomButtonY, btnWidth, btnHeight, 'ゲームスタート', '#4CAF50', '#66BB6A');
+        this.backButton = new Button(buttonGroupStartX + btnWidth + col_gap, bottomButtonY, btnWidth, btnHeight, 'メインに戻る');
     }
 
     update() {
