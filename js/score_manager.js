@@ -41,12 +41,6 @@ export class ScoreManager {
         },
         body: jsonData
       });
-
-        if (putRes.ok) {
-            alert('スコア送信成功！');
-        } else {
-            alert('スコア送信失敗: ' + putRes.status);
-        }
     }
 
     getFormattedDate() {
