@@ -43,6 +43,9 @@ export class InputHandler {
         const isConnected = this.isGamepadConnected();
         const currentInstrumentConfig = isConnected ? this.gamepadInstrumentConfig : this.keyboardInstrumentConfig;
 
+        console.log('Updating active key map. Gamepad connected:', isConnected);
+        console.log('Current instrument config:', currentInstrumentConfig);
+
         this.activeKeyMap = {};
         this.actionMap = {};
 
@@ -63,6 +66,8 @@ export class InputHandler {
                 });
             }
         }
+        
+        console.log('Active key map:', this.activeKeyMap);
     }
 
     init() {
@@ -133,10 +138,40 @@ export class InputHandler {
         }
 
         // Process buttons for the currently active key map
-        // This part remains similar to previous implementation, using this.activeKeyMap
-        // and populating this.pressedKeys and this.actionsDown
-        // (This part is not included in the old_string/new_string for brevity,
-        // but it's implied to be after the connection status check)
+        this.processGamepadButtons();
+    }
+
+    // ゲームパッドのボタン状態を処理する
+    processGamepadButtons() {
+        if (!this.isGamepadConnected()) return;
+
+        // 接続されているゲームパッドを処理
+        this.gamepads.forEach((gamepad, index) => {
+            if (!gamepad) return;
+
+            // 各ボタンをチェック
+            gamepad.buttons.forEach((button, buttonIndex) => {
+                const physicalKey = `GamepadButton${buttonIndex}`;
+                const action = this.activeKeyMap[physicalKey];
+
+                if (button.pressed) {
+                    // ボタンが押されている
+                    if (!this.pressedKeys.has(physicalKey)) {
+                        // 新しく押された
+                        this.pressedKeys.add(physicalKey);
+                        if (action) {
+                            this.actionsDown.add(action);
+                        }
+                    }
+                } else {
+                    // ボタンが離されている
+                    if (this.pressedKeys.has(physicalKey)) {
+                        // 離された
+                        this.pressedKeys.delete(physicalKey);
+                    }
+                }
+            });
+        });
     }
 
     // 指定されたプレイヤーのゲームパッドのボタンが押されているか
