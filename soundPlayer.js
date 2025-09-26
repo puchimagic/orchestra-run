@@ -17,9 +17,15 @@ export class SoundPlayer {
     
     // 各音量の設定 (localStorageから読み込んだ値を適用)
     // セッターメソッドを呼び出すことで、Audioオブジェクトに反映させる
-    this.setBgmVolume(this.bgmVolume);
-    this.setInstrumentVolume(this.instrumentVolume); // ロード済みの楽器音がないため、ここでは効果なし
-    this.setGameSoundVolume(this.gameSoundVolume);
+    // コンストラクタ内ではプレビュー音を鳴らさないように、直接volumeを設定
+    this.gameSounds.game_bgm.volume = this.bgmVolume;
+    this.gameSounds.gameover_bgm.volume = this.bgmVolume;
+    this.gameSounds.home_bgm.volume = this.bgmVolume;
+    
+    this.gameSounds.jump.volume = this.gameSoundVolume;
+    this.gameSounds.score.volume = this.gameSoundVolume;
+    this.gameSounds.gameOver.volume = this.gameSoundVolume;
+    this.gameSounds.tree_fall.volume = this.gameSoundVolume;
 
     this.sounds = {}; // loadSoundでロードした音源を格納するオブジェクト
     this.currentBGM = null; // 現在再生中のBGMを追跡
@@ -27,6 +33,9 @@ export class SoundPlayer {
     // BGMのループ設定
     this.gameSounds.home_bgm.loop = true;
     this.gameSounds.game_bgm.loop = true;
+
+    // プレビュー用の楽器音を事前にロード
+    this.loadSound('guitar_preview', './sound/guitar/track01.wav');
   }
 
   // BGM音量を設定するセッター
@@ -53,6 +62,10 @@ export class SoundPlayer {
         }
       }
       localStorage.setItem('instrumentVolume', volume);
+      // プレビュー音を再生 (コンストラクタからの呼び出しでは鳴らさない)
+      if (this.sounds['guitar_preview']) { // guitar_previewがロード済みか確認
+        this.playSound('guitar_preview');
+      }
     } else {
       console.warn('Instrument volume must be between 0 and 1.');
     }
@@ -67,6 +80,8 @@ export class SoundPlayer {
       this.gameSounds.gameOver.volume = volume;
       this.gameSounds.tree_fall.volume = volume;
       localStorage.setItem('gameSoundVolume', volume);
+      // プレビュー音を再生 (コンストラクタからの呼び出しでは鳴らさない)
+      this.playGameSound('jump');
     } else {
       console.warn('Game sound volume must be between 0 and 1.');
     }
