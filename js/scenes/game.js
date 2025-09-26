@@ -13,7 +13,7 @@ export class GameScene {
     constructor(game, selectedInstrument) {
         this.game = game;
         this.selectedInstrument = selectedInstrument;
-        this.playerInput = new InputHandler(); 
+        this.inputHandler = this.game.inputHandler; 
         this.player2Input = new InputHandler(); 
         this.activeInstrumentConfig = null; 
 
@@ -68,13 +68,17 @@ export class GameScene {
         this.stage.init();
         this.player = new Player(
             this.game, 
-            this.playerInput, 
+            this.game.inputHandler, 
             this.stage.playerWaitImage, 
             this.stage.playerJumpImage, 
             this.stage.playerWalkImage,
             this.stage.playerWalkImage2
         );
         this.player.init();
+
+        // playerとstageをInputHandlerに設定し直す
+        this.game.inputHandler.player = this.player;
+        this.game.inputHandler.stage = this.stage;
         this.player2Input.init();
 
         // Countdown properties

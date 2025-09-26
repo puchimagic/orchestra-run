@@ -5,7 +5,7 @@ import { InputHandler } from '../input_handler.js'; // Import InputHandler
 export class MainScene {
     constructor(game) {
         this.game = game;
-        this.inputHandler = new InputHandler(); // Create an instance of InputHandler
+        this.inputHandler = this.game.inputHandler; // Create an instance of InputHandler
     }
 
     init() {
