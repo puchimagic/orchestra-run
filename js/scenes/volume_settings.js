@@ -140,9 +140,9 @@ export class VolumeSettingsScene {
         }
 
         ctx.fillStyle = 'black';
-        ctx.font = `${FONT_SIZE.LARGE}px ${FONT_FAMILY}`;
+        ctx.font = `${FONT_SIZE.MEDIUM}px ${FONT_FAMILY}`;
         ctx.textAlign = 'center';
-        ctx.fillText('音量設定', width / 2, 100);
+        ctx.fillText('音量設定', width / 2, 120);
 
         this.bgmSlider.draw(ctx);
         this.instrumentSlider.draw(ctx);
