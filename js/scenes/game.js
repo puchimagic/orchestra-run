@@ -49,10 +49,16 @@ export class GameScene {
 
     init(data) {
         this.instrumentName = this.selectedInstrument || 'トライアングル';
-        this.player2Input.setInstrumentKeyMaps(KEYBOARD_INSTRUMENT_CONFIG, GAMEPAD_INSTRUMENT_CONFIG);
+        
+        // ゲーム開始時に確定したゲームパッド接続状態に基づいて足場操作の入力設定を固定
+        const useGamepadForScaffold = this.game.isGamepadConnectedAtStart;
+        this.player2Input.setInstrumentKeyMaps(
+            KEYBOARD_INSTRUMENT_CONFIG, 
+            useGamepadForScaffold ? GAMEPAD_INSTRUMENT_CONFIG : KEYBOARD_INSTRUMENT_CONFIG // ゲームパッド接続時はゲームパッド設定、非接続時はキーボード設定
+        );
 
-        const isGamepadConnected = this.player2Input.isGamepadConnected();
-        this.activeInstrumentConfig = isGamepadConnected ? GAMEPAD_INSTRUMENT_CONFIG : KEYBOARD_INSTRUMENT_CONFIG;
+        // activeInstrumentConfigも同様に固定
+        this.activeInstrumentConfig = useGamepadForScaffold ? GAMEPAD_INSTRUMENT_CONFIG : KEYBOARD_INSTRUMENT_CONFIG;
         this.instrument = this.activeInstrumentConfig[this.instrumentName];
 
         this.startTime = Date.now();
