@@ -9,6 +9,8 @@ export class SoundPlayer {
       home_bgm: new Audio("./sound/game/home_bgm.mp3"),
       ki_patan: new Audio("./sound/game/木が倒れる音.wav"),
     };
+    this.gameSounds.score.volume = 0.3; // スコア音の音量を調整
+
     this.sounds = {}; // loadSoundでロードした音源を格納するオブジェクト
     this.currentBGM = null; // 現在再生中のBGMを追跡
 
