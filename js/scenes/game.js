@@ -175,9 +175,13 @@ export class GameScene {
 
     generateRequiredKeys() {
         const availableKeys = this.instrument.keys;
-        const numKeysToPress = (this.instrument.name === 'ギター') 
-            ? 1 + Math.floor(Math.random() * this.instrument.maxChord)
-            : 1;
+        let numKeysToPress;
+        if (this.instrument.name === 'ギター') {
+            // 2から5の範囲でランダムな数を生成
+            numKeysToPress = 2 + Math.floor(Math.random() * 4); // 2, 3, 4, 5
+        } else {
+            numKeysToPress = 1;
+        }
         const shuffledKeys = [...availableKeys].sort(() => 0.5 - Math.random());
         return shuffledKeys.slice(0, numKeysToPress);
     }
@@ -277,17 +281,17 @@ export class GameScene {
                 }
                 else if (this.instrumentName === 'ギター') {
                     // ギターの同時押し数に応じた処理
-                    const numPressedKeys = requiredActions.length;
-                    // maxChordは同時押しの最大数なので、それに対応するトラックを鳴らす
-                    // 例: 2キー同時押し -> track01, 3キー同時押し -> track02, ...
-                    const trackNumber = numPressedKeys - 1; // track01は2キー、track02は3キー...
+                    const numPressedKeys = requiredActions.length; // これは2から5の範囲
+                    // 音源のトラック番号は0から3の範囲でランダムに決定 (track01からtrack04に対応)
+                    const trackNumber = Math.floor(Math.random() * KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName].maxChord); // maxChordは4なので、0, 1, 2, 3
+                    
                     if (trackNumber >= 0 && trackNumber < KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName].maxChord) {
                         const soundName = `${this.instrumentDirName}_track${trackNumber + 1}`;
                         console.log(`Attempting to play guitar sound: ${soundName}`);
                         this.instrumentSoundPlayer.playSound(soundName);
                     }
                     else {
-                        console.warn(`No guitar sound for ${numPressedKeys} pressed keys.`);
+                        console.warn(`No guitar sound for track number ${trackNumber + 1}.`);
                     }
                 }
                 else {
