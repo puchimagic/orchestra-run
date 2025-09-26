@@ -263,7 +263,8 @@ export class GameScene {
                             console.log(`Attempting to play piano sound: ${soundName}`);
                             this.instrumentSoundPlayer.playSound(soundName);
                         }
-                    } else {
+                    }
+                    else {
                         console.warn(`Not enough piano tracks for ${numSoundsToPlay} required actions.`);
                         // 利用可能なトラック数でループ再生するなどの代替案も検討可能
                         for (let i = 0; i < numSoundsToPlay; i++) {
@@ -273,7 +274,8 @@ export class GameScene {
                             this.instrumentSoundPlayer.playSound(soundName);
                         }
                     }
-                } else if (this.instrumentName === 'ギター') {
+                }
+                else if (this.instrumentName === 'ギター') {
                     // ギターの同時押し数に応じた処理
                     const numPressedKeys = requiredActions.length;
                     // maxChordは同時押しの最大数なので、それに対応するトラックを鳴らす
@@ -283,10 +285,12 @@ export class GameScene {
                         const soundName = `${this.instrumentDirName}_track${trackNumber + 1}`;
                         console.log(`Attempting to play guitar sound: ${soundName}`);
                         this.instrumentSoundPlayer.playSound(soundName);
-                    } else {
+                    }
+                    else {
                         console.warn(`No guitar sound for ${numPressedKeys} pressed keys.`);
                     }
-                } else {
+                }
+                else {
                     // その他の楽器の処理 (既存のロジック)
                     requiredActions.forEach(action => {
                         const key = action.replace('ACTION_', '');
@@ -300,7 +304,8 @@ export class GameScene {
                     });
                 }
             }
-        } else if (target instanceof Wall) {
+        }
+        else if (target instanceof Wall) {
             const wallData = this.breakableWalls.get(target);
             const requiredActions = wallData.requiredKeys.map(key => `ACTION_${key}`);
             if (requiredActions.every(action => this.player2Input.isActionDown(action)) && 
@@ -329,6 +334,12 @@ export class GameScene {
 
     gameOver() {
         soundPlayer.playGameSound("gameOver"); // ゲームオーバー音を再生
+        // 木が倒れる音を停止
+        if (soundPlayer.gameSounds.tree_fall) {
+            soundPlayer.gameSounds.tree_fall.pause();
+            soundPlayer.gameSounds.tree_fall.currentTime = 0;
+        }
+        
         this.player.destroy();
         this.player2Input.destroy();
         this.game.changeScene(SCENE.GAME_OVER, { score: this.score, instrument: this.instrumentName });
@@ -340,7 +351,8 @@ export class GameScene {
 
         if (this.isBackgroundLoaded) {
             ctx.drawImage(this.backgroundImage, 0, 0, width, height);
-        } else {
+        }
+        else {
             ctx.clearRect(0, 0, width, height);
             ctx.fillStyle = '#d0d0d0';
             ctx.fillRect(0, 0, width, height);
@@ -393,7 +405,8 @@ export class GameScene {
     
             if (this.countdownNumber > 0) {
                 ctx.fillText(this.countdownNumber, width / 2, height / 2);
-            } else if (this.countdownNumber === 0) {
+            }
+            else if (this.countdownNumber === 0) {
                 ctx.font = `96px ${FONT_FAMILY}`;
                 ctx.fillText("Start!", width / 2, height / 2);
             }

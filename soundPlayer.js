@@ -1,17 +1,28 @@
 export class SoundPlayer {
   constructor() {
+    this.bgmVolume = 0.5; // BGM用音量変数
+    this.instrumentVolume = 1.0; // 楽器用音量変数
+    this.gameSoundVolume = 0.7; // ゲーム効果音用音量変数
+
     this.gameSounds = {
       jump: new Audio("./sound/game/track01.wav"),
       score: new Audio("./sound/game/track02.wav"),
       gameOver: new Audio("./sound/game/track03.wav"),
-      game_bgm: new Audio("./sound/game/game_bgm.mp3"),
-      gameover_bgm: new Audio("./sound/game/gameover_bgm.mp3"),
-      home_bgm: new Audio("./sound/game/home_bgm.mp3"),
+      game_bgm: new Audio("./sound/game/game_bgm.wav"),
+      gameover_bgm: new Audio("./sound/game/gameover_bgm.wav"),
+      home_bgm: new Audio("./sound/game/home_bgm.wav"),
       tree_fall: new Audio("./sound/game/木が倒れる音.wav"),
-      tree_fall: new Audio("./sound/game/木が倒れる音.wav"),
-      ki_patan: new Audio("./sound/game/木が倒れる音.wav"),
     };
-    this.gameSounds.score.volume = 0.3; // スコア音の音量を調整
+    
+    // 各音量の設定
+    this.gameSounds.jump.volume = this.gameSoundVolume;
+    this.gameSounds.score.volume = this.gameSoundVolume;
+    this.gameSounds.gameOver.volume = this.gameSoundVolume;
+    this.gameSounds.tree_fall.volume = this.gameSoundVolume;
+
+    this.gameSounds.game_bgm.volume = this.bgmVolume; // BGMの音量を変数で設定
+    this.gameSounds.gameover_bgm.volume = this.bgmVolume; // BGMの音量を変数で設定
+    this.gameSounds.home_bgm.volume = this.bgmVolume; // BGMの音量を変数で設定
 
     this.sounds = {}; // loadSoundでロードした音源を格納するオブジェクト
     this.currentBGM = null; // 現在再生中のBGMを追跡
@@ -63,7 +74,9 @@ export class SoundPlayer {
   }
 
   loadSound(name, path) {
-    this.sounds[name] = new Audio(path);
+    const audio = new Audio(path);
+    audio.volume = this.instrumentVolume; // 楽器用音量を適用
+    this.sounds[name] = audio;
   }
 }
 
