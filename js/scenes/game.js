@@ -119,12 +119,21 @@ export class GameScene {
             return;
         }
 
-        instrumentConfig.keys.forEach((key, index) => {
-            // 例: piano_track01, piano_track02
-            const soundName = `${this.instrumentDirName}_track${index + 1}`;
-            const soundPath = `sound/${this.instrumentDirName}/track0${index + 1}.wav`; // track01.wav, track02.wav...
-            this.instrumentSoundPlayer.loadSound(soundName, soundPath);
-        });
+        if (this.instrumentName === 'ギター') {
+            // ギターの場合、maxChordの数だけ音源をロード
+            for (let i = 0; i < instrumentConfig.maxChord; i++) {
+                const soundName = `${this.instrumentDirName}_track${i + 1}`;
+                const soundPath = `sound/${this.instrumentDirName}/track0${i + 1}.wav`;
+                this.instrumentSoundPlayer.loadSound(soundName, soundPath);
+            }
+        } else {
+            // その他の楽器の場合 (既存のロジック)
+            instrumentConfig.keys.forEach((key, index) => {
+                const soundName = `${this.instrumentDirName}_track${index + 1}`;
+                const soundPath = `sound/${this.instrumentDirName}/track0${index + 1}.wav`;
+                this.instrumentSoundPlayer.loadSound(soundName, soundPath);
+            });
+        }
     }
 
     requestScaffold(holeX, holeWidth) {
@@ -239,16 +248,54 @@ export class GameScene {
                 requiredActions.some(action => this.player2Input.isActionPressed(action))) {
                 target.solidify();
                 // 足場が生成されたときに音を鳴らす
-                requiredActions.forEach(action => {
-                    const key = action.replace('ACTION_', '');
-                    const instrumentConfig = KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName];
-                    const keyIndex = instrumentConfig.keys.indexOf(key);
-                    if (keyIndex !== -1) {
-                        const soundName = `${this.instrumentDirName}_track${keyIndex + 1}`;
-                        console.log(`Attempting to play sound: ${soundName}`); // ★追加
-                        this.instrumentSoundPlayer.playSound(soundName);
+                if (this.instrumentName === 'ピアノ') {
+                    // ピアノの連番処理
+                    const availableTracks = KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName].keys.length;
+                    const numSoundsToPlay = requiredActions.length;
+                    if (availableTracks >= numSoundsToPlay) {
+                        const startIndex = Math.floor(Math.random() * (availableTracks - numSoundsToPlay + 1));
+                        for (let i = 0; i < numSoundsToPlay; i++) {
+                            const trackNumber = startIndex + i + 1;
+                            const soundName = `${this.instrumentDirName}_track${trackNumber}`;
+                            console.log(`Attempting to play piano sound: ${soundName}`);
+                            this.instrumentSoundPlayer.playSound(soundName);
+                        }
+                    } else {
+                        console.warn(`Not enough piano tracks for ${numSoundsToPlay} required actions.`);
+                        // 利用可能なトラック数でループ再生するなどの代替案も検討可能
+                        for (let i = 0; i < numSoundsToPlay; i++) {
+                            const trackNumber = (startIndex + i) % availableTracks + 1; // ループ再生
+                            const soundName = `${this.instrumentDirName}_track${trackNumber}`;
+                            console.log(`Attempting to play piano sound (looped): ${soundName}`);
+                            this.instrumentSoundPlayer.playSound(soundName);
+                        }
                     }
-                });
+                } else if (this.instrumentName === 'ギター') {
+                    // ギターの同時押し数に応じた処理
+                    const numPressedKeys = requiredActions.length;
+                    // maxChordは同時押しの最大数なので、それに対応するトラックを鳴らす
+                    // 例: 2キー同時押し -> track01, 3キー同時押し -> track02, ...
+                    const trackNumber = numPressedKeys - 1; // track01は2キー、track02は3キー...
+                    if (trackNumber >= 0 && trackNumber < KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName].maxChord) {
+                        const soundName = `${this.instrumentDirName}_track${trackNumber + 1}`;
+                        console.log(`Attempting to play guitar sound: ${soundName}`);
+                        this.instrumentSoundPlayer.playSound(soundName);
+                    } else {
+                        console.warn(`No guitar sound for ${numPressedKeys} pressed keys.`);
+                    }
+                } else {
+                    // その他の楽器の処理 (既存のロジック)
+                    requiredActions.forEach(action => {
+                        const key = action.replace('ACTION_', '');
+                        const instrumentConfig = KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName];
+                        const keyIndex = instrumentConfig.keys.indexOf(key);
+                        if (keyIndex !== -1) {
+                            const soundName = `${this.instrumentDirName}_track${keyIndex + 1}`;
+                            console.log(`Attempting to play sound: ${soundName}`);
+                            this.instrumentSoundPlayer.playSound(soundName);
+                        }
+                    });
+                }
             }
         } else if (target instanceof Wall) {
             const wallData = this.breakableWalls.get(target);
