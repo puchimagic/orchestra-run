@@ -35,14 +35,22 @@ export class MainScene {
     }
 
     onResize() {
-        const btnWidth = 400;
+        const btnWidth = 300; // ボタンの幅を少し狭める
         const btnHeight = 75;
         const cx = this.game.canvas.width / 2;
         const cy = this.game.canvas.height / 2;
+        const gapX = 50; // 列間のギャップ
+        const gapY = 20; // 行間のギャップ
 
-        this.startButton = new Button(cx - btnWidth / 2, cy - 100, btnWidth, btnHeight, 'ゲームスタート');
-        this.rankingButton = new Button(cx - btnWidth / 2, cy, btnWidth, btnHeight, 'ランキング');
-        this.descButton = new Button(cx - btnWidth / 2, cy + 100, btnWidth, btnHeight, 'あそびかた');
+        // 左列
+        const leftColX = cx - btnWidth - gapX / 2;
+        this.startButton = new Button(leftColX, cy - btnHeight - gapY / 2, btnWidth, btnHeight, 'ゲームスタート');
+        this.descButton = new Button(leftColX, cy + gapY / 2, btnWidth, btnHeight, 'あそびかた');
+
+        // 右列
+        const rightColX = cx + gapX / 2;
+        this.rankingButton = new Button(rightColX, cy - btnHeight - gapY / 2, btnWidth, btnHeight, 'ランキング');
+        this.volumeSettingsButton = new Button(rightColX, cy + gapY / 2, btnWidth, btnHeight, '音量設定');
     }
 
     update() {
@@ -66,6 +74,9 @@ export class MainScene {
         }
         if (this.descButton.update(this.game.mouse)) {
             this.game.changeScene(SCENE.GAME_DESCRIPTION);
+        }
+        if (this.volumeSettingsButton.update(this.game.mouse)) { // ★追加
+            this.game.changeScene(SCENE.VOLUME_SETTINGS);
         }
     }
 
@@ -99,6 +110,7 @@ export class MainScene {
         this.startButton.draw(ctx);
         this.rankingButton.draw(ctx);
         this.descButton.draw(ctx);
+        this.volumeSettingsButton.draw(ctx); // ★追加
 
         if (!this.game.isGameActive) {
             ctx.fillStyle = 'black';

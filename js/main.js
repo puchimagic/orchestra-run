@@ -5,6 +5,7 @@ import { RankingScene } from './scenes/ranking.js';
 import { InstrumentSelectScene } from './scenes/instrument_select.js';
 import { GameScene } from './scenes/game.js';
 import { GameOverScene } from './scenes/game_over.js';
+import { VolumeSettingsScene } from './scenes/volume_settings.js'; // ★追加
 import { ScoreManager } from './score_manager.js';
 
 import { InputHandler } from './input_handler.js';
@@ -16,6 +17,7 @@ const SCENE_BGM_MAP = {
     [SCENE.INSTRUMENT_SELECT]: 'home_bgm',
     [SCENE.RANKING]: 'home_bgm',
     [SCENE.GAME_DESCRIPTION]: 'home_bgm',
+    [SCENE.VOLUME_SETTINGS]: 'home_bgm', // ★追加
     [SCENE.GAME]: 'game_bgm',
     [SCENE.GAME_OVER]: 'gameover_bgm',
 };
@@ -68,12 +70,18 @@ class Game {
         this.scenes[SCENE.RANKING] = new RankingScene(this);
         this.scenes[SCENE.INSTRUMENT_SELECT] = new InstrumentSelectScene(this);
         this.scenes[SCENE.GAME_OVER] = new GameOverScene(this);
+        this.scenes[SCENE.VOLUME_SETTINGS] = new VolumeSettingsScene(this); // ★追加
         
         this.changeScene(SCENE.MAIN);
         this.gameLoop();
     }
 
     changeScene(sceneName, data = {}) {
+        // 現在のシーンのdestroyメソッドを呼び出す (HTML要素のクリーンアップなど)
+        if (this.currentScene && this.currentScene.destroy) {
+            this.currentScene.destroy();
+        }
+
         // ★BGM管理をここに集約 (ゲームがアクティブな時のみ再生)
         if (this.isGameActive) {
             const targetBGM = SCENE_BGM_MAP[sceneName];

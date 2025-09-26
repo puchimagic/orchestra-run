@@ -1,9 +1,13 @@
 body {
     margin: 0;
     overflow: hidden; /* スクロールバーを非表示に */
+    position: relative; /* ★追加 */
 }
 
 canvas {
     display: block; /* canvas周りの余白をなくす */
     background-color: #e0e0e0;
+    position: absolute; /* ★追加 */
+    top: 0;
+    left: 0;
 }

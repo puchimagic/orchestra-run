@@ -1,16 +1,17 @@
 export class SoundPlayer {
   constructor() {
-    this.bgmVolume = 0.5; // BGM用音量変数
-    this.instrumentVolume = 1.0; // 楽器用音量変数
-    this.gameSoundVolume = 0.7; // ゲーム効果音用音量変数
+    // localStorageから音量設定を読み込むか、デフォルト値を設定
+    this.bgmVolume = parseFloat(localStorage.getItem('bgmVolume')) || 0.5;
+    this.instrumentVolume = parseFloat(localStorage.getItem('instrumentVolume')) || 1.0;
+    this.gameSoundVolume = parseFloat(localStorage.getItem('gameSoundVolume')) || 0.7;
 
     this.gameSounds = {
       jump: new Audio("./sound/game/track01.wav"),
       score: new Audio("./sound/game/track02.wav"),
       gameOver: new Audio("./sound/game/track03.wav"),
-      game_bgm: new Audio("./sound/game/game_bgm.wav"),
-      gameover_bgm: new Audio("./sound/game/gameover_bgm.wav"),
-      home_bgm: new Audio("./sound/game/home_bgm.wav"),
+      game_bgm: new Audio("./sound/game/game_bgm.wav"), // .wav に修正
+      gameover_bgm: new Audio("./sound/game/gameover_bgm.wav"), // .wav に修正
+      home_bgm: new Audio("./sound/game/home_bgm.wav"), // .wav に修正
       tree_fall: new Audio("./sound/game/木が倒れる音.wav"),
     };
     
@@ -20,9 +21,9 @@ export class SoundPlayer {
     this.gameSounds.gameOver.volume = this.gameSoundVolume;
     this.gameSounds.tree_fall.volume = this.gameSoundVolume;
 
-    this.gameSounds.game_bgm.volume = this.bgmVolume; // BGMの音量を変数で設定
-    this.gameSounds.gameover_bgm.volume = this.bgmVolume; // BGMの音量を変数で設定
-    this.gameSounds.home_bgm.volume = this.bgmVolume; // BGMの音量を変数で設定
+    this.gameSounds.game_bgm.volume = this.bgmVolume;
+    this.gameSounds.gameover_bgm.volume = this.bgmVolume;
+    this.gameSounds.home_bgm.volume = this.bgmVolume;
 
     this.sounds = {}; // loadSoundでロードした音源を格納するオブジェクト
     this.currentBGM = null; // 現在再生中のBGMを追跡
@@ -30,6 +31,49 @@ export class SoundPlayer {
     // BGMのループ設定
     this.gameSounds.home_bgm.loop = true;
     this.gameSounds.game_bgm.loop = true;
+  }
+
+  // BGM音量を設定するセッター
+  setBgmVolume(volume) {
+    if (volume >= 0 && volume <= 1) {
+      this.bgmVolume = volume;
+      this.gameSounds.game_bgm.volume = volume;
+      this.gameSounds.gameover_bgm.volume = volume;
+      this.gameSounds.home_bgm.volume = volume;
+      localStorage.setItem('bgmVolume', volume);
+    } else {
+      console.warn('BGM volume must be between 0 and 1.');
+    }
+  }
+
+  // 楽器用音量を設定するセッター
+  setInstrumentVolume(volume) {
+    if (volume >= 0 && volume <= 1) {
+      this.instrumentVolume = volume;
+      // ロード済みの楽器音の音量も更新
+      for (const name in this.sounds) {
+        if (this.sounds[name]) {
+          this.sounds[name].volume = volume;
+        }
+      }
+      localStorage.setItem('instrumentVolume', volume);
+    } else {
+      console.warn('Instrument volume must be between 0 and 1.');
+    }
+  }
+
+  // ゲーム効果音用音量を設定するセッター
+  setGameSoundVolume(volume) {
+    if (volume >= 0 && volume <= 1) {
+      this.gameSoundVolume = volume;
+      this.gameSounds.jump.volume = volume;
+      this.gameSounds.score.volume = volume;
+      this.gameSounds.gameOver.volume = volume;
+      this.gameSounds.tree_fall.volume = volume;
+      localStorage.setItem('gameSoundVolume', volume);
+    } else {
+      console.warn('Game sound volume must be between 0 and 1.');
+    }
   }
 
   playBGM(bgmName) {
@@ -65,11 +109,11 @@ export class SoundPlayer {
 
   playSound(name) {
     if (this.sounds[name]) {
-      console.log(`Playing sound: ${name}`); // ★追加
+      console.log(`Playing sound: ${name}`);
       this.sounds[name].currentTime = 0;
       this.sounds[name].play();
     } else {
-      console.warn(`Sound not found: ${name}`); // ★追加
+      console.warn(`Sound not found: ${name}`);
     }
   }
 
@@ -77,6 +121,32 @@ export class SoundPlayer {
     const audio = new Audio(path);
     audio.volume = this.instrumentVolume; // 楽器用音量を適用
     this.sounds[name] = audio;
+  }
+
+  // すべての音を停止するメソッド (BGM、楽器音、ゲーム効果音)
+  stopAllSounds() {
+    // 現在再生中のBGMがあれば停止
+    if (this.currentBGM) {
+      this.currentBGM.pause();
+      this.currentBGM.currentTime = 0;
+      this.currentBGM = null;
+    }
+    // ロードされたすべての楽器音を停止
+    for (const key in this.sounds) {
+      if (this.sounds[key]) {
+        this.sounds[key].pause();
+        this.sounds[key].currentTime = 0;
+      }
+    }
+    // ゲーム効果音も停止
+    for (const key in this.gameSounds) {
+      // BGMはcurrentBGMで処理済みなのでスキップ
+      if (key.endsWith('_bgm')) continue; 
+      if (this.gameSounds[key]) {
+        this.gameSounds[key].pause();
+        this.gameSounds[key].currentTime = 0;
+      }
+    }
   }
 }
 
