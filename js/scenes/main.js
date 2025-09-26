@@ -1,6 +1,7 @@
 import { SCENE, FONT_SIZE, FONT_FAMILY } from '../config.js';
 import { Button } from '../ui/button.js';
 import { InputHandler } from '../input_handler.js'; // Import InputHandler
+import { soundPlayer } from '../../soundPlayer.js';
 
 export class MainScene {
     constructor(game) {
@@ -17,6 +18,7 @@ export class MainScene {
         this.startButton = new Button(cx - btnWidth / 2, cy - 100, btnWidth, btnHeight, 'ゲームスタート');
         this.rankingButton = new Button(cx - btnWidth / 2, cy, btnWidth, btnHeight, 'ランキング');
         this.descButton = new Button(cx - btnWidth / 2, cy + 100, btnWidth, btnHeight, 'あそびかた');
+        soundPlayer.playBGM('home_bgm');
     }
 
     update() {

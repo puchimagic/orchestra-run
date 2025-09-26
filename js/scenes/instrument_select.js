@@ -1,5 +1,6 @@
 import { SCENE, FONT_SIZE, FONT_FAMILY, KEYBOARD_INSTRUMENT_CONFIG, INSTRUMENT_ORDER } from '../config.js';
 import { Button } from '../ui/button.js';
+import { soundPlayer } from '../../soundPlayer.js';
 
 export class InstrumentSelectScene {
     constructor(game) {
@@ -39,6 +40,7 @@ export class InstrumentSelectScene {
             }
             this.instrumentButtons[name] = new Button(x, y, btnWidth, btnHeight, name);
         });
+        soundPlayer.playBGM('home_bgm');
 
         const bottomButtonY = y3 + btnHeight + 80;
         this.startButton = new Button(cx - btnWidth / 2 - 170, bottomButtonY, btnWidth, btnHeight, 'ゲームスタート', '#4CAF50', '#66BB6A');

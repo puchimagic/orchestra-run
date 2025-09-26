@@ -1,5 +1,6 @@
 import { SCENE, FONT_SIZE, FONT_FAMILY } from '../config.js';
 import { Button } from '../ui/button.js';
+import { soundPlayer } from '../../soundPlayer.js';
 
 export class GameOverScene {
     constructor(game) {
@@ -13,6 +14,7 @@ export class GameOverScene {
         this.lastInstrument = data.instrument || 'なし';
 
         this.game.scoreManager.addScore(this.finalScore, this.lastInstrument);
+        soundPlayer.playBGM('gameover_bgm');
 
         const btnWidth = 300;
         const btnHeight = 75;

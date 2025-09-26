@@ -113,6 +113,7 @@ export class GameScene {
         };
 
         this.loadInstrumentSounds(); // 楽器の音源をロード
+        soundPlayer.playBGM('game_bgm');
     }
 
     // 楽器の音源をロードするメソッド
@@ -326,6 +327,7 @@ export class GameScene {
     }
 
     gameOver() {
+        soundPlayer.playBGM('gameover_bgm');
         soundPlayer.playGameSound("gameOver"); // ゲームオーバー音を再生
         this.player.destroy();
         this.player2Input.destroy();
