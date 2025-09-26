@@ -6,6 +6,17 @@ export class InstrumentSelectScene {
     constructor(game) {
         this.game = game;
         this.selectedInstrument = INSTRUMENT_ORDER[0];
+
+         // 背景画像を読み込む
+        this.backgroundImage = new Image();
+        this.backgroundImage.src = 'img/title_rank_select.png';
+        this.isBackgroundLoaded = false;
+        this.backgroundImage.onload = () => {
+            this.isBackgroundLoaded = true;
+        };
+        this.backgroundImage.onerror = () => {
+            console.error('Failed to load background image: img/title_rank_select.png');
+        };
     }
 
     init() {
@@ -67,9 +78,14 @@ export class InstrumentSelectScene {
         const ctx = this.game.ctx;
         const { width, height } = this.game.canvas;
 
-        ctx.clearRect(0, 0, width, height);
-        ctx.fillStyle = '#f0f0f0';
-        ctx.fillRect(0, 0, width, height);
+           //背景設定
+        if (this.isBackgroundLoaded) {
+            ctx.drawImage(this.backgroundImage, 0, 0, width, height);
+        } else {
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#f0f0f0';
+            ctx.fillRect(0, 0, width, height);
+        }
 
         ctx.fillStyle = 'black';
         ctx.textAlign = 'center';
