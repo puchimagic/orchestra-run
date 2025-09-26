@@ -1,4 +1,4 @@
-import { BLOCK_SIZE } from './config.js';
+import { BLOCK_SIZE, STUMP_WIDTH_IN_BLOCKS } from './config.js'; // ★STUMP_WIDTH_IN_BLOCKSをインポート
 import { soundPlayer } from "../soundPlayer.js";
 
 const PLAYER_WIDTH_IN_BLOCKS = 2.0;
@@ -31,7 +31,7 @@ export class Player {
         this.isMoving = false;
         this.facingDirection = 1;
 
-        this.isCrushed = false; // ★挟まれた状態のフラグ
+        this.isCrushed = false;
 
         this.keys = {};
         this.handleKeyDown = this.handleKeyDown.bind(this);
@@ -44,7 +44,7 @@ export class Player {
         this.vx = 0;
         this.vy = 0;
         this.onGround = false;
-        this.isCrushed = false; // ★初期化
+        this.isCrushed = false;
         document.addEventListener('keydown', this.handleKeyDown);
         document.addEventListener('keyup', this.handleKeyUp);
     }
@@ -71,7 +71,7 @@ export class Player {
             else if (this.keys['KeyD']) this.vx = MOVE_SPEED;
             else this.vx = 0;
             if (this.keys['Space'] && this.onGround) {
-                soundPlayer.playGameSound("jump"); // ジャンプ音
+                soundPlayer.playGameSound("jump");
                 this.vy = -JUMP_POWER;
                 this.onGround = false;
             }
@@ -83,56 +83,61 @@ export class Player {
         else if (this.vx < 0) this.facingDirection = -1;
         this.isMoving = this.vx !== 0;
 
-        // ★衝突状態の検出
         let isCollidingLeft = false;
         let isCollidingRight = false;
 
-        // 左側（カメラ）との衝突
         if (this.x < this.game.currentScene.stage.cameraX) {
             isCollidingLeft = true;
         }
 
-        // 右側（壁）との衝突
         walls.forEach(wall => {
-            if (this.x < wall.x + wall.width && this.x + this.width > wall.x &&
+            let cbox = { x: wall.x, width: wall.width };
+            if (wall.isBreakable) { // ★木なら当たり判定を幹の幅に
+                cbox.width = STUMP_WIDTH_IN_BLOCKS * BLOCK_SIZE;
+                cbox.x = wall.x + (wall.width - cbox.width) / 2;
+            }
+            if (this.x < cbox.x + cbox.width && this.x + this.width > cbox.x &&
                 this.y < wall.y + wall.height && this.y + this.height > wall.y) {
-                // 右移動中または静止中に右の壁に接触した場合を考慮
                 if (this.vx >= 0) { 
                     isCollidingRight = true;
                 }
             }
         });
 
-        // ★挟まれ判定
         if (isCollidingLeft && isCollidingRight) {
-            soundPlayer.playGameSound("jugmp"); // ジャンプ音
             this.isCrushed = true;
-            return; // 挟まれたら以降の処理は不要
+            return;
         }
 
-        // ★位置補正処理
-        // 壁との衝突判定 (横)
         walls.forEach(wall => {
-            if (this.x < wall.x + wall.width && this.x + this.width > wall.x &&
+            let cbox = { x: wall.x, width: wall.width };
+            if (wall.isBreakable) { // ★木なら当たり判定を幹の幅に
+                cbox.width = STUMP_WIDTH_IN_BLOCKS * BLOCK_SIZE;
+                cbox.x = wall.x + (wall.width - cbox.width) / 2;
+            }
+            if (this.x < cbox.x + cbox.width && this.x + this.width > cbox.x &&
                 this.y < wall.y + wall.height && this.y + this.height > wall.y) {
-                if (this.vx > 0) this.x = wall.x - this.width;
-                else if (this.vx < 0) this.x = wall.x + wall.width;
+                if (this.vx > 0) this.x = cbox.x - this.width;
+                else if (this.vx < 0) this.x = cbox.x + cbox.width;
             }
         });
 
-        // カメラとの衝突判定
         if (this.x < this.game.currentScene.stage.cameraX) {
             this.x = this.game.currentScene.stage.cameraX;
         }
 
-        // 重力と地面の判定
         this.vy += GRAVITY;
         this.y += this.vy;
         this.onGround = false;
         const allGrounds = [...platforms, ...walls];
         allGrounds.forEach(ground => {
-            if (this.x < ground.x + ground.width &&
-                this.x + this.width > ground.x &&
+            let cbox = { x: ground.x, width: ground.width };
+            if (ground.isBreakable) { // ★木なら当たり判定を幹の幅に
+                cbox.width = STUMP_WIDTH_IN_BLOCKS * BLOCK_SIZE;
+                cbox.x = ground.x + (ground.width - cbox.width) / 2;
+            }
+            if (this.x < cbox.x + cbox.width &&
+                this.x + this.width > cbox.x &&
                 this.y + this.height > ground.y &&
                 this.y + this.height < ground.y + ground.height &&
                 this.vy >= 0) {

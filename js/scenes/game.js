@@ -306,6 +306,7 @@ export class GameScene {
             if (requiredActions.every(action => this.player2Input.isActionDown(action)) && 
                 requiredActions.some(action => this.player2Input.isActionPressed(action))) {
                 target.break();
+                this.stage.spawnFallingTreeAnimation(target); // ★アニメーションを生成
                 this.breakableWalls.delete(target);
             }
         }

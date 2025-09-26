@@ -1,16 +1,61 @@
-import { BLOCK_SIZE, PLATFORM_HEIGHT_IN_BLOCKS, PLAYER_MAX_JUMP_IN_BLOCKS, INITIAL_SCROLL_SPEED } from './config.js';
+import { BLOCK_SIZE, PLATFORM_HEIGHT_IN_BLOCKS, PLAYER_MAX_JUMP_IN_BLOCKS, INITIAL_SCROLL_SPEED, STUMP_WIDTH_IN_BLOCKS } from './config.js';
 import { soundPlayer } from '../../soundPlayer.js';
 
 const STUMP_HEIGHT_IN_BLOCKS = 4.4;
-const STUMP_WIDTH_IN_BLOCKS = 3.4;
 
 const MIN_PLATFORM_WIDTH_IN_BLOCKS = 5;
 const MAX_PLATFORM_WIDTH_IN_BLOCKS = 15;
 const MIN_GAP_IN_BLOCKS = 4;
 const MAX_GAP_IN_BLOCKS = 40;
 
+class TemporaryAnimation {
+    constructor(x, y, width, height, images, speed) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.images = images;
+        this.animationSpeed = speed;
+        this.animationFrame = 0;
+        this.animationTimer = 0;
+        this.isFinished = false;
+    }
+
+    update(deltaTime) {
+        this.animationTimer += deltaTime;
+        if (this.animationTimer > this.animationSpeed) {
+            this.animationTimer = 0;
+            this.animationFrame++;
+            if (this.animationFrame >= this.images.length) {
+                this.isFinished = true;
+            }
+        }
+    }
+
+    draw(ctx) {
+        const frameImage = this.images[this.animationFrame];
+        if (frameImage && frameImage.complete) {
+            let drawX = this.x;
+            let drawY = this.y;
+
+            if (this.animationFrame === 0) { // ki2
+                drawX -= this.width * 0.2;
+            } else if (this.animationFrame === 1) { // ki3
+                drawX -= this.width * 0.2;
+                drawY += this.height * 0.1;
+            } else if (this.animationFrame === 2) { // ki4
+                const logWidth = this.height * 0.9;
+                const logHeight = this.width * 1.2;
+                drawX -= this.width * 0.1;
+                drawY = this.y + this.height - logHeight;
+            }
+            ctx.drawImage(frameImage, drawX, drawY, this.width, this.height);
+        }
+    }
+}
+
 export class Wall {
-    constructor(x, y, width, height, image, isBreakable = false, stumpImage = null, fallingImages = []) {
+    constructor(x, y, width, height, image, isBreakable = false, stumpImage = null) {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -18,80 +63,28 @@ export class Wall {
         this.image = image;
         this.isBreakable = isBreakable;
         this.stumpImage = stumpImage;
-        this.fallingImages = fallingImages;
-
-        this.state = 'standing'; // standing, falling, fallen
-        this.animationFrame = 0;
-        this.animationTimer = 0;
-        this.ANIMATION_SPEED = 0.15; // 1フレームあたりの秒数
     }
 
     break() {
-        if (!this.isBreakable || this.state !== 'standing') return;
-        this.state = 'falling';
+        if (!this.isBreakable) return;
         soundPlayer.playGameSound('tree_fall');
-    }
-
-    update(deltaTime) {
-        if (this.state === 'falling') {
-            this.animationTimer += deltaTime;
-            if (this.animationTimer > this.ANIMATION_SPEED) {
-                this.animationTimer = 0;
-                this.animationFrame++;
-                if (this.animationFrame >= this.fallingImages.length) {
-                    this.state = 'fallen';
-                    this.isBreakable = false;
-                }
-            }
-        }
+        const newHeight = BLOCK_SIZE * STUMP_HEIGHT_IN_BLOCKS;
+        const newWidth = BLOCK_SIZE * STUMP_WIDTH_IN_BLOCKS;
+        const centerX = this.x + this.width / 2;
+        this.x = centerX - (newWidth / 2);
+        this.y = this.y + this.height - newHeight;
+        this.height = newHeight;
+        this.width = newWidth;
+        this.image = this.stumpImage;
+        this.isBreakable = false;
     }
 
     draw(ctx) {
-        if (this.state !== 'fallen' && (!this.image || !this.image.complete || this.image.naturalHeight === 0)) {
+        if (this.image && this.image.complete && this.image.naturalHeight !== 0) {
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        } else {
             ctx.fillStyle = '#555';
             ctx.fillRect(this.x, this.y, this.width, this.height);
-            return;
-        }
-
-        switch (this.state) {
-            case 'standing':
-                ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-                break;
-            case 'falling':
-                const frameImage = this.fallingImages[this.animationFrame];
-                if (frameImage && frameImage.complete) {
-                    const baseHeight = this.height;
-                    const baseWidth = this.width;
-                    let drawX = this.x;
-                    let drawY = this.y;
-
-                    if (this.animationFrame === 0) { // ki2
-                        ctx.drawImage(frameImage, drawX - baseWidth * 0.1, drawY, baseWidth, baseHeight);
-                    } else if (this.animationFrame === 1) { // ki3
-                        ctx.drawImage(frameImage, drawX - baseWidth * 0.2, drawY + baseHeight * 0.1, baseWidth, baseHeight);
-                    } else if (this.animationFrame === 2) { // ki4
-                        const logWidth = baseHeight * 0.9;
-                        const logHeight = baseWidth * 1.2;
-                        ctx.drawImage(frameImage, drawX, this.y + this.height - logHeight, logWidth, logHeight);
-                    }
-                }
-                break;
-            case 'fallen':
-                const stumpHeight = BLOCK_SIZE * STUMP_HEIGHT_IN_BLOCKS;
-                const stumpWidth = BLOCK_SIZE * STUMP_WIDTH_IN_BLOCKS;
-                const stumpX = this.x + (this.width - stumpWidth) / 2;
-                const stumpY = this.y + this.height - stumpHeight;
-                ctx.drawImage(this.stumpImage, stumpX, stumpY, stumpWidth, stumpHeight);
-
-                const fallenLogImage = this.fallingImages[2];
-                if (fallenLogImage && fallenLogImage.complete) {
-                    const logWidth = this.height * 0.9;
-                    const logHeight = this.width * 1.2;
-                    const logX = stumpX + stumpWidth * 0.5;
-                    const logY = this.y + this.height - logHeight;
-                    ctx.drawImage(fallenLogImage, logX, logY, logWidth, logHeight);
-                }
-                break;
         }
     }
 }
@@ -144,23 +137,15 @@ export class Stage {
         this.game = game;
         this.scrollSpeed = INITIAL_SCROLL_SPEED;
         this.elapsedTimeInSeconds = 0;
-        this.groundImage = new Image();
-        this.groundImage.src = 'img/ground.png';
-        this.enemyImage = new Image();
-        this.enemyImage.src = 'img/teki.png';
-        this.playerWaitImage = new Image();
-        this.playerWaitImage.src = 'img/character_wait.png';
-        this.playerJumpImage = new Image();
-        this.playerJumpImage.src = 'img/character_jump.png';
-        this.playerWalkImage = new Image();
-        this.playerWalkImage.src = 'img/character_woke.png';
-        this.playerWalkImage2 = new Image();
-        this.playerWalkImage2.src = 'img/character_woke2.png';
-        this.treeImage = new Image();
-        this.treeImage.src = 'img/ki.png';
-        this.stumpImage = new Image();
-        this.stumpImage.src = 'img/kirikabu.png';
-
+        this.animations = [];
+        this.groundImage = new Image(); this.groundImage.src = 'img/ground.png';
+        this.enemyImage = new Image(); this.enemyImage.src = 'img/teki.png';
+        this.playerWaitImage = new Image(); this.playerWaitImage.src = 'img/character_wait.png';
+        this.playerJumpImage = new Image(); this.playerJumpImage.src = 'img/character_jump.png';
+        this.playerWalkImage = new Image(); this.playerWalkImage.src = 'img/character_woke.png';
+        this.playerWalkImage2 = new Image(); this.playerWalkImage2.src = 'img/character_woke2.png';
+        this.treeImage = new Image(); this.treeImage.src = 'img/ki.png';
+        this.stumpImage = new Image(); this.stumpImage.src = 'img/kirikabu.png';
         this.treeFallImages = [];
         for (let i = 2; i <= 4; i++) {
             const img = new Image();
@@ -176,16 +161,21 @@ export class Stage {
         this.platforms = [];
         this.walls = [];
         this.enemies = [];
+        this.animations = [];
         this.lastPlatformX = -50;
         const initialPlatformWidth = Math.ceil(this.game.canvas.width / BLOCK_SIZE) + 2;
         this.createPlatform(this.lastPlatformX, this.game.canvas.height - (PLATFORM_HEIGHT_IN_BLOCKS * BLOCK_SIZE), initialPlatformWidth);
-        
         while (this.lastPlatformX < this.cameraX + this.game.canvas.width * 2) {
             this.generateNext();
         }
     }
 
     setScrollSpeed(speed) { this.scrollSpeed = speed; }
+
+    spawnFallingTreeAnimation(originalWall) {
+        const anim = new TemporaryAnimation(originalWall.x, originalWall.y, originalWall.width, originalWall.height, this.treeFallImages, 0.15);
+        this.animations.push(anim);
+    }
 
     createPlatform(x, y, widthInBlocks) {
         const platform = new Platform(x, y, widthInBlocks, this.groundImage);
@@ -200,21 +190,18 @@ export class Stage {
 
             if (obstacleType < wallThreshold) {
                 const isHighWall = Math.random() < 0.5;
-
                 if (isHighWall) {
                     const wallHeight = BLOCK_SIZE * 11;
                     const aspectRatio = 0.8;
                     const wallWidth = wallHeight * aspectRatio;
                     const wallX = (x + platform.width / 2) - (wallWidth / 2);
-                    
-                    const wall = new Wall(wallX, y - wallHeight, wallWidth, wallHeight, this.treeImage, true, this.stumpImage, this.treeFallImages);
+                    const wall = new Wall(wallX, y - wallHeight, wallWidth, wallHeight, this.treeImage, true, this.stumpImage);
                     this.walls.push(wall);
                     this.game.currentScene.requestWallBreakEvent(wall);
                 } else {
                     const wallHeight = BLOCK_SIZE * STUMP_HEIGHT_IN_BLOCKS;
                     const wallWidth = BLOCK_SIZE * STUMP_WIDTH_IN_BLOCKS;
                     const wallX = (x + platform.width / 2) - (wallWidth / 2);
-
                     const wall = new Wall(wallX, y - wallHeight, wallWidth, wallHeight, this.stumpImage, false, this.stumpImage);
                     this.walls.push(wall);
                 }
@@ -233,7 +220,6 @@ export class Stage {
         const gapInPixels = gapInBlocks * BLOCK_SIZE;
         const newX = this.lastPlatformX + gapInPixels;
         const newY = this.game.canvas.height - (PLATFORM_HEIGHT_IN_BLOCKS * BLOCK_SIZE);
-
         if (gapInBlocks > PLAYER_MAX_JUMP_IN_BLOCKS) {
             this.game.currentScene.requestScaffold(this.lastPlatformX, gapInPixels);
         }
@@ -242,22 +228,22 @@ export class Stage {
 
     update(deltaTime) {
         this.cameraX += this.scrollSpeed;
-
         if (this.lastPlatformX < this.cameraX + this.game.canvas.width + 200) {
             this.generateNext();
         }
-
         this.platforms = this.platforms.filter(p => p.x + p.width > this.cameraX);
         this.walls = this.walls.filter(w => w.x + w.width > this.cameraX);
         this.enemies = this.enemies.filter(e => e.x + e.width > this.cameraX);
-
-        this.walls.forEach(w => w.update(deltaTime));
         this.enemies.forEach(e => e.update());
+
+        this.animations.forEach(a => a.update(deltaTime));
+        this.animations = this.animations.filter(a => !a.isFinished);
     }
 
     draw(ctx) {
         this.platforms.forEach(p => p.draw(ctx));
         this.walls.forEach(w => w.draw(ctx));
         this.enemies.forEach(e => e.draw(ctx));
+        this.animations.forEach(a => a.draw(ctx));
     }
 }

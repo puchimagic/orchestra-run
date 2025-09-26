@@ -22,6 +22,8 @@ export const INITIAL_SCROLL_SPEED = 5;
 // ★プレイヤーのジャンプ力を共通設定に
 export const PLAYER_MAX_JUMP_IN_BLOCKS = 8;
 
+export const STUMP_WIDTH_IN_BLOCKS = 3.4; // ★追加：切り株の幅
+
 export const KEYBOARD_INSTRUMENT_CONFIG = {
     'トライアングル': { name: 'トライアングル', keys: ['J'], maxChord: 1, multiplier: 1.0 },
     'タンバリン':   { name: 'タンバリン',   keys: ['J', 'L'], maxChord: 1, multiplier: 1.1 },
