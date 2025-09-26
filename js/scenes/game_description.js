@@ -1,5 +1,6 @@
 import { SCENE, FONT_SIZE, FONT_FAMILY } from '../config.js';
 import { Button } from '../ui/button.js';
+import { soundPlayer } from '../../soundPlayer.js';
 
 export class GameDescriptionScene {
     constructor(game) {
@@ -12,6 +13,7 @@ export class GameDescriptionScene {
         const x = (this.game.canvas.width - btnWidth) / 2;
         const y = this.game.canvas.height - btnHeight - 75;
         this.backButton = new Button(x, y, btnWidth, btnHeight, 'メインに戻る');
+        soundPlayer.playBGM('home_bgm');
     }
 
     update() {

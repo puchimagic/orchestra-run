@@ -1,5 +1,6 @@
 import { SCENE, FONT_SIZE, FONT_FAMILY } from '../config.js';
 import { Button } from '../ui/button.js';
+import { soundPlayer } from '../../soundPlayer.js';
 
 export class RankingScene {
     constructor(game) {
@@ -20,6 +21,7 @@ export class RankingScene {
 
     async init() {
         this.scores = await this.game.scoreManager.getScores();
+        soundPlayer.playBGM('home_bgm');
 
         const btnWidth = 300;
         const btnHeight = 75;

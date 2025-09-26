@@ -8,6 +8,7 @@ import { GameOverScene } from './scenes/game_over.js';
 import { ScoreManager } from './score_manager.js'; // ★インポート
 
 import { InputHandler } from './input_handler.js';
+import { soundPlayer } from '../soundPlayer.js';
 
 class Game {
     constructor() {
@@ -62,6 +63,7 @@ class Game {
     }
 
     changeScene(sceneName, data = {}) {
+        soundPlayer.stopBGM();
         if (sceneName === SCENE.GAME) {
             // GameSceneは毎回新しいインスタンスを生成し、選択された楽器を渡す
             this.currentScene = new GameScene(this, this.selectedInstrument);
