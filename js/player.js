@@ -78,53 +78,77 @@ export class Player {
             }
         }
 
-        this.x += this.vx;
+        // ★ここから新しい衝突判定ロジック
+        let canMoveRight = true;
+        let canMoveLeft = true;
+
+        // ステージ左端との衝突チェック
+        if (this.x + this.vx < this.game.currentScene.stage.cameraX) {
+            canMoveLeft = false;
+            this.vx = 0; // 左端にいる場合は左への移動をキャンセル
+            this.x = this.game.currentScene.stage.cameraX; // 左端に固定
+        }
+
+        // 壁との衝突を予測して移動を制限
+        walls.forEach(wall => {
+            let cbox = { x: wall.x, width: wall.width };
+            if (wall.isBreakable) {
+                cbox.width = STUMP_WIDTH_IN_BLOCKS * BLOCK_SIZE;
+                cbox.x = wall.x + (wall.width - cbox.width) / 2;
+            }
+
+            // プレイヤーが壁とY軸方向で重なっているか
+            if (this.y < wall.y + wall.height && this.y + this.height > wall.y) {
+                // 右に移動しようとしていて、右側に壁がある場合
+                if (this.vx > 0 && this.x + this.width + this.vx > cbox.x && this.x + this.width <= cbox.x) {
+                    canMoveRight = false;
+                }
+                // 左に移動しようとしていて、左側に壁がある場合
+                if (this.vx < 0 && this.x + this.vx < cbox.x + cbox.width && this.x >= cbox.x + cbox.width) {
+                    canMoveLeft = false;
+                }
+            }
+        });
+
+        if (this.vx > 0 && !canMoveRight) {
+            this.vx = 0;
+        }
+        if (this.vx < 0 && !canMoveLeft) {
+            this.vx = 0;
+        }
+        // ★ここまで新しい衝突判定ロジック
+
+        this.x += this.vx; // 調整されたvxでx座標を更新
 
         if (this.vx > 0) this.facingDirection = 1;
         else if (this.vx < 0) this.facingDirection = -1;
         this.isMoving = this.vx !== 0;
 
-        let isCollidingLeft = false;
-        let isCollidingRight = false;
+        // isCrushed の判定は、ステージ左端と右側の壁に挟まれた場合にのみ行う
+        let leftWallCollision = false;
+        let rightWallCollision = false;
 
-        if (this.x < this.game.currentScene.stage.cameraX) {
-            isCollidingLeft = true;
+        // ステージ左端との衝突
+        if (this.x <= this.game.currentScene.stage.cameraX) {
+            leftWallCollision = true;
         }
 
+        // 右側の壁との衝突
         walls.forEach(wall => {
             let cbox = { x: wall.x, width: wall.width };
-            if (wall.isBreakable) { // ★木なら当たり判定を幹の幅に
+            if (wall.isBreakable) {
                 cbox.width = STUMP_WIDTH_IN_BLOCKS * BLOCK_SIZE;
                 cbox.x = wall.x + (wall.width - cbox.width) / 2;
             }
-            if (this.x < cbox.x + cbox.width && this.x + this.width > cbox.x &&
+            if (this.x + this.width > cbox.x && this.x < cbox.x + cbox.width &&
                 this.y < wall.y + wall.height && this.y + this.height > wall.y) {
-                if (this.vx >= 0) {
-                    isCollidingRight = true;
-                }
+                rightWallCollision = true;
             }
         });
 
-        if (isCollidingLeft && isCollidingRight) {
+        if (leftWallCollision && rightWallCollision) {
             this.isCrushed = true;
             return;
-        }
-
-        walls.forEach(wall => {
-            let cbox = { x: wall.x, width: wall.width };
-            if (wall.isBreakable) { // ★木なら当たり判定を幹の幅に
-                cbox.width = STUMP_WIDTH_IN_BLOCKS * BLOCK_SIZE;
-                cbox.x = wall.x + (wall.width - cbox.width) / 2;
-            }
-            if (this.x < cbox.x + cbox.width && this.x + this.width > cbox.x &&
-                this.y < wall.y + wall.height && this.y + this.height > wall.y) {
-                if (this.vx > 0) this.x = cbox.x - this.width;
-                else if (this.vx < 0) this.x = cbox.x + cbox.width;
-            }
-        });
-
-        if (this.x < this.game.currentScene.stage.cameraX) {
-            this.x = this.game.currentScene.stage.cameraX;
         }
 
         this.vy += GRAVITY;
