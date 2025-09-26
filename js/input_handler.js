@@ -8,6 +8,7 @@ export class InputHandler {
         this.actionMap = {}; // 逆引き用 (physicalKey -> action)
         this.gamepads = []; // ゲームパッドを格納する配列
         this.lastGamepadConnectedStatus = false; // To track changes in gamepad connection status
+        this.fixedGamepadConnectedStatus = null; // ★追加: ゲーム開始時に確定した接続状態
 
         window.addEventListener('keydown', this.handleKeyDown.bind(this));
         window.addEventListener('keyup', this.handleKeyUp.bind(this));
@@ -30,17 +31,18 @@ export class InputHandler {
         this.pollGamepads(); // ゲームパッドの状態を常に更新する
     }
 
-    setInstrumentKeyMaps(keyboardConfig, gamepadConfig) {
+    setInstrumentKeyMaps(keyboardConfig, gamepadConfig, fixedConnectedStatus = null) { // ★引数を追加
         // Store the full instrument configurations
         this.keyboardInstrumentConfig = keyboardConfig;
         this.gamepadInstrumentConfig = gamepadConfig;
+        this.fixedGamepadConnectedStatus = fixedConnectedStatus; // ★設定
 
         // Initialize activeKeyMap and actionMap based on current gamepad status
         this._updateActiveKeyMap();
     }
 
     _updateActiveKeyMap() {
-        const isConnected = this.isGamepadConnected();
+        const isConnected = this.fixedGamepadConnectedStatus !== null ? this.fixedGamepadConnectedStatus : this.isGamepadConnected();
         const currentInstrumentConfig = isConnected ? this.gamepadInstrumentConfig : this.keyboardInstrumentConfig;
 
         console.log('Updating active key map. Gamepad connected:', isConnected);

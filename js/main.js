@@ -7,6 +7,8 @@ import { GameScene } from './scenes/game.js';
 import { GameOverScene } from './scenes/game_over.js';
 import { ScoreManager } from './score_manager.js'; // ★インポート
 
+import { InputHandler } from './input_handler.js';
+
 class Game {
     constructor() {
         this.canvas = document.getElementById('gameCanvas');
@@ -17,6 +19,7 @@ class Game {
 
         this.scoreManager = new ScoreManager(); // ★インスタンス化
         this.selectedInstrument = null; // 選択された楽器を保持
+        this.isGamepadConnectedAtStart = false; // ゲーム開始時のゲームパッド接続状態を保持
 
         this.resizeCanvas();
         window.addEventListener('resize', () => this.resizeCanvas());
@@ -44,7 +47,11 @@ class Game {
     }
 
     init() {
-        this.scenes[SCENE.MAIN] = new MainScene(this);
+        this.inputHandler = new InputHandler(null, null);
+        const mainSceneInstance = new MainScene(this);
+        this.currentScene = mainSceneInstance;
+        this.scenes[SCENE.MAIN] = mainSceneInstance;
+        
         this.scenes[SCENE.GAME_DESCRIPTION] = new GameDescriptionScene(this);
         this.scenes[SCENE.RANKING] = new RankingScene(this);
         this.scenes[SCENE.INSTRUMENT_SELECT] = new InstrumentSelectScene(this);

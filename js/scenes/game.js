@@ -13,7 +13,7 @@ export class GameScene {
     constructor(game, selectedInstrument) {
         this.game = game;
         this.selectedInstrument = selectedInstrument;
-        this.playerInput = new InputHandler(); 
+        this.inputHandler = this.game.inputHandler; 
         this.player2Input = new InputHandler(); 
         this.activeInstrumentConfig = null; 
 
@@ -49,10 +49,16 @@ export class GameScene {
 
     init(data) {
         this.instrumentName = this.selectedInstrument || 'トライアングル';
-        this.player2Input.setInstrumentKeyMaps(KEYBOARD_INSTRUMENT_CONFIG, GAMEPAD_INSTRUMENT_CONFIG);
+        
+        const useGamepadForScaffold = this.game.isGamepadConnectedAtStart;
+        this.player2Input.setInstrumentKeyMaps(
+            KEYBOARD_INSTRUMENT_CONFIG, 
+            GAMEPAD_INSTRUMENT_CONFIG, // ここは常に両方の設定を渡す
+            useGamepadForScaffold // ★fixedConnectedStatusとして渡す
+        );
 
-        const isGamepadConnected = this.player2Input.isGamepadConnected();
-        this.activeInstrumentConfig = isGamepadConnected ? GAMEPAD_INSTRUMENT_CONFIG : KEYBOARD_INSTRUMENT_CONFIG;
+        // activeInstrumentConfigも同様に固定
+        this.activeInstrumentConfig = useGamepadForScaffold ? GAMEPAD_INSTRUMENT_CONFIG : KEYBOARD_INSTRUMENT_CONFIG;
         this.instrument = this.activeInstrumentConfig[this.instrumentName];
 
         this.startTime = Date.now();
@@ -68,13 +74,17 @@ export class GameScene {
         this.stage.init();
         this.player = new Player(
             this.game, 
-            this.playerInput, 
+            this.game.inputHandler, 
             this.stage.playerWaitImage, 
             this.stage.playerJumpImage, 
             this.stage.playerWalkImage,
             this.stage.playerWalkImage2
         );
         this.player.init();
+
+        // playerとstageをInputHandlerに設定し直す
+        this.game.inputHandler.player = this.player;
+        this.game.inputHandler.stage = this.stage;
         this.player2Input.init();
 
         // Countdown properties
@@ -188,14 +198,6 @@ export class GameScene {
                 }
             }
             return;
-        }
-
-        const isGamepadConnected = this.player2Input.isGamepadConnected();
-        const currentInputConfig = isGamepadConnected ? GAMEPAD_INSTRUMENT_CONFIG : KEYBOARD_INSTRUMENT_CONFIG;
-
-        if (this.activeInstrumentConfig !== currentInputConfig) {
-            this.activeInstrumentConfig = currentInputConfig;
-            this.instrument = this.activeInstrumentConfig[this.instrumentName];
         }
 
         const elapsedTimeInSeconds = (now - this.startTime) / 1000;
