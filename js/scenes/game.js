@@ -61,6 +61,11 @@ export class GameScene {
         this.player.init();
         this.player2Input.init();
 
+        // Countdown properties
+        this.isCountdown = true;
+        this.countdownNumber = 3;
+        this.countdownTimer = 0;
+
         // 楽器名ごとに対応する画像URLをマッピング
         const instrumentImageMap = {
             "トライアングル": "https://github.com/puchimagic/oic_hack/blob/main/img/toraianguru.png?raw=true",
@@ -118,6 +123,24 @@ export class GameScene {
     }
 
     update() {
+        const now = Date.now();
+        const deltaTime = (now - this.lastTime) / 1000;
+        this.lastTime = now;
+
+        if (this.isCountdown) {
+            this.countdownTimer += deltaTime;
+            if (this.countdownTimer >= 1) {
+                this.countdownTimer = 0;
+                this.countdownNumber--;
+                if (this.countdownNumber < 0) {
+                    this.isCountdown = false;
+                    this.startTime = Date.now(); // Reset start time after countdown
+                    this.lastTime = this.startTime;
+                }
+            }
+            return;
+        }
+
         const isGamepadConnected = this.player2Input.isGamepadConnected();
         const currentInputConfig = isGamepadConnected ? GAMEPAD_INSTRUMENT_CONFIG : KEYBOARD_INSTRUMENT_CONFIG;
 
@@ -126,9 +149,6 @@ export class GameScene {
             this.instrument = this.activeInstrumentConfig[this.instrumentName];
         }
 
-        const now = Date.now();
-        const deltaTime = (now - this.lastTime) / 1000;
-        this.lastTime = now;
         const elapsedTimeInSeconds = (now - this.startTime) / 1000;
 
         const scorePerSecond = 1;
@@ -257,6 +277,23 @@ export class GameScene {
             const x = width - 100 - 10;
             const y = 10;
             ctx.drawImage(this.instrumentImage, x, y, 100, 110);
+        }
+
+        if (this.isCountdown) {
+            ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+            ctx.fillRect(0, 0, width, height);
+    
+            ctx.font = `128px ${FONT_FAMILY}`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillStyle = "white";
+    
+            if (this.countdownNumber > 0) {
+                ctx.fillText(this.countdownNumber, width / 2, height / 2);
+            } else if (this.countdownNumber === 0) {
+                ctx.font = `96px ${FONT_FAMILY}`;
+                ctx.fillText("Start!", width / 2, height / 2);
+            }
         }
     }
 }
