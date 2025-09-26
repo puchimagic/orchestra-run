@@ -53,25 +53,40 @@ export class GameDescriptionScene {
         ctx.textAlign = 'center';
 
         ctx.font = `${FONT_SIZE.MEDIUM}px ${FONT_FAMILY}`;
-        ctx.fillText('あそびかた', width / 2, 120);
+        ctx.fillText('あそびかた', width / 2, 120); // タイトルはY=120
 
         // ★レイアウト調整
         const descriptionFontSize = 32; // 文字サイズを少し小さく
         ctx.font = `${descriptionFontSize}px ${FONT_FAMILY}`;
         ctx.textAlign = 'left';
         const lineHeight = 45; // 行間を詰める
-        let currentY = 180;    // さらに開始位置を上げる
+        let currentY;
+
+        // 説明テキスト表示可能領域の縦方向の開始Yと終了Yを決定
+        const descriptionContentStartY = 120 + 100; // タイトルY + タイトルからのマージンを増やす
+        const backButtonY = this.backButton ? this.backButton.y : this.game.canvas.height - 75 - 75; // backButtonが未定義の場合のフォールバック
+        const descriptionContentEndY = backButtonY - 50; // ボタンY - ボタンへのマージン
+        const availableHeight = descriptionContentEndY - descriptionContentStartY;
+
+        // 説明テキスト全体の高さを計算 (9行のテキスト + 間に挿入されるlineHeightの合計)
+        const totalDescriptionHeight = 18 * lineHeight; // 9行のテキスト + 2*2 + 5*1 = 18行分の高さ
+
+        // 説明テキスト全体を中央に配置するための開始Y座標
+        currentY = descriptionContentStartY + (availableHeight - totalDescriptionHeight) / 2;
+        if (currentY < descriptionContentStartY) { // 最小値チェック（テキストが長すぎて領域に収まらない場合）
+            currentY = descriptionContentStartY;
+        }
 
         const maxTextWidth = 1200; // Maximum width for the text block
         const startX = (width - maxTextWidth) / 2; // Center the text block
 
         ctx.fillText('このゲームは、2人で協力してハイスコアを目指すゲームです。', startX, currentY);
-        currentY += lineHeight * 2;
+        currentY += lineHeight * 1.6;
 
         ctx.fillText('■ プレイヤー1（キャラクター操作）', startX, currentY);
         currentY += lineHeight;
         ctx.fillText('   A: 左に移動,  D: 右に移動,  S: ジャンプ', startX, currentY);
-        currentY += lineHeight * 2;
+        currentY += lineHeight * 1.6;
 
         ctx.fillText('■ プレイヤー2（おんがく・足場作り）', startX, currentY);
         currentY += lineHeight;
