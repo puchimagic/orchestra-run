@@ -1,6 +1,5 @@
 import { SCENE, FONT_SIZE, FONT_FAMILY, KEYBOARD_INSTRUMENT_CONFIG, INSTRUMENT_ORDER } from '../config.js';
 import { Button } from '../ui/button.js';
-import { soundPlayer } from '../../soundPlayer.js';
 
 export class InstrumentSelectScene {
     constructor(game) {

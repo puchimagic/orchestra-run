@@ -1,6 +1,5 @@
 import { SCENE, FONT_SIZE, FONT_FAMILY } from '../config.js';
 import { Button } from '../ui/button.js';
-import { soundPlayer } from '../../soundPlayer.js';
 
 export class RankingScene {
     constructor(game) {

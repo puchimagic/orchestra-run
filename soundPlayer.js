@@ -9,21 +9,17 @@ export class SoundPlayer {
       jump: new Audio("./sound/game/track01.wav"),
       score: new Audio("./sound/game/track02.wav"),
       gameOver: new Audio("./sound/game/track03.wav"),
-      game_bgm: new Audio("./sound/game/game_bgm.wav"), // .wav に修正
-      gameover_bgm: new Audio("./sound/game/gameover_bgm.wav"), // .wav に修正
-      home_bgm: new Audio("./sound/game/home_bgm.wav"), // .wav に修正
+      game_bgm: new Audio("./sound/game/game_bgm.wav"),
+      gameover_bgm: new Audio("./sound/game/gameover_bgm.wav"),
+      home_bgm: new Audio("./sound/game/home_bgm.wav"),
       tree_fall: new Audio("./sound/game/木が倒れる音.wav"),
     };
     
-    // 各音量の設定
-    this.gameSounds.jump.volume = this.gameSoundVolume;
-    this.gameSounds.score.volume = this.gameSoundVolume;
-    this.gameSounds.gameOver.volume = this.gameSoundVolume;
-    this.gameSounds.tree_fall.volume = this.gameSoundVolume;
-
-    this.gameSounds.game_bgm.volume = this.bgmVolume;
-    this.gameSounds.gameover_bgm.volume = this.bgmVolume;
-    this.gameSounds.home_bgm.volume = this.bgmVolume;
+    // 各音量の設定 (localStorageから読み込んだ値を適用)
+    // セッターメソッドを呼び出すことで、Audioオブジェクトに反映させる
+    this.setBgmVolume(this.bgmVolume);
+    this.setInstrumentVolume(this.instrumentVolume); // ロード済みの楽器音がないため、ここでは効果なし
+    this.setGameSoundVolume(this.gameSoundVolume);
 
     this.sounds = {}; // loadSoundでロードした音源を格納するオブジェクト
     this.currentBGM = null; // 現在再生中のBGMを追跡
