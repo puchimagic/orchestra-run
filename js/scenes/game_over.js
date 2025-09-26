@@ -7,6 +7,17 @@ export class GameOverScene {
         this.game = game;
         this.finalScore = 0;
         this.lastInstrument = null;
+
+         // 背景画像を読み込む
+        this.backgroundImage = new Image();
+        this.backgroundImage.src = 'img/gameover.png';
+        this.isBackgroundLoaded = false;
+        this.backgroundImage.onload = () => {
+            this.isBackgroundLoaded = true;
+        };
+        this.backgroundImage.onerror = () => {
+            console.error('Failed to load background image: img/gameover.png');
+        };
     }
 
     init(data) {
@@ -38,11 +49,16 @@ export class GameOverScene {
         const ctx = this.game.ctx;
         const { width, height } = this.game.canvas;
 
-        ctx.clearRect(0, 0, width, height);
-        ctx.fillStyle = '#a0a0a0';
-        ctx.fillRect(0, 0, width, height);
+        //背景設定
+        if (this.isBackgroundLoaded) {
+            ctx.drawImage(this.backgroundImage, 0, 0, width, height);
+        } else {
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#a0a0a0';
+            ctx.fillRect(0, 0, width, height);
+        }
 
-        ctx.fillStyle = 'white';
+        ctx.fillStyle = 'black';
         ctx.font = `${FONT_SIZE.LARGE}px ${FONT_FAMILY}`;
         ctx.textAlign = 'center';
         ctx.fillText('ゲームオーバー', width / 2, height / 2 - 120);
