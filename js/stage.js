@@ -1,5 +1,5 @@
 import { BLOCK_SIZE, PLATFORM_HEIGHT_IN_BLOCKS, PLAYER_MAX_JUMP_IN_BLOCKS, INITIAL_SCROLL_SPEED, STUMP_WIDTH_IN_BLOCKS } from './config.js';
-import { soundPlayer } from '../../soundPlayer.js';
+import { soundPlayer } from '../soundPlayer.js';
 
 const STUMP_HEIGHT_IN_BLOCKS = 4.4;
 
