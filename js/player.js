@@ -1,4 +1,4 @@
-import { BLOCK_SIZE, STUMP_WIDTH_IN_BLOCKS } from './config.js'; // ★STUMP_WIDTH_IN_BLOCKSをインポート
+import { BLOCK_SIZE, STUMP_WIDTH_IN_BLOCKS, PLATFORM_HEIGHT_IN_BLOCKS } from './config.js'; // ★STUMP_WIDTH_IN_BLOCKSをインポート
 import { soundPlayer } from "../soundPlayer.js";
 
 const PLAYER_WIDTH_IN_BLOCKS = 2.0;
@@ -40,7 +40,7 @@ export class Player {
 
     init() {
         this.x = 50;
-        this.y = this.game.canvas.height - this.height - 50;
+        this.y = this.game.canvas.height - (PLATFORM_HEIGHT_IN_BLOCKS * BLOCK_SIZE) - this.height;
         this.vx = 0;
         this.vy = 0;
         this.onGround = false;
@@ -66,7 +66,8 @@ export class Player {
                 this.vy = -JUMP_POWER;
                 this.onGround = false;
             }
-        } else {
+        }
+        else {
             if (this.keys['KeyA']) this.vx = -MOVE_SPEED;
             else if (this.keys['KeyD']) this.vx = MOVE_SPEED;
             else this.vx = 0;
@@ -98,7 +99,7 @@ export class Player {
             }
             if (this.x < cbox.x + cbox.width && this.x + this.width > cbox.x &&
                 this.y < wall.y + wall.height && this.y + this.height > wall.y) {
-                if (this.vx >= 0) { 
+                if (this.vx >= 0) {
                     isCollidingRight = true;
                 }
             }
@@ -154,14 +155,17 @@ export class Player {
         let currentImage;
         if (this.isJumping) {
             currentImage = this.jumpImage;
-        } else if (this.isMoving) {
+        }
+        else if (this.isMoving) {
             this.walkFrame++;
             if (Math.floor(this.walkFrame / this.walkAnimationSpeed) % 2 === 0) {
                 currentImage = this.walkImage;
-            } else {
+            }
+            else {
                 currentImage = this.walkImage2;
             }
-        } else {
+        }
+        else {
             currentImage = this.waitImage;
             this.walkFrame = 0;
         }
@@ -171,7 +175,8 @@ export class Player {
             ctx.translate(this.x + this.width, this.y);
             ctx.scale(-1, 1);
             ctx.drawImage(currentImage, 0, 0, this.width, this.height);
-        } else {
+        }
+        else {
             ctx.drawImage(currentImage, this.x, this.y, this.width, this.height);
         }
         ctx.restore();
