@@ -1,4 +1,5 @@
 import { FONT_SIZE, FONT_FAMILY } from '../config.js';
+import { soundPlayer } from '../../soundPlayer.js';
 
 export class Button {
     constructor(x, y, width, height, text, color = '#888', hoverColor = '#aaa') {
@@ -17,6 +18,7 @@ export class Button {
             mouse.y >= this.y && mouse.y <= this.y + this.height) {
             this.isHovered = true;
             if (mouse.clicked) {
+                soundPlayer.playGameSound("score"); // ボタンクリック音を再生
                 return true; // Button was clicked
             }
         } else {
