@@ -105,6 +105,7 @@ export class Player {
 
         // ★挟まれ判定
         if (isCollidingLeft && isCollidingRight) {
+            soundPlayer.playGameSound("jugmp"); // ジャンプ音
             this.isCrushed = true;
             return; // 挟まれたら以降の処理は不要
         }

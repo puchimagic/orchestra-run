@@ -7,6 +7,7 @@ import { Player } from '../player.js';
 import { Stage, Wall } from '../stage.js'; 
 import { ScaffoldBlock } from '../scaffold.js';
 import { InputHandler } from '../input_handler.js';
+import { soundPlayer } from '../../soundPlayer.js';
 
 export class GameScene {
     constructor(game) {
@@ -226,6 +227,7 @@ export class GameScene {
     }
 
     gameOver() {
+        soundPlayer.playGameSound("gameOver"); // ゲームオーバー音を再生
         this.player.destroy();
         this.player2Input.destroy();
         this.game.changeScene(SCENE.GAME_OVER, { score: this.score, instrument: this.instrumentName });
