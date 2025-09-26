@@ -17,6 +17,17 @@ export class MainScene {
         this.backgroundImage.onerror = () => {
             console.error('Failed to load background image: img/title_rank_select.png');
         };
+
+        // ロゴ画像を読み込む
+        this.logoImage = new Image();
+        this.logoImage.src = 'img/logo.png';
+        this.isLogoLoaded = false;
+        this.logoImage.onload = () => {
+            this.isLogoLoaded = true;
+        };
+        this.logoImage.onerror = () => {
+            console.error('Failed to load logo image: img/logo.png');
+        };
     }
 
     init() {
@@ -70,10 +81,20 @@ export class MainScene {
             ctx.fillRect(0, 0, width, height);
         }
 
-        ctx.fillStyle = 'black';
-        ctx.font = `${FONT_SIZE.LARGE}px ${FONT_FAMILY}`;
-        ctx.textAlign = 'center';
-        ctx.fillText('オケラン', width / 2, height / 2 - 250);
+        if (this.isLogoLoaded) {
+            // 画像のサイズと位置を調整して中央に配置
+            const logoWidth = 600; // 適当な幅、調整が必要
+            const logoHeight = this.logoImage.height * (logoWidth / this.logoImage.width); // アスペクト比を維持
+            const logoX = width / 2 - logoWidth / 2;
+            const logoY = height / 2 - 250 - logoHeight / 2; // 元のテキストのY座標を基準に中央寄せ
+            ctx.drawImage(this.logoImage, logoX, logoY, logoWidth, logoHeight);
+        } else {
+            // 画像が読み込まれていない場合は、元のテキストを表示
+            ctx.fillStyle = 'black';
+            ctx.font = `${FONT_SIZE.LARGE}px ${FONT_FAMILY}`;
+            ctx.textAlign = 'center';
+            ctx.fillText('オケラン', width / 2, height / 2 - 250);
+        }
 
         this.startButton.draw(ctx);
         this.rankingButton.draw(ctx);
