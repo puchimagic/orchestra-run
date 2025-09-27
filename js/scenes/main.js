@@ -18,7 +18,6 @@ export class MainScene {
             console.error('Failed to load background image: img/title_rank_select.png');
         };
 
-        // ロゴ画像を読み込む
         this.logoImage = new Image();
         this.logoImage.src = 'img/logo.png';
         this.isLogoLoaded = false;
@@ -35,19 +34,17 @@ export class MainScene {
     }
 
     onResize() {
-        const btnWidth = 300; // ボタンの幅を少し狭める
+        const btnWidth = 300;
         const btnHeight = 75;
         const cx = this.game.canvas.width / 2;
         const cy = this.game.canvas.height / 2;
-        const gapX = 50; // 列間のギャップ
-        const gapY = 20; // 行間のギャップ
+        const gapX = 50;
+        const gapY = 20;
 
-        // 左列
         const leftColX = cx - btnWidth - gapX / 2;
         this.startButton = new Button(leftColX, cy - btnHeight - gapY / 2, btnWidth, btnHeight, 'ゲームスタート');
         this.descButton = new Button(leftColX, cy + gapY / 2, btnWidth, btnHeight, 'あそびかた');
 
-        // 右列
         const rightColX = cx + gapX / 2;
         this.rankingButton = new Button(rightColX, cy - btnHeight - gapY / 2, btnWidth, btnHeight, 'ランキング');
         this.volumeSettingsButton = new Button(rightColX, cy + gapY / 2, btnWidth, btnHeight, '音量設定');
@@ -55,14 +52,14 @@ export class MainScene {
 
     update() {
         if (!this.game.isGameActive) {
-            if (this.inputHandler.isKeyPressed('KeyF') || this.inputHandler.isTouch()) {
+            if (this.inputHandler.isActivated()) {
                 this.game.isGameActive = true;
                 soundPlayer.playBGM('home_bgm');
                 if (this.game.canvas.requestFullscreen) {
                     this.game.canvas.requestFullscreen().catch(err => console.log(err));
                 }
             }
-            return; // Fキーまたはタッチがされるまで他の操作をブロック
+            return; // 入力があるまで他の操作をブロック
         }
 
         if (this.startButton.update(this.game.mouse)) {
@@ -75,7 +72,7 @@ export class MainScene {
         if (this.descButton.update(this.game.mouse)) {
             this.game.changeScene(SCENE.GAME_DESCRIPTION);
         }
-        if (this.volumeSettingsButton.update(this.game.mouse)) { // ★追加
+        if (this.volumeSettingsButton.update(this.game.mouse)) {
             this.game.changeScene(SCENE.VOLUME_SETTINGS);
         }
     }
@@ -93,14 +90,12 @@ export class MainScene {
         }
 
         if (this.isLogoLoaded) {
-            // 画像のサイズと位置を調整して中央に配置
-            const logoWidth = 600; // 適当な幅、調整が必要
-            const logoHeight = this.logoImage.height * (logoWidth / this.logoImage.width); // アスペクト比を維持
+            const logoWidth = 600;
+            const logoHeight = this.logoImage.height * (logoWidth / this.logoImage.width);
             const logoX = width / 2 - logoWidth / 2;
-            const logoY = height / 2 - 250 - logoHeight / 2; // 元のテキストのY座標を基準に中央寄せ
+            const logoY = height / 2 - 250 - logoHeight / 2;
             ctx.drawImage(this.logoImage, logoX, logoY, logoWidth, logoHeight);
         } else {
-            // 画像が読み込まれていない場合は、元のテキストを表示
             ctx.fillStyle = 'black';
             ctx.font = `${FONT_SIZE.LARGE}px ${FONT_FAMILY}`;
             ctx.textAlign = 'center';
@@ -110,13 +105,16 @@ export class MainScene {
         this.startButton.draw(ctx);
         this.rankingButton.draw(ctx);
         this.descButton.draw(ctx);
-        this.volumeSettingsButton.draw(ctx); // ★追加
+        this.volumeSettingsButton.draw(ctx);
 
         if (!this.game.isGameActive) {
-            ctx.fillStyle = 'black';
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'; // Semi-transparent overlay
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.fillStyle = 'white';
             ctx.font = `${FONT_SIZE.MEDIUM}px ${FONT_FAMILY}`;
             ctx.textAlign = 'center';
-            ctx.fillText('画面に触れてください。', width / 2, this.descButton.y + this.descButton.height + 60);
+            ctx.fillText('画面を押してください', width / 2, height / 2 + 150);
         }
 
         if (this.inputHandler.isGamepadConnected()) {

@@ -27,14 +27,16 @@ export class Button {
         return false; // Button was not clicked
     }
 
-    draw(ctx) {
+    draw(ctx, scale = 1) {
         // Draw button
         ctx.fillStyle = this.isHovered ? this.hoverColor : this.color;
         ctx.fillRect(this.x, this.y, this.width, this.height);
 
         // Draw text
         ctx.fillStyle = '#fff';
-        ctx.font = `${FONT_SIZE.SMALL}px ${FONT_FAMILY}`;
+        // Apply scale to font size
+        const scaledFontSize = FONT_SIZE.SMALL;
+        ctx.font = `${scaledFontSize}px ${FONT_FAMILY}`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(this.text, this.x + this.width / 2, this.y + this.height / 2);
