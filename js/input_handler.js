@@ -9,9 +9,13 @@ export class InputHandler {
         this.gamepads = []; // ゲームパッドを格納する配列
         this.lastGamepadConnectedStatus = false; // To track changes in gamepad connection status
         this.fixedGamepadConnectedStatus = null; // ★追加: ゲーム開始時に確定した接続状態
+        this.touched = false; // ★追加: タッチされたかどうか
 
         window.addEventListener('keydown', this.handleKeyDown.bind(this));
         window.addEventListener('keyup', this.handleKeyUp.bind(this));
+
+        // ★追加: タッチイベント
+        window.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: false });
 
         // Gamepad接続イベント
         window.addEventListener('gamepadconnected', e => {
@@ -29,6 +33,19 @@ export class InputHandler {
         });
 
         this.pollGamepads(); // ゲームパッドの状態を常に更新する
+    }
+
+    // ★追加: タッチ開始ハンドラ
+    handleTouchStart(e) {
+        e.preventDefault(); // デフォルトのタッチ操作（スクロールなど）を無効化
+        this.touched = true;
+    }
+
+    // ★追加: タッチ状態をチェックするメソッド
+    isTouch() {
+        const touchState = this.touched;
+        this.touched = false; // 状態を一度読んだらリセット
+        return touchState;
     }
 
     setInstrumentKeyMaps(keyboardConfig, gamepadConfig, fixedConnectedStatus = null) { // ★引数を追加

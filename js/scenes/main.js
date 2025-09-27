@@ -55,14 +55,14 @@ export class MainScene {
 
     update() {
         if (!this.game.isGameActive) {
-            if (this.inputHandler.isKeyPressed('KeyF')) {
+            if (this.inputHandler.isKeyPressed('KeyF') || this.inputHandler.isTouch()) {
                 this.game.isGameActive = true;
                 soundPlayer.playBGM('home_bgm');
                 if (this.game.canvas.requestFullscreen) {
-                    this.game.canvas.requestFullscreen();
+                    this.game.canvas.requestFullscreen().catch(err => console.log(err));
                 }
             }
-            return; // Fキーが押されるまで他の操作をブロック
+            return; // Fキーまたはタッチがされるまで他の操作をブロック
         }
 
         if (this.startButton.update(this.game.mouse)) {
@@ -116,7 +116,7 @@ export class MainScene {
             ctx.fillStyle = 'black';
             ctx.font = `${FONT_SIZE.MEDIUM}px ${FONT_FAMILY}`;
             ctx.textAlign = 'center';
-            ctx.fillText('Fキーを押してください。', width / 2, this.descButton.y + this.descButton.height + 60);
+            ctx.fillText('画面に触れてください。', width / 2, this.descButton.y + this.descButton.height + 60);
         }
 
         if (this.inputHandler.isGamepadConnected()) {
