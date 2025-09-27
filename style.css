@@ -1,13 +1,18 @@
 body {
     margin: 0;
-    overflow: hidden; /* スクロールバーを非表示に */
-    position: relative; /* ★追加 */
+    overflow: hidden; /* スクロールバーを消す */
+    background-color: #000; /* はみ出た部分の背景色 */
 }
 
-canvas {
-    display: block; /* canvas周りの余白をなくす */
+canvas#gameCanvas {
+    display: block;
     background-color: #e0e0e0;
-    position: absolute; /* ★追加 */
-    top: 0;
-    left: 0;
+    /* 画面に合わせてアスペクト比を保ったまま中央に配置 */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100vw;
+    height: 100vh;
+    object-fit: contain;
 }
