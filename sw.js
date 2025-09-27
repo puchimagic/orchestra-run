@@ -1,13 +1,14 @@
-const CACHE_NAME = 'okerun-cache-v2'; // Cache version updated
-// All assets to be cached for full offline functionality
+const CACHE_NAME = 'okerun-cache-v3'; // キャッシュのバージョンを更新
+
+// キャッシュするすべてのファイル
 const urlsToCache = [
-  // Core files
+  // --- Core Files ---
   './',
   './index.html',
   './style.css',
   './soundPlayer.js',
 
-  // JavaScript files
+  // --- JavaScript Files ---
   './js/config.js',
   './js/input_handler.js',
   './js/main.js',
@@ -25,7 +26,7 @@ const urlsToCache = [
   './js/ui/button.js',
   './js/ui/volume_slider.js',
 
-  // Image files
+  // --- Image Files ---
   './img/character_jump.png',
   './img/character_wait.png',
   './img/character_woke.png',
@@ -50,7 +51,7 @@ const urlsToCache = [
   './img/title_rank_select.png',
   './img/toraianguru.png',
 
-  // Sound files
+  // --- Sound Files ---
   // drum
   './sound/drum/track01.wav',
   './sound/drum/track02.wav',
@@ -90,26 +91,51 @@ const urlsToCache = [
   './sound/triangle/track01.wav'
 ];
 
-// Install event
+// インストール時にキャッシュを保存する
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('Opened cache');
+        console.log('Opened cache and caching all assets');
         return cache.addAll(urlsToCache);
+      })
+      .catch(error => {
+        console.error('Failed to cache assets:', error);
+        // キャッシュに失敗したファイルなどを特定するのに役立つ
+        urlsToCache.forEach(url => {
+            fetch(url).catch(err => console.error(`Failed to fetch ${url}`, err));
+        });
       })
   );
 });
 
-// Fetch event to serve from cache
+// フェッチイベントで、キャッシュがあればキャッシュから返す
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
+        // キャッシュにヒットすれば、それを返す
         if (response) {
           return response;
         }
+        // キャッシュになければ、ネットワークからフェッチする
         return fetch(event.request);
       })
+  );
+});
+
+// 新しいService Workerが有効になったときに古いキャッシュを削除する
+self.addEventListener('activate', (event) => {
+  const cacheWhitelist = [CACHE_NAME];
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
   );
 });
