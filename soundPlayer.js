@@ -17,7 +17,7 @@ export class SoundPlayer {
       game_bgm: new Audio("./sound/game/game_bgm.wav"),
       gameover_bgm: new Audio("./sound/game/gameover_bgm.wav"),
       home_bgm: new Audio("./sound/game/home_bgm.wav"),
-      tree_fall: new Audio("./sound/game/木が倒れる音.wav"),
+      tree_fall: new Audio("./sound/game/tree_fall.wav"), // ファイル名を変更
     };
     
     // 各音量の設定 (localStorageから読み込んだ値を適用)
