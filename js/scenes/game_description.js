@@ -84,7 +84,7 @@ export class GameDescriptionScene {
 
         ctx.fillText('■ プレイヤー1（キャラクター操作）', startX, currentY);
         currentY += lineHeight;
-        ctx.fillText('   A: 左に移動,  D: 右に移動,  S: ジャンプ', startX, currentY);
+        ctx.fillText('   A: 左に移動,  D: 右に移動,  スペース: ジャンプ', startX, currentY);
         currentY += lineHeight * 1.6;
 
         ctx.fillText('■ プレイヤー2（おんがく・足場作り）', startX, currentY);
