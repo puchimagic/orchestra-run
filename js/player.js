@@ -57,7 +57,7 @@ export class Player {
     handleKeyDown(e) { this.keys[e.code] = true; }
     handleKeyUp(e) { this.keys[e.code] = false; }
 
-    update(platforms, walls) {
+    update(platforms, trees) {
         const useGamepadForPlayer = this.game.inputMethod === 'gamepad'; // 変更
         if (useGamepadForPlayer) {
             const gamepadXAxis = this.input.getGamepadAxis(0, 0);
@@ -90,21 +90,21 @@ export class Player {
             this.x = this.game.currentScene.stage.cameraX; // 左端に固定
         }
 
-        // 壁との衝突を予測して移動を制限
-        walls.forEach(wall => {
-            let cbox = { x: wall.x, width: wall.width };
-            if (wall.isBreakable) {
+        // 木との衝突を予測して移動を制限
+        trees.forEach(tree => {
+            let cbox = { x: tree.x, width: tree.width };
+            if (tree.isBreakable) {
                 cbox.width = STUMP_WIDTH_IN_BLOCKS * BLOCK_SIZE;
-                cbox.x = wall.x + (wall.width - cbox.width) / 2;
+                cbox.x = tree.x + (tree.width - cbox.width) / 2;
             }
 
-            // プレイヤーが壁とY軸方向で重なっているか
-            if (this.y < wall.y + wall.height && this.y + this.height > wall.y) {
-                // 右に移動しようとしていて、右側に壁がある場合
+            // プレイヤーが木とY軸方向で重なっているか
+            if (this.y < tree.y + tree.height && this.y + this.height > tree.y) {
+                // 右に移動しようとしていて、右側に木がある場合
                 if (this.vx > 0 && this.x + this.width + this.vx > cbox.x && this.x + this.width <= cbox.x) {
                     canMoveRight = false;
                 }
-                // 左に移動しようとしていて、左側に壁がある場合
+                // 左に移動しようとしていて、左側に木がある場合
                 if (this.vx < 0 && this.x + this.vx < cbox.x + cbox.width && this.x >= cbox.x + cbox.width) {
                     canMoveLeft = false;
                 }
@@ -125,29 +125,29 @@ export class Player {
         else if (this.vx < 0) this.facingDirection = -1;
         this.isMoving = this.vx !== 0;
 
-        // isCrushed の判定は、ステージ左端と右側の壁に挟まれた場合にのみ行う
-        let leftWallCollision = false;
-        let rightWallCollision = false;
+        // isCrushed の判定は、ステージ左端と右側の木に挟まれた場合にのみ行う
+        let leftTreeCollision = false;
+        let rightTreeCollision = false;
 
         // ステージ左端との衝突
         if (this.x <= this.game.currentScene.stage.cameraX) {
-            leftWallCollision = true;
+            leftTreeCollision = true;
         }
 
-        // 右側の壁との衝突
-        walls.forEach(wall => {
-            let cbox = { x: wall.x, width: wall.width };
-            if (wall.isBreakable) {
+        // 右側の木との衝突
+        trees.forEach(tree => {
+            let cbox = { x: tree.x, width: tree.width };
+            if (tree.isBreakable) {
                 cbox.width = STUMP_WIDTH_IN_BLOCKS * BLOCK_SIZE;
-                cbox.x = wall.x + (wall.width - cbox.width) / 2;
+                cbox.x = tree.x + (tree.width - cbox.width) / 2;
             }
             if (this.x + this.width > cbox.x && this.x < cbox.x + cbox.width &&
-                this.y < wall.y + wall.height && this.y + this.height > wall.y) {
-                rightWallCollision = true;
+                this.y < tree.y + tree.height && this.y + this.height > tree.y) {
+                rightTreeCollision = true;
             }
         });
 
-        if (leftWallCollision && rightWallCollision) {
+        if (leftTreeCollision && rightTreeCollision) {
             this.isCrushed = true;
             return;
         }
@@ -155,7 +155,7 @@ export class Player {
         this.vy += GRAVITY;
         this.y += this.vy;
         this.onGround = false;
-        const allGrounds = [...platforms, ...walls];
+        const allGrounds = [...platforms, ...trees];
         allGrounds.forEach(ground => {
             let cbox = { x: ground.x, width: ground.width };
             if (ground.isBreakable) { // ★木なら当たり判定を幹の幅に

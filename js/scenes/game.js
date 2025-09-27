@@ -4,7 +4,7 @@ import {
     INITIAL_SCROLL_SPEED, PLAYER_MAX_JUMP_IN_BLOCKS 
 } from '../config.js';
 import { Player } from '../player.js';
-import { Stage, Wall } from '../stage.js'; 
+import { Stage, Tree } from '../stage.js'; 
 import { ScaffoldBlock } from '../scaffold.js';
 import { InputHandler } from '../input_handler.js';
 import { SoundPlayer, soundPlayer } from '../../soundPlayer.js';
@@ -69,7 +69,7 @@ export class GameScene {
 
         this.stage = new Stage(this.game);
         this.scaffolds = [];
-        this.breakableWalls = new Map();
+        this.breakableTrees = new Map();
 
         this.stage.init();
         this.player = new Player(
@@ -168,9 +168,9 @@ export class GameScene {
         }
     }
 
-    requestWallBreakEvent(wall) {
+    requestTreeBreakEvent(tree) {
         const requiredKeys = this.generateRequiredKeys();
-        this.breakableWalls.set(wall, { requiredKeys });
+        this.breakableTrees.set(tree, { requiredKeys });
     }
 
     generateRequiredKeys() {
@@ -225,7 +225,7 @@ export class GameScene {
 
         const solidScaffolds = this.scaffolds.filter(s => s.state === 'SOLID');
         const allPlatforms = [...this.stage.platforms, ...solidScaffolds];
-        this.player.update(allPlatforms, this.stage.walls);
+        this.player.update(allPlatforms, this.stage.trees);
 
         this.scaffolds = this.scaffolds.filter(s => s.state !== 'EXPIRED' && s.x + s.width > this.stage.cameraX);
 
@@ -236,18 +236,18 @@ export class GameScene {
     handlePlayer2Input() {
         // ゲームパッドが選択されている場合は楽器演奏を行わない
         if (this.game.inputMethod === 'gamepad') {
-            // ただし、足場生成や壁破壊のロジックは引き続き実行する
+            // ただし、足場生成や木破壊のロジックは引き続き実行する
             // 楽器音を鳴らす部分だけをスキップする
             const activeScaffolds = this.scaffolds.filter(s => 
                 s.state === 'ACTIVE' && 
                 s.x < this.stage.cameraX + this.game.canvas.width && 
                 s.x + s.width > this.stage.cameraX
             );
-            const activeWalls = Array.from(this.breakableWalls.keys()).filter(w => 
-                w.x < this.stage.cameraX + this.game.canvas.width && 
-                w.x + w.width > this.stage.cameraX
+            const activeTrees = Array.from(this.breakableTrees.keys()).filter(t => 
+                t.x < this.stage.cameraX + this.game.canvas.width && 
+                t.x + t.width > this.stage.cameraX
             );
-            const allInteractiveObjects = [...activeScaffolds, ...activeWalls];
+            const allInteractiveObjects = [...activeScaffolds, ...activeTrees];
     
             if (allInteractiveObjects.length === 0) return;
     
@@ -293,9 +293,9 @@ export class GameScene {
                     // ゲームパッド選択時は楽器音を鳴らさない
                 }
             }
-            else if (target instanceof Wall) {
-                const wallData = this.breakableWalls.get(target);
-                const requiredActions = wallData.requiredKeys.map(key => `ACTION_${key}`);
+            else if (target instanceof Tree) {
+                const treeData = this.breakableTrees.get(target);
+                const requiredActions = treeData.requiredKeys.map(key => `ACTION_${key}`);
     
                 let isPerfectMatch = true;
                 const requiredPhysicalKeys = new Set();
@@ -332,7 +332,7 @@ export class GameScene {
                 ) {
                     this.stage.spawnFallingTreeAnimation(target);
                     target.break();
-                    this.breakableWalls.delete(target);
+                    this.breakableTrees.delete(target);
                 }
             }
             return; // ゲームパッド選択時は楽器音を鳴らさないため、ここで処理を終了
@@ -344,11 +344,11 @@ export class GameScene {
             s.x < this.stage.cameraX + this.game.canvas.width && 
             s.x + s.width > this.stage.cameraX
         );
-        const activeWalls = Array.from(this.breakableWalls.keys()).filter(w => 
-            w.x < this.stage.cameraX + this.game.canvas.width && 
-            w.x + w.width > this.stage.cameraX
+        const activeTrees = Array.from(this.breakableTrees.keys()).filter(t => 
+            t.x < this.stage.cameraX + this.game.canvas.width && 
+            t.x + t.width > this.stage.cameraX
         );
-        const allInteractiveObjects = [...activeScaffolds, ...activeWalls];
+        const allInteractiveObjects = [...activeScaffolds, ...activeTrees];
 
         if (allInteractiveObjects.length === 0) return;
 
@@ -441,9 +441,9 @@ export class GameScene {
                 }
             }
         }
-        else if (target instanceof Wall) {
-            const wallData = this.breakableWalls.get(target);
-            const requiredActions = wallData.requiredKeys.map(key => `ACTION_${key}`);
+        else if (target instanceof Tree) {
+            const treeData = this.breakableTrees.get(target);
+            const requiredActions = treeData.requiredKeys.map(key => `ACTION_${key}`);
 
             let isPerfectMatch = true;
             const requiredPhysicalKeys = new Set();
@@ -480,7 +480,7 @@ export class GameScene {
             ) {
                 this.stage.spawnFallingTreeAnimation(target);
                 target.break();
-                this.breakableWalls.delete(target);
+                this.breakableTrees.delete(target);
             }
         }
     }
@@ -533,7 +533,7 @@ export class GameScene {
         this.player.draw(ctx);
         this.scaffolds.forEach(s => s.draw(ctx));
 
-        this.breakableWalls.forEach((data, wall) => {
+        this.breakableTrees.forEach((data, tree) => {
             const keyText = data.requiredKeys.join(' + ');
             ctx.font = `${BLOCK_SIZE}px ${FONT_FAMILY}`;
             ctx.textAlign = 'center';
@@ -542,10 +542,10 @@ export class GameScene {
             // テキストに黒い縁取りを追加
             ctx.strokeStyle = 'black';
             ctx.lineWidth = 4;
-            ctx.strokeText(keyText, wall.x + wall.width / 2, wall.y + wall.height / 2);
+            ctx.strokeText(keyText, tree.x + tree.width / 2, tree.y + tree.height / 2);
             
             ctx.fillStyle = 'white';
-            ctx.fillText(keyText, wall.x + wall.width / 2, wall.y + wall.height / 2);
+            ctx.fillText(keyText, tree.x + tree.width / 2, tree.y + tree.height / 2);
         });
 
         ctx.restore();
@@ -575,7 +575,8 @@ export class GameScene {
                 ctx.fillText(this.countdownNumber, width / 2, height / 2);
             }
             else if (this.countdownNumber === 0) {
-                ctx.font = `96px ${FONT_FAMILY}`;                ctx.fillText("Start!", width / 2, height / 2);
+                ctx.font = `96px ${FONT_FAMILY}`;
+                ctx.fillText("Start!", width / 2, height / 2);
             }
         }
     }

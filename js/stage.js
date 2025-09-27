@@ -93,7 +93,7 @@ class TemporaryAnimation {
     }
 }
 
-export class Wall {
+export class Tree {
     constructor(x, y, width, height, image, isBreakable = false, stumpImage = null) {
         this.x = x;
         this.y = y;
@@ -198,7 +198,7 @@ export class Stage {
         this.elapsedTimeInSeconds = 0;
         this.cameraX = 0;
         this.platforms = [];
-        this.walls = [];
+        this.trees = [];
         this.enemies = [];
         this.animations = [];
         this.lastPlatformX = -50;
@@ -211,8 +211,8 @@ export class Stage {
 
     setScrollSpeed(speed) { this.scrollSpeed = speed; }
 
-    spawnFallingTreeAnimation(originalWall) {
-        const anim = new TemporaryAnimation(originalWall.x, originalWall.y, originalWall.width, originalWall.height, this.treeFallImages, 0.15);
+    spawnFallingTreeAnimation(originalTree) {
+        const anim = new TemporaryAnimation(originalTree.x, originalTree.y, originalTree.width, originalTree.height, this.treeFallImages, 0.15);
         this.animations.push(anim);
     }
 
@@ -223,28 +223,28 @@ export class Stage {
 
         if (widthInBlocks > 8 && Math.random() < 0.8) {
             const t = this.elapsedTimeInSeconds;
-            const wallThreshold = 0.45;
+            const treeThreshold = 0.45;
             const enemyChance = Math.min(0.8, 0.45 + (t / 150));
             const obstacleType = Math.random();
 
-            if (obstacleType < wallThreshold) {
-                const isHighWall = Math.random() < 0.5;
-                if (isHighWall) {
-                    const wallHeight = BLOCK_SIZE * 11;
+            if (obstacleType < treeThreshold) {
+                const isHighTree = Math.random() < 0.5;
+                if (isHighTree) {
+                    const treeHeight = BLOCK_SIZE * 11;
                     const aspectRatio = 0.8;
-                    const wallWidth = wallHeight * aspectRatio;
-                    const wallX = (x + platform.width / 2) - (wallWidth / 2);
-                    const wall = new Wall(wallX, y - wallHeight, wallWidth, wallHeight, this.treeImage, true, this.stumpImage);
-                    this.walls.push(wall);
-                    this.game.currentScene.requestWallBreakEvent(wall);
+                    const treeWidth = treeHeight * aspectRatio;
+                    const treeX = (x + platform.width / 2) - (treeWidth / 2);
+                    const tree = new Tree(treeX, y - treeHeight, treeWidth, treeHeight, this.treeImage, true, this.stumpImage);
+                    this.trees.push(tree);
+                    this.game.currentScene.requestTreeBreakEvent(tree);
                 } else {
-                    const wallHeight = BLOCK_SIZE * STUMP_HEIGHT_IN_BLOCKS;
-                    const wallWidth = BLOCK_SIZE * STUMP_WIDTH_IN_BLOCKS;
-                    const wallX = (x + platform.width / 2) - (wallWidth / 2);
-                    const wall = new Wall(wallX, y - wallHeight, wallWidth, wallHeight, this.stumpImage, false, this.stumpImage);
-                    this.walls.push(wall);
+                    const treeHeight = BLOCK_SIZE * STUMP_HEIGHT_IN_BLOCKS;
+                    const treeWidth = BLOCK_SIZE * STUMP_WIDTH_IN_BLOCKS;
+                    const treeX = (x + platform.width / 2) - (treeWidth / 2);
+                    const tree = new Tree(treeX, y - treeHeight, treeWidth, treeHeight, this.stumpImage, false, this.stumpImage);
+                    this.trees.push(tree);
                 }
-            } else if (obstacleType < wallThreshold + enemyChance) {
+            } else if (obstacleType < treeThreshold + enemyChance) {
                 const enemy = new Enemy(x + platform.width / 2, y - BLOCK_SIZE * 1.5, platform.width / 4, this.enemyImage);
                 this.enemies.push(enemy);
             }
@@ -271,7 +271,7 @@ export class Stage {
             this.generateNext();
         }
         this.platforms = this.platforms.filter(p => p.x + p.width > this.cameraX);
-        this.walls = this.walls.filter(w => w.x + w.width > this.cameraX);
+        this.trees = this.trees.filter(t => t.x + t.width > this.cameraX);
         this.enemies = this.enemies.filter(e => e.x + e.width > this.cameraX);
         this.enemies.forEach(e => e.update());
 
@@ -286,7 +286,7 @@ export class Stage {
         // 倒れた木のアニメーションを先に描画する
         this.animations.forEach(a => a.draw(ctx));
 
-        // その後に壁（切り株を含む）を描画する
-        this.walls.forEach(w => w.draw(ctx));
+        // その後に木（切り株を含む）を描画する
+        this.trees.forEach(t => t.draw(ctx));
     }
 }
