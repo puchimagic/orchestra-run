@@ -11,7 +11,8 @@ export class VolumeSlider {
         this.setterFunction = setterFunction;
 
         this.isDragging = false;
-        this.thumbRadius = height / 2; // つまみの半径
+        // つまみの半径を少し大きくして視認性を向上
+        this.thumbRadius = height * 0.8;
     }
 
     draw(ctx) {
@@ -39,24 +40,26 @@ export class VolumeSlider {
         ctx.font = `24px ${FONT_FAMILY}`;
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
-        ctx.fillText(this.label, this.x, this.y - 15); // スライダーの上にラベル
+        ctx.fillText(this.label, this.x, this.y - 20); // ラベルの位置を少し上に
 
         ctx.textAlign = 'right';
-        ctx.fillText(`${(this.value * 100).toFixed(0)}%`, this.x + this.width, this.y - 15); // スライダーの上に値
+        ctx.fillText(`${(this.value * 100).toFixed(0)}%`, this.x + this.width, this.y - 20); // 値の位置を少し上に
     }
 
-    // マウスがスライダーのつまみの上にあるか
+    // マウスがスライダーのつまみの上にあるか（当たり判定を拡大）
     isMouseOverThumb(mouseX, mouseY) {
         const thumbX = this.x + this.width * this.value;
         const thumbY = this.y + this.height / 2;
+        // 見た目の半径(this.thumbRadius)より当たり判定を2.5倍に拡大
+        const hitboxRadius = this.thumbRadius * 2.5;
         const distance = Math.sqrt(Math.pow(mouseX - thumbX, 2) + Math.pow(mouseY - thumbY, 2));
-        return distance < this.thumbRadius;
+        return distance < hitboxRadius;
     }
 
     // マウスがスライダーのバーの上にあるか
     isMouseOverBar(mouseX, mouseY) {
         return mouseX >= this.x && mouseX <= this.x + this.width &&
-               mouseY >= this.y + this.height / 4 && mouseY <= this.y + this.height * 3 / 4;
+               mouseY >= this.y && mouseY <= this.y + this.height;
     }
 
     handleMouseDown(mouseX, mouseY) {
@@ -81,8 +84,7 @@ export class VolumeSlider {
     updateValueFromMouse(mouseX) {
         let newValue = (mouseX - this.x) / this.width;
         newValue = Math.max(0, Math.min(1, newValue)); // 0から1の範囲にクランプ
-        // newValue = Math.round(newValue * 100) / 100; // ★削除
-        this.value = newValue; // ★条件を削除し、常に更新
+        this.value = newValue;
         this.setterFunction(this.value);
     }
 }
