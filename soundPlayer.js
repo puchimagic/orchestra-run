@@ -1,9 +1,14 @@
 export class SoundPlayer {
   constructor() {
     // localStorageから音量設定を読み込むか、デフォルト値を設定
-    this.bgmVolume = parseFloat(localStorage.getItem('bgmVolume')) || 0.5;
-    this.instrumentVolume = parseFloat(localStorage.getItem('instrumentVolume')) || 1.0;
-    this.gameSoundVolume = parseFloat(localStorage.getItem('gameSoundVolume')) || 0.7;
+    const storedBgmVolume = localStorage.getItem('bgmVolume');
+    this.bgmVolume = storedBgmVolume !== null ? parseFloat(storedBgmVolume) : 0.5;
+
+    const storedInstrumentVolume = localStorage.getItem('instrumentVolume');
+    this.instrumentVolume = storedInstrumentVolume !== null ? parseFloat(storedInstrumentVolume) : 1.0;
+
+    const storedGameSoundVolume = localStorage.getItem('gameSoundVolume');
+    this.gameSoundVolume = storedGameSoundVolume !== null ? parseFloat(storedGameSoundVolume) : 0.7;
 
     this.gameSounds = {
       jump: new Audio("./sound/game/track01.wav"),
