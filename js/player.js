@@ -58,13 +58,14 @@ export class Player {
     handleKeyUp(e) { this.keys[e.code] = false; }
 
     update(platforms, walls) {
-        const useGamepadForPlayer = this.game.isGamepadConnectedAtStart;
+        const useGamepadForPlayer = this.game.inputMethod === 'gamepad'; // 変更
         if (useGamepadForPlayer) {
             const gamepadXAxis = this.input.getGamepadAxis(0, 0);
             this.vx = gamepadXAxis !== 0 ? MOVE_SPEED * gamepadXAxis : 0;
             if (this.input.isGamepadButtonPressed(0, 3) && this.onGround) {
                 this.vy = -JUMP_POWER;
                 this.onGround = false;
+                soundPlayer.playGameSound("jump"); // 変更
             }
         }
         else {

@@ -87,7 +87,7 @@ export class MainScene {
         this.startButton = new Button(leftColX, cy - btnHeight - gapY / 2, btnWidth, btnHeight, 'ゲームスタート');
         this.descButton = new Button(leftColX, cy + gapY / 2, btnWidth, btnHeight, 'あそびかた');
         this.rankingButton = new Button(rightColX, cy - btnHeight - gapY / 2, btnWidth, btnHeight, 'ランキング');
-        this.volumeSettingsButton = new Button(rightColX, cy + gapY / 2, btnWidth, btnHeight, '音量設定');
+        this.settingsButton = new Button(rightColX, cy + gapY / 2, btnWidth, btnHeight, '設定');
     }
 
     update() {
@@ -105,7 +105,7 @@ export class MainScene {
         if (this.startButton.update(this.game.mouse)) this.game.changeScene(SCENE.INSTRUMENT_SELECT);
         if (this.rankingButton.update(this.game.mouse)) this.game.changeScene(SCENE.RANKING);
         if (this.descButton.update(this.game.mouse)) this.game.changeScene(SCENE.GAME_DESCRIPTION);
-        if (this.volumeSettingsButton.update(this.game.mouse)) this.game.changeScene(SCENE.VOLUME_SETTINGS);
+        if (this.settingsButton.update(this.game.mouse)) this.game.changeScene(SCENE.SETTINGS);
     }
 
     draw() {
@@ -127,7 +127,7 @@ export class MainScene {
         this.startButton.draw(ctx);
         this.rankingButton.draw(ctx);
         this.descButton.draw(ctx);
-        this.volumeSettingsButton.draw(ctx);
+        this.settingsButton.draw(ctx);
 
         if (!this.game.isGameActive) {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
@@ -136,11 +136,6 @@ export class MainScene {
             ctx.font = `${FONT_SIZE.MEDIUM}px ${FONT_FAMILY}`;
             ctx.textAlign = 'center';
             ctx.fillText(this.promptMessage, width / 2, height / 2 + 150);
-        }
-
-        if (this.inputHandler.isGamepadConnected()) {
-            ctx.fillStyle = 'green'; ctx.font = `${FONT_SIZE.SMALL / 2}px ${FONT_FAMILY}`; ctx.textAlign = 'right';
-            ctx.fillText('コントローラー接続済み', width - 20, height - 20);
         }
     }
 }

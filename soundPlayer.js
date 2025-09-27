@@ -11,9 +11,9 @@ export class SoundPlayer {
     this.gameSoundVolume = storedGameSoundVolume !== null ? parseFloat(storedGameSoundVolume) : 0.7;
 
     this.gameSounds = {
-      jump: new Audio("./sound/game/track01.wav"),
-      score: new Audio("./sound/game/track02.wav"),
-      gameOver: new Audio("./sound/game/track03.wav"),
+      jump: new Audio("./sound/game/jump.wav"), // ファイル名を変更
+      score: new Audio("./sound/game/click.wav"), // ファイル名を変更
+      gameOver: new Audio("./sound/game/gameOver.wav"), // ファイル名を変更
       game_bgm: new Audio("./sound/game/game_bgm.wav"),
       gameover_bgm: new Audio("./sound/game/gameover_bgm.wav"),
       home_bgm: new Audio("./sound/game/home_bgm.wav"),

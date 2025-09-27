@@ -5,7 +5,7 @@ import { RankingScene } from './scenes/ranking.js';
 import { InstrumentSelectScene } from './scenes/instrument_select.js';
 import { GameScene } from './scenes/game.js';
 import { GameOverScene } from './scenes/game_over.js';
-import { VolumeSettingsScene } from './scenes/volume_settings.js';
+import { SettingsScene } from './scenes/settings.js'; // VolumeSettingsScene を SettingsScene に変更
 import { ScoreManager } from './score_manager.js';
 import { InputHandler } from './input_handler.js';
 import { soundPlayer } from '../soundPlayer.js';
@@ -15,7 +15,7 @@ const SCENE_BGM_MAP = {
     [SCENE.INSTRUMENT_SELECT]: 'home_bgm',
     [SCENE.RANKING]: 'home_bgm',
     [SCENE.GAME_DESCRIPTION]: 'home_bgm',
-    [SCENE.VOLUME_SETTINGS]: 'home_bgm',
+    [SCENE.SETTINGS]: 'home_bgm', // VOLUME_SETTINGS を SETTINGS に変更
     [SCENE.GAME]: 'game_bgm',
     [SCENE.GAME_OVER]: 'gameover_bgm',
 };
@@ -38,13 +38,46 @@ class Game {
 
         this.scoreManager = new ScoreManager();
         this.selectedInstrument = null;
-        this.isGamepadConnectedAtStart = false;
+        this.inputMethod = 'keyboard'; // 追加
+
+        this.loadSettings(); // 追加
 
         window.addEventListener('resize', () => this.resizeCanvas());
         this.resizeCanvas();
 
         this.init();
         this.setupMouseHandlers();
+    }
+
+    // 追加: 設定の読み込み
+    loadSettings() {
+        try {
+            const settings = JSON.parse(localStorage.getItem('okerun-settings'));
+            if (settings) {
+                this.inputMethod = settings.inputMethod || 'keyboard';
+                soundPlayer.setBgmVolume(settings.bgmVolume !== undefined ? settings.bgmVolume : 0.5);
+                soundPlayer.setInstrumentVolume(settings.instrumentVolume !== undefined ? settings.instrumentVolume : 1.0);
+                soundPlayer.setGameSoundVolume(settings.gameSoundVolume !== undefined ? settings.gameSoundVolume : 0.7);
+            }
+        } catch (e) {
+            console.error('Failed to load settings:', e);
+            this.inputMethod = 'keyboard';
+        }
+    }
+
+    // 追加: 設定の保存
+    saveSettings() {
+        try {
+            const settings = {
+                inputMethod: this.inputMethod,
+                bgmVolume: soundPlayer.bgmVolume,
+                instrumentVolume: soundPlayer.instrumentVolume,
+                gameSoundVolume: soundPlayer.gameSoundVolume,
+            };
+            localStorage.setItem('okerun-settings', JSON.stringify(settings));
+        } catch (e) {
+            console.error('Failed to save settings:', e);
+        }
     }
 
     resizeCanvas() {
@@ -100,7 +133,7 @@ class Game {
         this.scenes[SCENE.RANKING] = new RankingScene(this);
         this.scenes[SCENE.INSTRUMENT_SELECT] = new InstrumentSelectScene(this);
         this.scenes[SCENE.GAME_OVER] = new GameOverScene(this);
-        this.scenes[SCENE.VOLUME_SETTINGS] = new VolumeSettingsScene(this);
+        this.scenes[SCENE.SETTINGS] = new SettingsScene(this); // VOLUME_SETTINGS を SETTINGS に変更
         
         this.changeScene(SCENE.MAIN);
         this.gameLoop();

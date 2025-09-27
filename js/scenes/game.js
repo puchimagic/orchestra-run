@@ -50,11 +50,11 @@ export class GameScene {
     init(data) {
         this.instrumentName = this.selectedInstrument || 'トライアングル';
         
-        const useGamepadForScaffold = this.game.isGamepadConnectedAtStart;
+        const useGamepadForScaffold = this.game.inputMethod === 'gamepad'; // 変更
         this.player2Input.setInstrumentKeyMaps(
             KEYBOARD_INSTRUMENT_CONFIG, 
-            GAMEPAD_INSTRUMENT_CONFIG, // ここは常に両方の設定を渡す
-            useGamepadForScaffold // ★fixedConnectedStatusとして渡す
+            GAMEPAD_INSTRUMENT_CONFIG, 
+            useGamepadForScaffold 
         );
 
         // activeInstrumentConfigも同様に固定
@@ -234,6 +234,111 @@ export class GameScene {
     }
 
     handlePlayer2Input() {
+        // ゲームパッドが選択されている場合は楽器演奏を行わない
+        if (this.game.inputMethod === 'gamepad') {
+            // ただし、足場生成や壁破壊のロジックは引き続き実行する
+            // 楽器音を鳴らす部分だけをスキップする
+            const activeScaffolds = this.scaffolds.filter(s => 
+                s.state === 'ACTIVE' && 
+                s.x < this.stage.cameraX + this.game.canvas.width && 
+                s.x + s.width > this.stage.cameraX
+            );
+            const activeWalls = Array.from(this.breakableWalls.keys()).filter(w => 
+                w.x < this.stage.cameraX + this.game.canvas.width && 
+                w.x + w.width > this.stage.cameraX
+            );
+            const allInteractiveObjects = [...activeScaffolds, ...activeWalls];
+    
+            if (allInteractiveObjects.length === 0) return;
+    
+            const target = allInteractiveObjects.reduce((prev, curr) => prev.x < curr.x ? prev : curr);
+    
+            if (target instanceof ScaffoldBlock) {
+                const requiredActions = target.requiredKeys.map(key => `ACTION_${key}`);
+                
+                let isPerfectMatch = true;
+                const requiredPhysicalKeys = new Set();
+                requiredActions.forEach(action => {
+                    const physicalKey = this.player2Input.actionMap[action];
+                    if (physicalKey) {
+                        requiredPhysicalKeys.add(physicalKey);
+                    }
+                });
+    
+                const instrumentPhysicalKeys = this.player2Input.getInstrumentPhysicalKeys();
+    
+                const currentlyPressedInstrumentKeys = new Set();
+                for (const pressedKey of this.player2Input.pressedKeys) {
+                    if (instrumentPhysicalKeys.has(pressedKey)) {
+                        currentlyPressedInstrumentKeys.add(pressedKey);
+                    }
+                }
+    
+                if (currentlyPressedInstrumentKeys.size !== requiredPhysicalKeys.size) {
+                    isPerfectMatch = false;
+                } else {
+                    for (const requiredKey of requiredPhysicalKeys) {
+                        if (!currentlyPressedInstrumentKeys.has(requiredKey)) {
+                            isPerfectMatch = false;
+                            break;
+                        }
+                    }
+                }
+    
+                if (requiredActions.every(action => this.player2Input.isActionDown(action)) && 
+                    requiredActions.some(action => this.player2Input.isActionPressed(action)) &&
+                    isPerfectMatch
+                ) {
+                    target.solidify();
+                    // ゲームパッド選択時は楽器音を鳴らさない
+                }
+            }
+            else if (target instanceof Wall) {
+                const wallData = this.breakableWalls.get(target);
+                const requiredActions = wallData.requiredKeys.map(key => `ACTION_${key}`);
+    
+                let isPerfectMatch = true;
+                const requiredPhysicalKeys = new Set();
+                requiredActions.forEach(action => {
+                    const physicalKey = this.player2Input.actionMap[action];
+                    if (physicalKey) {
+                        requiredPhysicalKeys.add(physicalKey);
+                    }
+                });
+    
+                const instrumentPhysicalKeys = this.player2Input.getInstrumentPhysicalKeys();
+    
+                const currentlyPressedInstrumentKeys = new Set();
+                for (const pressedKey of this.player2Input.pressedKeys) {
+                    if (instrumentPhysicalKeys.has(pressedKey)) {
+                        currentlyPressedInstrumentKeys.add(pressedKey);
+                    }
+                }
+    
+                if (currentlyPressedInstrumentKeys.size !== requiredPhysicalKeys.size) {
+                    isPerfectMatch = false;
+                } else {
+                    for (const requiredKey of requiredPhysicalKeys) {
+                        if (!currentlyPressedInstrumentKeys.has(requiredKey)) {
+                            isPerfectMatch = false;
+                            break;
+                        }
+                    }
+                }
+    
+                if (requiredActions.every(action => this.player2Input.isActionDown(action)) && 
+                    requiredActions.some(action => this.player2Input.isActionPressed(action)) &&
+                    isPerfectMatch
+                ) {
+                    this.stage.spawnFallingTreeAnimation(target);
+                    target.break();
+                    this.breakableWalls.delete(target);
+                }
+            }
+            return; // ゲームパッド選択時は楽器音を鳴らさないため、ここで処理を終了
+        }
+
+        // キーボード選択時、またはゲームパッド選択時でも楽器音以外の処理は続行
         const activeScaffolds = this.scaffolds.filter(s => 
             s.state === 'ACTIVE' && 
             s.x < this.stage.cameraX + this.game.canvas.width && 
@@ -261,9 +366,8 @@ export class GameScene {
                 }
             });
 
-            const instrumentPhysicalKeys = this.player2Input.getInstrumentPhysicalKeys(); // 楽器のアクションキーに対応する物理キーを取得
+            const instrumentPhysicalKeys = this.player2Input.getInstrumentPhysicalKeys();
 
-            // 押されているキーの中で、楽器のアクションキーに対応するものだけをフィルタリング
             const currentlyPressedInstrumentKeys = new Set();
             for (const pressedKey of this.player2Input.pressedKeys) {
                 if (instrumentPhysicalKeys.has(pressedKey)) {
@@ -271,11 +375,9 @@ export class GameScene {
                 }
             }
 
-            // 押されている楽器キーの数がrequiredPhysicalKeysの数と一致しない場合
             if (currentlyPressedInstrumentKeys.size !== requiredPhysicalKeys.size) {
                 isPerfectMatch = false;
             } else {
-                // 押されている楽器キーがrequiredPhysicalKeysと完全に一致するかチェック
                 for (const requiredKey of requiredPhysicalKeys) {
                     if (!currentlyPressedInstrumentKeys.has(requiredKey)) {
                         isPerfectMatch = false;
@@ -291,7 +393,6 @@ export class GameScene {
                 target.solidify();
                 // 足場が生成されたときに音を鳴らす
                 if (this.instrumentName === 'ピアノ') {
-                    // ピアノの連番処理
                     const availableTracks = KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName].keys.length;
                     const numSoundsToPlay = requiredActions.length;
                     if (availableTracks >= numSoundsToPlay) {
@@ -305,9 +406,8 @@ export class GameScene {
                     }
                     else {
                         console.warn(`Not enough piano tracks for ${numSoundsToPlay} required actions.`);
-                        // 利用可能なトラック数でループ再生するなどの代替案も検討可能
                         for (let i = 0; i < numSoundsToPlay; i++) {
-                            const trackNumber = (startIndex + i) % availableTracks + 1; // ループ再生
+                            const trackNumber = (startIndex + i) % availableTracks + 1;
                             const soundName = `${this.instrumentDirName}_track${trackNumber}`;
                             console.log(`Attempting to play piano sound (looped): ${soundName}`);
                             this.instrumentSoundPlayer.playSound(soundName);
@@ -315,10 +415,8 @@ export class GameScene {
                     }
                 }
                 else if (this.instrumentName === 'ギター') {
-                    // ギターの同時押し数に応じた処理
-                    const numPressedKeys = requiredActions.length; // これは2から5の範囲
-                    // 音源のトラック番号は0から3の範囲でランダムに決定 (track01からtrack04に対応)
-                    const trackNumber = Math.floor(Math.random() * KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName].maxChord); // maxChordは4なので、0, 1, 2, 3
+                    const numPressedKeys = requiredActions.length;
+                    const trackNumber = Math.floor(Math.random() * KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName].maxChord);
                     
                     if (trackNumber >= 0 && trackNumber < KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName].maxChord) {
                         const soundName = `${this.instrumentDirName}_track${trackNumber + 1}`;
@@ -330,7 +428,6 @@ export class GameScene {
                     }
                 }
                 else {
-                    // その他の楽器の処理 (既存のロジック)
                     requiredActions.forEach(action => {
                         const key = action.replace('ACTION_', '');
                         const instrumentConfig = KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName];
@@ -357,9 +454,8 @@ export class GameScene {
                 }
             });
 
-            const instrumentPhysicalKeys = this.player2Input.getInstrumentPhysicalKeys(); // 楽器のアクションキーに対応する物理キーを取得
+            const instrumentPhysicalKeys = this.player2Input.getInstrumentPhysicalKeys();
 
-            // 押されているキーの中で、楽器のアクションキーに対応するものだけをフィルタリング
             const currentlyPressedInstrumentKeys = new Set();
             for (const pressedKey of this.player2Input.pressedKeys) {
                 if (instrumentPhysicalKeys.has(pressedKey)) {
@@ -367,11 +463,9 @@ export class GameScene {
                 }
             }
 
-            // 押されている楽器キーの数がrequiredPhysicalKeysの数と一致しない場合
             if (currentlyPressedInstrumentKeys.size !== requiredPhysicalKeys.size) {
                 isPerfectMatch = false;
             } else {
-                // 押されている楽器キーがrequiredPhysicalKeysと完全に一致するかチェック
                 for (const requiredKey of requiredPhysicalKeys) {
                     if (!currentlyPressedInstrumentKeys.has(requiredKey)) {
                         isPerfectMatch = false;
@@ -384,8 +478,8 @@ export class GameScene {
                 requiredActions.some(action => this.player2Input.isActionPressed(action)) &&
                 isPerfectMatch
             ) {
-                this.stage.spawnFallingTreeAnimation(target); // ★先にアニメーションを生成
-                target.break(); // ★その後に当たり判定を切り株に変化させる
+                this.stage.spawnFallingTreeAnimation(target);
+                target.break();
                 this.breakableWalls.delete(target);
             }
         }
@@ -481,8 +575,7 @@ export class GameScene {
                 ctx.fillText(this.countdownNumber, width / 2, height / 2);
             }
             else if (this.countdownNumber === 0) {
-                ctx.font = `96px ${FONT_FAMILY}`;
-                ctx.fillText("Start!", width / 2, height / 2);
+                ctx.font = `96px ${FONT_FAMILY}`;                ctx.fillText("Start!", width / 2, height / 2);
             }
         }
     }
