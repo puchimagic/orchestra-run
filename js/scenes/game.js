@@ -1,7 +1,9 @@
 import { 
     SCENE, FONT_SIZE, FONT_FAMILY, BLOCK_SIZE, PLATFORM_HEIGHT_IN_BLOCKS, 
     KEYBOARD_INSTRUMENT_CONFIG, GAMEPAD_INSTRUMENT_CONFIG, 
-    INITIAL_SCROLL_SPEED, PLAYER_MAX_JUMP_IN_BLOCKS 
+    INITIAL_SCROLL_SPEED, PLAYER_MAX_JUMP_IN_BLOCKS, 
+    TREE_TEXT_COLOR, TREE_TEXT_STROKE_COLOR, TREE_TEXT_STROKE_WIDTH, 
+    TREE_TEXT_BACKGROUND_COLOR, TREE_TEXT_BACKGROUND_PADDING 
 } from '../config.js';
 import { Player } from '../player.js';
 import { Stage, Tree } from '../stage.js'; 
@@ -539,12 +541,27 @@ export class GameScene {
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
 
+            // テキストの幅と高さを測定
+            const textMetrics = ctx.measureText(keyText);
+            const textWidth = textMetrics.width;
+            const textHeight = BLOCK_SIZE; // フォントサイズと同じくらいと仮定
+
+            const padding = TREE_TEXT_BACKGROUND_PADDING; // configから取得
+            const bgX = tree.x + tree.width / 2 - textWidth / 2 - padding;
+            const bgY = tree.y + tree.height / 2 - textHeight / 2 - padding;
+            const bgWidth = textWidth + padding * 2;
+            const bgHeight = textHeight + padding * 2;
+
+            // 黒い背景を描画
+            ctx.fillStyle = TREE_TEXT_BACKGROUND_COLOR; // configから取得
+            ctx.fillRect(bgX, bgY, bgWidth, bgHeight);
+
             // テキストに黒い縁取りを追加
-            ctx.strokeStyle = 'black';
-            ctx.lineWidth = 4;
+            ctx.strokeStyle = TREE_TEXT_STROKE_COLOR; // configから取得
+            ctx.lineWidth = TREE_TEXT_STROKE_WIDTH; // configから取得
             ctx.strokeText(keyText, tree.x + tree.width / 2, tree.y + tree.height / 2);
             
-            ctx.fillStyle = 'white';
+            ctx.fillStyle = TREE_TEXT_COLOR; // configから取得
             ctx.fillText(keyText, tree.x + tree.width / 2, tree.y + tree.height / 2);
         });
 

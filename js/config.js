@@ -33,6 +33,22 @@ export const SELECTED_BUTTON_HOVER_COLOR = '#555';
 export const DEFAULT_BUTTON_COLOR = '#888';
 export const DEFAULT_BUTTON_HOVER_COLOR = '#aaa';
 
+// 足場ブロックの描画設定
+export const SCAFFOLD_ACTIVE_STROKE_COLOR = '#f0ad4e'; // アクティブな足場の枠線の色 (現在 #f0ad4e)
+export const SCAFFOLD_ACTIVE_LINE_WIDTH = 5; // アクティブな足場の枠線の太さ (現在 5)
+export const SCAFFOLD_ACTIVE_TEXT_COLOR = '#f0ad4e'; // アクティブな足場のキーテキストの色 (現在 #f0ad4e)
+export const SCAFFOLD_ACTIVE_TEXT_STROKE_COLOR = 'black'; // アクティブな足場のキーテキストの縁取りの色 (現在 black)
+export const SCAFFOLD_ACTIVE_TEXT_STROKE_WIDTH = 4; // アクティブな足場のキーテキストの縁取りの太さ (現在 4)
+export const SCAFFOLD_SOLID_FILL_COLOR_FALLBACK = '#f0ad4e'; // 固まった足場の画像がない場合の塗りつぶし色 (現在 #f0ad4e)
+
+// 木のテキストの描画設定
+export const TREE_TEXT_COLOR = 'white'; // 木に表示されるキーテキストの色 (現在 white)
+export const TREE_TEXT_STROKE_COLOR = 'black'; // 木に表示されるキーテキストの縁取りの色 (現在 black)
+export const TREE_TEXT_STROKE_WIDTH = 4; // 木に表示されるキーテキストの縁取りの太さ (現在 4)
+export const TREE_TEXT_BACKGROUND_COLOR = 'rgba(0, 0, 0, 0.7)'; // 木に表示されるキーテキストの背景色 (現在 rgba(0, 0, 0, 0.7))
+export const TREE_TEXT_BACKGROUND_PADDING = 10; // 木に表示されるキーテキストの背景のパディング (現在 10)
+
+
 export const KEYBOARD_INSTRUMENT_CONFIG = {
     'トライアングル': { name: 'トライアングル', keys: ['U'], maxChord: 1, multiplier: 1.0 },
     'タンバリン':   { name: 'タンバリン',   keys: ['U', 'I'], maxChord: 1, multiplier: 1.1 },

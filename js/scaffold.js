@@ -1,4 +1,4 @@
-import { FONT_FAMILY, BLOCK_SIZE } from './config.js';
+import { FONT_FAMILY, BLOCK_SIZE, SCAFFOLD_ACTIVE_STROKE_COLOR, SCAFFOLD_ACTIVE_LINE_WIDTH, SCAFFOLD_ACTIVE_TEXT_COLOR, SCAFFOLD_ACTIVE_TEXT_STROKE_COLOR, SCAFFOLD_ACTIVE_TEXT_STROKE_WIDTH, SCAFFOLD_SOLID_FILL_COLOR_FALLBACK } from './config.js';
 
 const SOLID_DURATION = 5000;
 const scaffoldImage = new Image();
@@ -35,16 +35,23 @@ export class ScaffoldBlock {
         if (this.state === 'EXPIRED') return;
 
         if (this.state === 'ACTIVE') {
-            ctx.strokeStyle = '#f0ad4e';
-            ctx.lineWidth = 5;
+            ctx.strokeStyle = SCAFFOLD_ACTIVE_STROKE_COLOR; // configから取得
+            ctx.lineWidth = SCAFFOLD_ACTIVE_LINE_WIDTH; // configから取得
             ctx.strokeRect(this.x, this.y, this.width, this.height);
 
-            ctx.fillStyle = '#f0ad4e';
+            // テキストの描画
             ctx.font = `${this.height * 0.7}px ${FONT_FAMILY}`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            // 複数のキーを並べて表示
             const keyText = this.requiredKeys.join(' + ');
+
+            // 黒い縁取りを追加
+            ctx.strokeStyle = SCAFFOLD_ACTIVE_TEXT_STROKE_COLOR; // configから取得
+            ctx.lineWidth = SCAFFOLD_ACTIVE_TEXT_STROKE_WIDTH; // configから取得
+            ctx.strokeText(keyText, this.x + this.width / 2, this.y + this.height / 2);
+
+            // オレンジ色のテキストを描画
+            ctx.fillStyle = SCAFFOLD_ACTIVE_TEXT_COLOR; // configから取得
             ctx.fillText(keyText, this.x + this.width / 2, this.y + this.height / 2);
 
         } else if (this.state === 'SOLID') {
@@ -52,7 +59,7 @@ export class ScaffoldBlock {
                 ctx.drawImage(scaffoldImage, this.x, this.y, this.width, this.height);
             } else {
                 // 画像が読み込まれるまでのフォールバック
-                ctx.fillStyle = '#f0ad4e';
+                ctx.fillStyle = SCAFFOLD_SOLID_FILL_COLOR_FALLBACK; // configから取得
                 ctx.fillRect(this.x, this.y, this.width, this.height);
             }
         }
