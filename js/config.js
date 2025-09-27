@@ -26,12 +26,12 @@ export const PLAYER_MAX_JUMP_IN_BLOCKS = 8;
 export const STUMP_WIDTH_IN_BLOCKS = 3.4; // ★追加：切り株の幅
 
 export const KEYBOARD_INSTRUMENT_CONFIG = {
-    'トライアングル': { name: 'トライアングル', keys: ['J'], maxChord: 1, multiplier: 1.0 },
-    'タンバリン':   { name: 'タンバリン',   keys: ['J', 'L'], maxChord: 1, multiplier: 1.1 },
-    '太鼓':         { name: '太鼓',         keys: ['J', 'K', 'L'], maxChord: 1, multiplier: 1.2 },
-    'ドラム':       { name: 'ドラム',       keys: ['U', 'I', 'J', 'K', 'L'], maxChord: 1, multiplier: 1.4 },
-    'ピアノ':       { name: 'ピアノ',       keys: ['U', 'I', 'O', 'J', 'K', 'L', 'P'], maxChord: 1, multiplier: 1.6 },
-    'ギター':       { name: 'ギター',       keys: ['U', 'I', 'O', 'J', 'K', 'L'], maxChord: 4, multiplier: 1.5 },
+    'トライアングル': { name: 'トライアングル', keys: ['U'], maxChord: 1, multiplier: 1.0 },
+    'タンバリン':   { name: 'タンバリン',   keys: ['U', 'I'], maxChord: 1, multiplier: 1.1 },
+    '太鼓':         { name: '太鼓',         keys: ['U', 'I', 'O'], maxChord: 1, multiplier: 1.2 },
+    'ドラム':       { name: 'ドラム',       keys: ['U', 'I', 'O', 'P', 'J'], maxChord: 1, multiplier: 1.4 },
+    'ピアノ':       { name: 'ピアノ',       keys: ['U', 'I', 'O', 'P', 'J', 'K', 'L'], maxChord: 1, multiplier: 1.6 },
+    'ギター':       { name: 'ギター',       keys: ['U', 'I', 'O', 'P', 'J', 'K'], maxChord: 4, multiplier: 1.5 },
 };
 
 export const GAMEPAD_INSTRUMENT_CONFIG = {
