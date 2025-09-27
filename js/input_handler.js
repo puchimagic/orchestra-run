@@ -10,11 +10,11 @@ export class InputHandler {
         this.lastGamepadConnectedStatus = false;
         this.fixedGamepadConnectedStatus = null;
 
-        // --- ▼ First Interaction Logic ▼ ---
         this.activated = false;
+        this.mouseDown = false; // ★マウスボタンの状態を追加
+
         const activateOnce = () => {
             this.activated = true;
-            // Remove listeners after first activation
             window.removeEventListener('keydown', activateOnce);
             window.removeEventListener('mousedown', activateOnce);
             window.removeEventListener('touchstart', activateOnce);
@@ -22,32 +22,33 @@ export class InputHandler {
         window.addEventListener('keydown', activateOnce);
         window.addEventListener('mousedown', activateOnce);
         window.addEventListener('touchstart', activateOnce);
-        // --- ▲ First Interaction Logic ▲ ---
 
         window.addEventListener('keydown', this.handleKeyDown.bind(this));
         window.addEventListener('keyup', this.handleKeyUp.bind(this));
 
+        // ★マウスイベントをInputHandlerで管理
+        window.addEventListener('mousedown', () => { this.mouseDown = true; });
+        window.addEventListener('mouseup', () => { this.mouseDown = false; });
+
         window.addEventListener('gamepadconnected', e => {
-            console.log('Gamepad connected at index %d: %s. %d buttons, %d axes.',
-                e.gamepad.index, e.gamepad.id,
-                e.gamepad.buttons.length, e.gamepad.axes.length);
             this.gamepads[e.gamepad.index] = e.gamepad;
         });
 
         window.addEventListener('gamepaddisconnected', e => {
-            console.log('Gamepad disconnected from index %d: %s',
-                e.gamepad.index, e.gamepad.id);
             delete this.gamepads[e.gamepad.index];
         });
 
         this.pollGamepads();
     }
 
-    // --- ▼ First Interaction Logic ▼ ---
     isActivated() {
         return this.activated;
     }
-    // --- ▲ First Interaction Logic ▲ ---
+
+    // ★マウスボタンが押されているか
+    isMouseDown() {
+        return this.mouseDown;
+    }
 
     setInstrumentKeyMaps(keyboardConfig, gamepadConfig, fixedConnectedStatus = null) {
         this.keyboardInstrumentConfig = keyboardConfig;
@@ -68,11 +69,8 @@ export class InputHandler {
                 const instrument = currentInstrumentConfig[instrumentName];
                 instrument.keys.forEach(key => {
                     let physicalKey;
-                    if (typeof key === 'string') {
-                        physicalKey = `Key${key}`;
-                    } else { 
-                        physicalKey = `GamepadButton${key}`;
-                    }
+                    if (typeof key === 'string') physicalKey = `Key${key}`;
+                    else physicalKey = `GamepadButton${key}`;
                     const action = `ACTION_${key}`;
                     this.activeKeyMap[physicalKey] = action;
                     this.actionMap[action] = physicalKey;
@@ -82,17 +80,13 @@ export class InputHandler {
     }
 
     init() {}
-
     destroy() {}
 
     handleKeyDown(e) {
         if (this.pressedKeys.has(e.code)) return;
         this.pressedKeys.add(e.code);
-
         const action = this.activeKeyMap[e.code];
-        if (action) {
-            this.actionsDown.add(action);
-        }
+        if (action) this.actionsDown.add(action);
     }
 
     handleKeyUp(e) {
@@ -113,11 +107,7 @@ export class InputHandler {
     }
 
     getInstrumentPhysicalKeys() {
-        const instrumentPhysicalKeys = new Set();
-        for (const physicalKey in this.activeKeyMap) {
-            instrumentPhysicalKeys.add(physicalKey);
-        }
-        return instrumentPhysicalKeys;
+        return new Set(Object.keys(this.activeKeyMap));
     }
 
     clearPressedActions() {
@@ -127,12 +117,9 @@ export class InputHandler {
     updateGamepads() {
         const gamepadsFromAPI = navigator.getGamepads();
         for (let i = 0; i < this.gamepads.length; i++) {
-            const gamepadInArray = this.gamepads[i];
-            if (gamepadInArray) {
-                const currentApiState = gamepadsFromAPI[gamepadInArray.index];
-                if (currentApiState) {
-                    this.gamepads[i] = currentApiState;
-                }
+            if (this.gamepads[i]) {
+                const currentApiState = gamepadsFromAPI[this.gamepads[i].index];
+                if (currentApiState) this.gamepads[i] = currentApiState;
             }
         }
 
@@ -147,20 +134,15 @@ export class InputHandler {
 
     processGamepadButtons() {
         if (!this.isGamepadConnected()) return;
-
-        this.gamepads.forEach((gamepad, index) => {
+        this.gamepads.forEach((gamepad) => {
             if (!gamepad) return;
-
             gamepad.buttons.forEach((button, buttonIndex) => {
                 const physicalKey = `GamepadButton${buttonIndex}`;
                 const action = this.activeKeyMap[physicalKey];
-
                 if (button.pressed) {
                     if (!this.pressedKeys.has(physicalKey)) {
                         this.pressedKeys.add(physicalKey);
-                        if (action) {
-                            this.actionsDown.add(action);
-                        }
+                        if (action) this.actionsDown.add(action);
                     }
                 } else {
                     if (this.pressedKeys.has(physicalKey)) {
@@ -172,18 +154,13 @@ export class InputHandler {
     }
 
     isGamepadButtonPressed(playerIndex, buttonIndex) {
-        if (this.gamepads[playerIndex] && this.gamepads[playerIndex].buttons[buttonIndex]) {
-            return this.gamepads[playerIndex].buttons[buttonIndex].pressed;
-        }
-        return false;
+        return this.gamepads[playerIndex]?.buttons[buttonIndex]?.pressed || false;
     }
 
     getGamepadAxis(playerIndex, axisIndex) {
-        if (this.gamepads[playerIndex] && this.gamepads[playerIndex].axes[axisIndex] !== undefined) {
-            const threshold = 0.1;
-            if (Math.abs(this.gamepads[playerIndex].axes[axisIndex]) > threshold) {
-                return this.gamepads[playerIndex].axes[axisIndex];
-            }
+        const axisValue = this.gamepads[playerIndex]?.axes[axisIndex];
+        if (axisValue !== undefined && Math.abs(axisValue) > 0.1) {
+            return axisValue;
         }
         return 0;
     }
@@ -194,6 +171,6 @@ export class InputHandler {
     }
 
     isGamepadConnected() {
-        return this.gamepads.some(gamepad => gamepad !== undefined && gamepad !== null);
+        return this.gamepads.some(gp => gp);
     }
 }
