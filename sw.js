@@ -1,31 +1,32 @@
 import { CACHE_NAME } from './js/config.js';
 import { assetsToCache } from './js/asset_list.js';
 
-// インストール時にキャッシュを保存する
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Opened cache and caching all assets');
-        return cache.addAll(assetsToCache);
-      })
-      .catch(error => {
-        console.error('Failed to cache assets:', error);
-      })
+    caches.open(CACHE_NAME).then((cache) => {
+      console.log('Opened cache. Caching assets individually.');
+      // cache.addAll is all-or-nothing. We add individually for robustness.
+      const promises = assetsToCache.map((url) => {
+        return cache.add(url).catch(err => {
+          // Log failed caches but don't fail the entire install
+          console.error(`Failed to cache ${url}:`, err);
+        });
+      });
+      return Promise.all(promises);
+    })
   );
 });
 
-// フェッチイベントで、キャッシュがあればキャッシュから返す
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
+        // Cache-first strategy
         return response || fetch(event.request);
       })
   );
 });
 
-// 新しいService Workerが有効になったときに古いキャッシュを削除する
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {

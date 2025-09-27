@@ -19,18 +19,27 @@ export class MainScene {
         this.isLogoLoaded = false;
         this.logoImage.onload = () => { this.isLogoLoaded = true; };
 
-        this.cacheStatus = 'verifying'; // 'verifying', 'caching', 'complete', 'incomplete_offline'
-        this.promptMessage = 'キャッシュを確認中...';
-        this.verifyAssetCache();
+        // --- Mode-dependent logic ---
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
 
-        window.addEventListener('online', () => this.handleNetworkChange());
-        window.addEventListener('offline', () => this.handleNetworkChange());
+        if (isStandalone) {
+            // PWA mode: strict cache verification
+            this.cacheStatus = 'verifying';
+            this.promptMessage = 'キャッシュを確認中...';
+            this.verifyAssetCache();
+            window.addEventListener('online', () => this.handleNetworkChange());
+            window.addEventListener('offline', () => this.handleNetworkChange());
+        } else {
+            // Browser mode: skip cache check and start directly
+            this.cacheStatus = 'complete';
+            this.promptMessage = '画面を押してください';
+        }
     }
 
     async verifyAssetCache() {
         if (!('caches' in window)) {
             this.promptMessage = 'このブラウザはオフライン非対応です';
-            this.cacheStatus = 'complete'; // Playable online, but no offline support
+            this.cacheStatus = 'complete';
             return;
         }
 
@@ -47,7 +56,6 @@ export class MainScene {
                 if (navigator.onLine) {
                     this.cacheStatus = 'caching';
                     this.promptMessage = 'アセットを準備中です...';
-                    // Retry verification after a delay, as the service worker is likely installing.
                     setTimeout(() => this.verifyAssetCache(), 2000);
                 } else {
                     this.cacheStatus = 'incomplete_offline';
@@ -56,18 +64,12 @@ export class MainScene {
             }
         } catch (error) {
             console.error('Cache verification failed:', error);
-            if (navigator.onLine) {
-                this.cacheStatus = 'complete'; // Allow playing if online, despite error
-                this.promptMessage = '画面を押してください';
-            } else {
-                this.cacheStatus = 'incomplete_offline';
-                this.promptMessage = 'エラーが発生しました';
-            }
+            this.cacheStatus = 'incomplete_offline';
+            this.promptMessage = 'エラーが発生しました';
         }
     }
 
     handleNetworkChange() {
-        // Only re-verify if the cache status is not already complete
         if (this.cacheStatus !== 'complete') {
             this.verifyAssetCache();
         }
@@ -90,7 +92,6 @@ export class MainScene {
 
     update() {
         if (!this.game.isGameActive) {
-            // Only allow activation if cache is complete
             if (this.cacheStatus === 'complete' && this.inputHandler.isActivated()) {
                 this.game.isGameActive = true;
                 soundPlayer.playBGM('home_bgm');
@@ -98,7 +99,7 @@ export class MainScene {
                     this.game.canvas.requestFullscreen().catch(err => console.log(err));
                 }
             }
-            return; // Block other updates until activated
+            return;
         }
 
         if (this.startButton.update(this.game.mouse)) this.game.changeScene(SCENE.INSTRUMENT_SELECT);
@@ -118,7 +119,8 @@ export class MainScene {
             const logoWidth = 600, logoHeight = this.logoImage.height * (logoWidth / this.logoImage.width);
             ctx.drawImage(this.logoImage, width / 2 - logoWidth / 2, height / 2 - 250 - logoHeight / 2, logoWidth, logoHeight);
         } else {
-            ctx.fillStyle = 'black'; ctx.font = `${FONT_SIZE.LARGE}px ${FONT_FAMILY}`; ctx.textAlign = 'center';
+            ctx.fillStyle = 'black'; ctx.font = `${FONT_SIZE.LARGE}px ${FONT_FAMILY}`;
+            ctx.textAlign = 'center';
             ctx.fillText('オケラン', width / 2, height / 2 - 250);
         }
 
