@@ -1,8 +1,8 @@
-import { FONT_SIZE, FONT_FAMILY } from '../config.js';
+import { FONT_SIZE, FONT_FAMILY, SELECTED_BUTTON_COLOR, SELECTED_BUTTON_HOVER_COLOR, DEFAULT_BUTTON_COLOR, DEFAULT_BUTTON_HOVER_COLOR } from '../config.js';
 import { soundPlayer } from '../../soundPlayer.js';
 
 export class Button {
-    constructor(x, y, width, height, text, color = '#888', hoverColor = '#aaa') {
+    constructor(x, y, width, height, text, color = DEFAULT_BUTTON_COLOR, hoverColor = DEFAULT_BUTTON_HOVER_COLOR) {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -11,6 +11,7 @@ export class Button {
         this.color = color;
         this.hoverColor = hoverColor;
         this.isHovered = false;
+        this.isHighlighted = false; // 追加
     }
 
     update(mouse) {
@@ -29,7 +30,15 @@ export class Button {
 
     draw(ctx, scale = 1) {
         // Draw button
-        ctx.fillStyle = this.isHovered ? this.hoverColor : this.color;
+        let currentColor = this.color;
+        let currentHoverColor = this.hoverColor;
+
+        if (this.isHighlighted) {
+            currentColor = SELECTED_BUTTON_COLOR;
+            currentHoverColor = SELECTED_BUTTON_HOVER_COLOR;
+        }
+
+        ctx.fillStyle = this.isHovered ? currentHoverColor : currentColor;
         ctx.fillRect(this.x, this.y, this.width, this.height);
 
         // Draw text

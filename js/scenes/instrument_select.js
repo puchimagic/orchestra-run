@@ -100,25 +100,22 @@ export class InstrumentSelectScene {
 
         for (const name of INSTRUMENT_ORDER) {
             const button = this.instrumentButtons[name];
-            const instrument = KEYBOARD_INSTRUMENT_CONFIG[name]; // Use KEYBOARD_INSTRUMENT_CONFIG for display
+            const instrumentConfig = KEYBOARD_INSTRUMENT_CONFIG[name]; // Use KEYBOARD_INSTRUMENT_CONFIG for display
 
-            if (this.selectedInstrument === name) {
-                button.color = '#333';
-                button.hoverColor = '#555';
-            } else {
-                button.color = '#888';
-                button.hoverColor = '#aaa';
-            }
+            // Highlight selected instrument
+            button.isHighlighted = (this.selectedInstrument === name);
+
             button.draw(ctx);
 
+            // 楽器情報の表示を復活
             ctx.fillStyle = '#555';
             ctx.font = `24px ${FONT_FAMILY}`;
             ctx.textAlign = 'left';
             ctx.textBaseline = 'middle';
 
-            let infoText = `キー: ${instrument.keys.length}種`;
-            if (instrument.maxChord > 1) {
-                infoText += ` / 最大${instrument.maxChord}音`;
+            let infoText = `キー: ${instrumentConfig.keys.length}種`;
+            if (instrumentConfig.maxChord > 1) {
+                infoText += ` / 最大${instrumentConfig.maxChord}音`;
             }
 
             ctx.fillText(infoText, button.x + button.width + 20, button.y + button.height / 2);

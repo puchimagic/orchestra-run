@@ -7,7 +7,7 @@ export const SCENE = {
     INSTRUMENT_SELECT: 'instrument_select',
     GAME: 'game',
     GAME_OVER: 'game_over',
-    SETTINGS: 'settings', // VOLUME_SETTINGS を SETTINGS に変更
+    VOLUME_SETTINGS: 'volume_settings', // ★追加
 };
 
 export const FONT_FAMILY = 'Arial';
@@ -26,6 +26,12 @@ export const INITIAL_SCROLL_SPEED = 5;
 export const PLAYER_MAX_JUMP_IN_BLOCKS = 8;
 
 export const STUMP_WIDTH_IN_BLOCKS = 3.4; // ★追加：切り株の幅
+
+// ボタンのハイライト色
+export const SELECTED_BUTTON_COLOR = '#333';
+export const SELECTED_BUTTON_HOVER_COLOR = '#555';
+export const DEFAULT_BUTTON_COLOR = '#888';
+export const DEFAULT_BUTTON_HOVER_COLOR = '#aaa';
 
 export const KEYBOARD_INSTRUMENT_CONFIG = {
     'トライアングル': { name: 'トライアングル', keys: ['U'], maxChord: 1, multiplier: 1.0 },
