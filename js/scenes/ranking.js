@@ -6,7 +6,7 @@ export class RankingScene {
         this.game = game;
         this.scores = [];
 
-         // 背景画像を読み込む
+        // 背景画像を読み込む
         this.backgroundImage = new Image();
         this.backgroundImage.src = 'img/title_rank_select.png';
         this.isBackgroundLoaded = false;
@@ -16,11 +16,13 @@ export class RankingScene {
         this.backgroundImage.onerror = () => {
             console.error('Failed to load background image: img/title_rank_select.png');
         };
+
+        this.onResize();
+        this.loadScores();
     }
 
-    async init() {
+    async loadScores() {
         this.scores = await this.game.scoreManager.getScores();
-        this.onResize();
     }
 
     onResize() {
@@ -41,7 +43,7 @@ export class RankingScene {
         const ctx = this.game.ctx;
         const { width, height } = this.game.canvas;
 
-          //背景設定
+        //背景設定
         if (this.isBackgroundLoaded) {
             ctx.drawImage(this.backgroundImage, 0, 0, width, height);
         } else {
