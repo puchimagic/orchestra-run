@@ -67,10 +67,6 @@ export class SoundPlayer {
         }
       }
       localStorage.setItem('instrumentVolume', volume);
-      // プレビュー音を再生 (コンストラクタからの呼び出しでは鳴らさない)
-      if (this.sounds['guitar_preview']) { // guitar_previewがロード済みか確認
-        this.playSound('guitar_preview');
-      }
     } else {
       console.warn('Instrument volume must be between 0 and 1.');
     }
@@ -85,8 +81,6 @@ export class SoundPlayer {
       this.gameSounds.gameOver.volume = volume;
       this.gameSounds.tree_fall.volume = volume;
       localStorage.setItem('gameSoundVolume', volume);
-      // プレビュー音を再生 (コンストラクタからの呼び出しでは鳴らさない)
-      this.playGameSound('jump');
     } else {
       console.warn('Game sound volume must be between 0 and 1.');
     }
