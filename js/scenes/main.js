@@ -93,8 +93,8 @@ export class MainScene {
         const logoDisplayWidth = width * 0.7;
         // ロゴの高さをアスペクト比を維持して計算
         const logoDisplayHeight = this.logoImage.height * (logoDisplayWidth / this.logoImage.width);
-        // ロゴを画面上部から約10%の位置に配置
-        const logoY = height * 0.1;
+        // ロゴを画面上部から約5%の位置に配置 (0.1 -> 0.05)
+        const logoY = height * 0.05;
 
         // ロゴの描画位置を更新 (draw メソッドで使用するため、プロパティとして保存)
         this.logoX = cx - logoDisplayWidth / 2;

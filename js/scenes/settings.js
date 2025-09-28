@@ -35,8 +35,8 @@ export class SettingsScene {
         });
 
         // Input Method Buttons
-        this.keyboardButton = new Button(0, 0, 350, 100, 'キーボード'); // サイズ変更
-        this.gamepadButton = new Button(0, 0, 350, 100, 'ゲームパッド'); // サイズ変更
+        this.keyboardButton = new Button(0, 0, 450, 100, 'キーボード'); // サイズ変更
+        this.gamepadButton = new Button(0, 0, 450, 100, 'ゲームパッド'); // サイズ変更
 
         // Back Button
         this.backButton = new Button(0, 0, 500, 100, '戻る'); // サイズ変更とテキスト変更
@@ -87,7 +87,7 @@ export class SettingsScene {
         this.gameSoundSlider.height = 40;
 
         // --- 右セクション (入力方法) ---
-        const buttonWidth = 350;
+        const buttonWidth = 450; // 350から増加
         const buttonHeight = 100;
         // 右半分の中心に配置
         const rightSectionCenterX = width * 3 / 4;

@@ -25,7 +25,7 @@ export class GameOverScene {
 
         this.game.scoreManager.addScore(this.finalScore, this.lastInstrument);
 
-        const btnWidth = 400; // 300から増加
+        const btnWidth = 500; // 400から増加
         const btnHeight = 100; // 75から増加
         const cx = this.game.canvas.width / 2;
         const cy = this.game.canvas.height / 2;

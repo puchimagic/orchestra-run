@@ -23,7 +23,7 @@ export class InstrumentSelectScene {
     }
 
     onResize() {
-        const btnWidth = 400; // Increased from 300
+        const btnWidth = 500; // Increased from 400
         const btnHeight = 100; // Increased from 75
         const cx = this.game.canvas.width / 2;
         const cy = this.game.canvas.height / 2;
@@ -61,8 +61,8 @@ export class InstrumentSelectScene {
         const buttonGroupWidth = btnWidth * 2 + col_gap; // Two buttons + gap
         const buttonGroupStartX = cx - buttonGroupWidth / 2;
 
-        this.startButton = new Button(buttonGroupStartX, bottomButtonY, btnWidth, btnHeight, 'スタート', '#4CAF50', '#66BB6A');
-        this.backButton = new Button(buttonGroupStartX + btnWidth + col_gap, bottomButtonY, btnWidth, btnHeight, '戻る'); // テキストを「戻る」に変更
+        this.startButton = new Button(buttonGroupStartX, bottomButtonY, btnWidth, btnHeight, 'スタート', '#4CAF50', '#66BB6A'); // テキストを「スタート」に変更
+        this.backButton = new Button(buttonGroupStartX + btnWidth + col_gap, bottomButtonY, btnWidth, btnHeight, '戻る');
     }
 
     update() {
@@ -110,7 +110,7 @@ export class InstrumentSelectScene {
 
             // 楽器情報の表示を復活
             ctx.fillStyle = '#555';
-            ctx.font = `24px ${FONT_FAMILY}`;
+            ctx.font = `40px ${FONT_FAMILY}`;
             ctx.textAlign = 'left';
             ctx.textBaseline = 'middle';
 
