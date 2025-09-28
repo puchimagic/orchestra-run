@@ -14,7 +14,7 @@ export class InstrumentSelectScene {
             this.isBackgroundLoaded = true;
         };
         this.backgroundImage.onerror = () => {
-            console.error('Failed to load background image: img/title_rank_select.png');
+            console.error('背景画像の読み込みに失敗しました: img/title_rank_select.png');
         };
     }
 
@@ -23,25 +23,25 @@ export class InstrumentSelectScene {
     }
 
     onResize() {
-        const btnWidth = 500; // Increased from 400
-        const btnHeight = 100; // Increased from 75
+        const btnWidth = 500; // 400から増加
+        const btnHeight = 100; // 75から増加
         const cx = this.game.canvas.width / 2;
         const cy = this.game.canvas.height / 2;
-        const row_margin = 30; // Increased from 20
-        const col_gap = 60; // Increased from 40
-        const infoTextWidth = 250; // Approximate width for info text next to buttons
+        const row_margin = 30; // 20から増加
+        const col_gap = 60; // 40から増加
+        const infoTextWidth = 250; // ボタン横の情報テキストの推定幅
 
-        // Calculate total width for the two columns of instrument buttons + info text + gap
+        // 楽器ボタン2列 + 情報テキスト + ギャップの合計幅を計算
         const instrumentBlockWidth = (btnWidth + infoTextWidth) * 2 + col_gap;
         const instrumentBlockStartX = cx - instrumentBlockWidth / 2;
 
         const col1_x = instrumentBlockStartX;
         const col2_x = instrumentBlockStartX + btnWidth + infoTextWidth + col_gap;
 
-        // Adjust Y positions to spread out more
-        const y1 = cy - btnHeight - row_margin - 100; // Adjusted from -80
-        const y2 = cy - 10; // Adjusted from -80
-        const y3 = cy + btnHeight + row_margin + 80; // Adjusted from -80
+        // Y座標を調整して間隔を広げる
+        const y1 = cy - btnHeight - row_margin - 100; // -80から調整
+        const y2 = cy - 10; // -80から調整
+        const y3 = cy + btnHeight + row_margin + 80; // -80から調整
 
         this.instrumentButtons = {};
         INSTRUMENT_ORDER.forEach((name, i) => {
@@ -56,9 +56,9 @@ export class InstrumentSelectScene {
             this.instrumentButtons[name] = new Button(x, y, btnWidth, btnHeight, name);
         });
 
-        // Center start and back buttons as a group
-        const bottomButtonY = y3 + btnHeight + 100; // Adjusted from 80
-        const buttonGroupWidth = btnWidth * 2 + col_gap; // Two buttons + gap
+        // スタートボタンと戻るボタンをグループとして中央に配置
+        const bottomButtonY = y3 + btnHeight + 100; // 80から調整
+        const buttonGroupWidth = btnWidth * 2 + col_gap; // ボタン2つ + ギャップ
         const buttonGroupStartX = cx - buttonGroupWidth / 2;
 
         this.startButton = new Button(buttonGroupStartX, bottomButtonY, btnWidth, btnHeight, 'スタート', '#4CAF50', '#66BB6A'); // テキストを「スタート」に変更
@@ -101,14 +101,14 @@ export class InstrumentSelectScene {
 
         for (const name of INSTRUMENT_ORDER) {
             const button = this.instrumentButtons[name];
-            const instrumentConfig = KEYBOARD_INSTRUMENT_CONFIG[name]; // Use KEYBOARD_INSTRUMENT_CONFIG for display
+            const instrumentConfig = KEYBOARD_INSTRUMENT_CONFIG[name]; // 表示用にKEYBOARD_INSTRUMENT_CONFIGを使用
 
-            // Highlight selected instrument
+            // 選択された楽器をハイライト
             button.isHighlighted = (this.selectedInstrument === name);
 
             button.draw(ctx);
 
-            // 楽器情報の表示を復活
+            // 楽器情報の表示
             ctx.fillStyle = '#555';
             ctx.font = `40px ${FONT_FAMILY}`;
             ctx.textAlign = 'left';
