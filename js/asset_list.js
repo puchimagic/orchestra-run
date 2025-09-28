@@ -58,9 +58,9 @@ export const assetsToCache = [
   './sound/game/game_bgm.wav',
   './sound/game/gameover_bgm.wav',
   './sound/game/home_bgm.wav',
-  './sound/game/track01.wav',
-  './sound/game/track02.wav',
-  './sound/game/track03.wav',
+  // './sound/game/track01.wav', // 削除
+  // './sound/game/track02.wav', // 削除
+  // './sound/game/track03.wav', // 削除
   './sound/game/tree_fall.wav',
   './sound/guitar/track01.wav',
   './sound/guitar/track02.wav',
