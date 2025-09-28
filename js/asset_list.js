@@ -61,7 +61,7 @@ export const assetsToCache = [
   './sound/game/track01.wav',
   './sound/game/track02.wav',
   './sound/game/track03.wav',
-  './sound/game/木が倒れる音.wav',
+  './sound/game/tree_fall.wav',
   './sound/guitar/track01.wav',
   './sound/guitar/track02.wav',
   './sound/guitar/track03.wav',
