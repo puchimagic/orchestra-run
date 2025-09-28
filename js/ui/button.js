@@ -44,7 +44,7 @@ export class Button {
         // Draw text
         ctx.fillStyle = '#fff';
         // Apply scale to font size
-        const scaledFontSize = FONT_SIZE.SMALL;
+        const scaledFontSize = FONT_SIZE.MEDIUM; // FONT_SIZE.SMALL から FONT_SIZE.MEDIUM に変更
         ctx.font = `${scaledFontSize}px ${FONT_FAMILY}`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';

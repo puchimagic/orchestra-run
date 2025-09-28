@@ -76,27 +76,28 @@ export class GameDescriptionScene {
     }
 
     onResize() {
-        const btnWidth = 300;
-        const btnHeight = 75;
+        const { width, height } = this.game.canvas;
 
         // メインに戻るボタンを画面下部に配置
-        const backBtnY = this.game.canvas.height - btnHeight - 40; // 画面下部から少し上に配置
-        const backBtnX = (this.game.canvas.width - btnWidth) / 2;
-        this.backButton = new Button(backBtnX, backBtnY, btnWidth, btnHeight, 'メインに戻る');
+        const btnWidth = 400; // 300から増加
+        const btnHeight = 100; // 75から増加
+        const backBtnY = height - btnHeight - 60; // 40から調整
+        const backBtnX = (width - btnWidth) / 2;
+        this.backButton = new Button(backBtnX, backBtnY, btnWidth, btnHeight, '戻る'); // テキストを「戻る」に変更
 
         // ページ切り替えボタンをその上に配置
-        const navBtnWidth = 80;
-        const navBtnHeight = 60;
-        const navBtnY = backBtnY - navBtnHeight - 40; // メインに戻るボタンより上に配置
-        const navBtnMargin = 20; // ボタン間のマージン
+        const navBtnWidth = 100; // 80から増加
+        const navBtnHeight = 80; // 60から増加
+        const navBtnY = backBtnY - navBtnHeight - 60; // 40から調整
+        const navBtnMargin = 30; // 20から増加
 
         this.prevButton = new Button(
-            this.game.canvas.width / 2 - navBtnWidth - navBtnMargin - 50, // ページ番号表示のために少し左にずらす
-            navBtnY, navBtnWidth, navBtnHeight, '＜' // 三角記号に変更
+            width / 2 - navBtnWidth - navBtnMargin - 50, // ページ番号表示のために少し左にずらす
+            navBtnY, navBtnWidth, navBtnHeight, '＜'
         );
         this.nextButton = new Button(
-            this.game.canvas.width / 2 + navBtnMargin + 50, // ページ番号表示のために少し右にずらす
-            navBtnY, navBtnWidth, navBtnHeight, '＞' // 三角記号に変更
+            width / 2 + navBtnMargin + 50, // ページ番号表示のために少し右にずらす
+            navBtnY, navBtnWidth, navBtnHeight, '＞'
         );
     }
 

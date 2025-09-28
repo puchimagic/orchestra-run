@@ -26,11 +26,13 @@ export class RankingScene {
     }
 
     onResize() {
-        const btnWidth = 300;
-        const btnHeight = 75;
-        const x = (this.game.canvas.width - btnWidth) / 2;
-        const y = this.game.canvas.height - btnHeight - 75;
-        this.backButton = new Button(x, y, btnWidth, btnHeight, 'メインに戻る');
+        const { width, height } = this.game.canvas;
+
+        const btnWidth = 400; // 300から増加
+        const btnHeight = 100; // 75から増加
+        const x = (width - btnWidth) / 2;
+        const y = height - btnHeight - 100; // 75から調整
+        this.backButton = new Button(x, y, btnWidth, btnHeight, '戻る'); // テキストを「戻る」に変更
     }
 
     update() {

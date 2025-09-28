@@ -25,13 +25,14 @@ export class GameOverScene {
 
         this.game.scoreManager.addScore(this.finalScore, this.lastInstrument);
 
-        const btnWidth = 300;
-        const btnHeight = 75;
+        const btnWidth = 400; // 300から増加
+        const btnHeight = 100; // 75から増加
         const cx = this.game.canvas.width / 2;
         const cy = this.game.canvas.height / 2;
 
-        this.continueButton = new Button(cx - btnWidth / 2, cy + 50, btnWidth, btnHeight, 'コンティニュー');
-        this.backButton = new Button(cx - btnWidth / 2, cy + 140, btnWidth, btnHeight, 'メインに戻る');
+        // より大きなボタンと広い間隔のためにY座標を調整
+        this.continueButton = new Button(cx - btnWidth / 2, cy + 80, btnWidth, btnHeight, 'コンティニュー'); // +50から調整
+        this.backButton = new Button(cx - btnWidth / 2, cy + 200, btnWidth, btnHeight, 'メインに戻る'); // +140から調整
     }
 
     update() {

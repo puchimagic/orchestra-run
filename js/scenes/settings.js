@@ -21,25 +21,25 @@ export class SettingsScene {
         this.backgroundImage.onload = () => { this.isBackgroundLoaded = true; };
 
         // Volume Sliders (3種類に修正)
-        this.bgmSlider = new VolumeSlider(0, 0, 400, 30, 'BGM音量', soundPlayer.bgmVolume, (v) => {
+        this.bgmSlider = new VolumeSlider(0, 0, 500, 40, 'BGM音量', soundPlayer.bgmVolume, (v) => { // サイズ変更
             soundPlayer.setBgmVolume(v);
             this.game.saveSettings();
         });
-        this.instrumentSlider = new VolumeSlider(0, 0, 400, 30, '楽器音量', soundPlayer.instrumentVolume, (v) => {
+        this.instrumentSlider = new VolumeSlider(0, 0, 500, 40, '楽器音量', soundPlayer.instrumentVolume, (v) => { // サイズ変更
             soundPlayer.setInstrumentVolume(v);
             this.game.saveSettings();
         });
-        this.gameSoundSlider = new VolumeSlider(0, 0, 400, 30, '効果音量', soundPlayer.gameSoundVolume, (v) => {
+        this.gameSoundSlider = new VolumeSlider(0, 0, 500, 40, '効果音量', soundPlayer.gameSoundVolume, (v) => { // サイズ変更
             soundPlayer.setGameSoundVolume(v);
             this.game.saveSettings();
         });
 
         // Input Method Buttons
-        this.keyboardButton = new Button(0, 0, 250, 75, 'キーボード');
-        this.gamepadButton = new Button(0, 0, 250, 75, 'ゲームパッド');
+        this.keyboardButton = new Button(0, 0, 350, 100, 'キーボード'); // サイズ変更
+        this.gamepadButton = new Button(0, 0, 350, 100, 'ゲームパッド'); // サイズ変更
 
         // Back Button
-        this.backButton = new Button(0, 0, 400, 75, 'メイン画面に戻る');
+        this.backButton = new Button(0, 0, 500, 100, '戻る'); // サイズ変更とテキスト変更
 
         this.onResize();
     }
@@ -51,17 +51,17 @@ export class SettingsScene {
         const mainTitleLineHeight = 60; // FONT_SIZE.LARGE の推定行の高さ
         const sectionTitleLineHeight = 40; // FONT_SIZE.MEDIUM の推定行の高さ
 
-        const elementPadding = 60; // 要素間のパディング (スライダー、ボタン)
-        const sectionPadding = 120; // 主要セクション間のパディング (音量、入力、戻るボタン) - 100から増加
+        const elementPadding = 70; // 要素間のパディング (スライダー、ボタン)
+        const sectionPadding = 140; // 主要セクション間のパディング (音量、入力、戻るボタン)
 
         // --- 左セクション (音量) ---
-        const sliderWidth = 400;
+        const sliderWidth = 500;
         // 左半分の中心に配置
         const leftSectionCenterX = width / 4;
         const leftSectionStartX = leftSectionCenterX - sliderWidth / 2;
 
-        // メインタイトルの下から開始Y座標を調整 (より上から開始)
-        let currentYLeft = 120 + mainTitleLineHeight + elementPadding / 2; // 開始Y座標を調整
+        // メインタイトルの下から開始Y座標を調整
+        let currentYLeft = 120 + mainTitleLineHeight + elementPadding / 2;
 
         // 「音量調整」セクションタイトル
         this.volumeTitleY = currentYLeft;
@@ -71,23 +71,30 @@ export class SettingsScene {
         // 音量スライダー
         this.bgmSlider.x = leftSectionStartX;
         this.bgmSlider.y = currentYLeft;
+        this.bgmSlider.width = sliderWidth;
+        this.bgmSlider.height = 40;
         currentYLeft += this.bgmSlider.height + elementPadding;
 
         this.instrumentSlider.x = leftSectionStartX;
         this.instrumentSlider.y = currentYLeft;
+        this.instrumentSlider.width = sliderWidth;
+        this.instrumentSlider.height = 40;
         currentYLeft += this.instrumentSlider.height + elementPadding;
 
         this.gameSoundSlider.x = leftSectionStartX;
         this.gameSoundSlider.y = currentYLeft;
+        this.gameSoundSlider.width = sliderWidth;
+        this.gameSoundSlider.height = 40;
 
         // --- 右セクション (入力方法) ---
-        const buttonWidth = this.keyboardButton.width; // 両方のボタンが同じ幅であると仮定
+        const buttonWidth = 350;
+        const buttonHeight = 100;
         // 右半分の中心に配置
         const rightSectionCenterX = width * 3 / 4;
         const rightSectionStartX = rightSectionCenterX - buttonWidth / 2;
 
-        // メインタイトルの下から開始Y座標を調整 (より上から開始)
-        let currentYRight = 120 + mainTitleLineHeight + elementPadding / 2; // 開始Y座標を調整
+        // メインタイトルの下から開始Y座標を調整
+        let currentYRight = 120 + mainTitleLineHeight + elementPadding / 2;
 
         // 「入力方法」セクションタイトル
         this.inputTitleY = currentYRight;
@@ -95,18 +102,25 @@ export class SettingsScene {
         currentYRight += sectionTitleLineHeight + elementPadding;
 
         // 入力方法ボタン
-        // ボタンのX座標は rightSectionStartX を基準に
         this.keyboardButton.x = rightSectionStartX;
         this.keyboardButton.y = currentYRight;
+        this.keyboardButton.width = buttonWidth;
+        this.keyboardButton.height = buttonHeight;
         currentYRight += this.keyboardButton.height + elementPadding;
 
         this.gamepadButton.x = rightSectionStartX;
         this.gamepadButton.y = currentYRight;
+        this.gamepadButton.width = buttonWidth;
+        this.gamepadButton.height = buttonHeight;
 
         // --- 戻るボタン (下部中央) ---
-        const maxSectionY = Math.max(currentYLeft, currentYRight);
-        this.backButton.x = cx - this.backButton.width / 2;
-        this.backButton.y = maxSectionY + sectionPadding; // sectionPadding を増加
+        const backButtonWidth = 500;
+        const backButtonHeight = 100;
+        const maxSectionY = Math.max(currentYLeft + this.gameSoundSlider.height, currentYRight + this.gamepadButton.height);
+        this.backButton.x = cx - backButtonWidth / 2;
+        this.backButton.y = maxSectionY + sectionPadding;
+        this.backButton.width = backButtonWidth;
+        this.backButton.height = backButtonHeight;
     }
 
     update() {
@@ -184,4 +198,5 @@ export class SettingsScene {
         this.backButton.draw(ctx);
     }
 
-    destroy() {}}
+    destroy() {}
+}

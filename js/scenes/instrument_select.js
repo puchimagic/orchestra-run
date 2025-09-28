@@ -23,12 +23,12 @@ export class InstrumentSelectScene {
     }
 
     onResize() {
-        const btnWidth = 300;
-        const btnHeight = 75;
+        const btnWidth = 400; // Increased from 300
+        const btnHeight = 100; // Increased from 75
         const cx = this.game.canvas.width / 2;
         const cy = this.game.canvas.height / 2;
-        const row_margin = 20;
-        const col_gap = 40; // Gap between columns of instrument buttons
+        const row_margin = 30; // Increased from 20
+        const col_gap = 60; // Increased from 40
         const infoTextWidth = 250; // Approximate width for info text next to buttons
 
         // Calculate total width for the two columns of instrument buttons + info text + gap
@@ -38,9 +38,10 @@ export class InstrumentSelectScene {
         const col1_x = instrumentBlockStartX;
         const col2_x = instrumentBlockStartX + btnWidth + infoTextWidth + col_gap;
 
-        const y1 = cy - btnHeight - row_margin - 80;
-        const y2 = cy - 80;
-        const y3 = cy + btnHeight + row_margin - 80;
+        // Adjust Y positions to spread out more
+        const y1 = cy - btnHeight - row_margin - 100; // Adjusted from -80
+        const y2 = cy - 10; // Adjusted from -80
+        const y3 = cy + btnHeight + row_margin + 80; // Adjusted from -80
 
         this.instrumentButtons = {};
         INSTRUMENT_ORDER.forEach((name, i) => {
@@ -56,12 +57,12 @@ export class InstrumentSelectScene {
         });
 
         // Center start and back buttons as a group
-        const bottomButtonY = y3 + btnHeight + 80;
+        const bottomButtonY = y3 + btnHeight + 100; // Adjusted from 80
         const buttonGroupWidth = btnWidth * 2 + col_gap; // Two buttons + gap
         const buttonGroupStartX = cx - buttonGroupWidth / 2;
 
-        this.startButton = new Button(buttonGroupStartX, bottomButtonY, btnWidth, btnHeight, 'ゲームスタート', '#4CAF50', '#66BB6A');
-        this.backButton = new Button(buttonGroupStartX + btnWidth + col_gap, bottomButtonY, btnWidth, btnHeight, 'メインに戻る');
+        this.startButton = new Button(buttonGroupStartX, bottomButtonY, btnWidth, btnHeight, 'スタート', '#4CAF50', '#66BB6A');
+        this.backButton = new Button(buttonGroupStartX + btnWidth + col_gap, bottomButtonY, btnWidth, btnHeight, '戻る'); // テキストを「戻る」に変更
     }
 
     update() {

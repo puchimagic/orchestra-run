@@ -104,22 +104,22 @@ export class MainScene {
 
 
         // --- ボタンの配置 --- 
-        // ボタンのサイズを大きくする
-        const btnWidth = 450; // 300 -> 450
-        const btnHeight = 120; // 75 -> 120
+        // ボタンのサイズをさらに大きくする
+        const btnWidth = 550; // 450 -> 550
+        const btnHeight = 150; // 120 -> 150
 
-        // ボタン間のギャップを広げる
-        const gapX = 80; // 50 -> 80
-        const gapY = 40; // 20 -> 40
+        // ボタン間のギャップを調整
+        const gapX = 100; // 80 -> 100
+        const gapY = 50; // 40 -> 50
 
-        // ボタンのY座標の基準点を画面の高さの約60%あたりに設定
-        const buttonsStartY = height * 0.6;
+        // ボタンのY座標の基準点を画面の高さの約55%あたりに調整 (より上から開始してスペースを確保)
+        const buttonsStartY = height * 0.55;
 
         // 2列のボタン配置
         const leftColX = cx - btnWidth - gapX / 2;
         const rightColX = cx + gapX / 2;
 
-        this.startButton = new Button(leftColX, buttonsStartY, btnWidth, btnHeight, 'ゲームスタート');
+        this.startButton = new Button(leftColX, buttonsStartY, btnWidth, btnHeight, '楽器選択'); // テキストを「楽器選択」に変更
         this.descButton = new Button(leftColX, buttonsStartY + btnHeight + gapY, btnWidth, btnHeight, 'あそびかた');
         this.rankingButton = new Button(rightColX, buttonsStartY, btnWidth, btnHeight, 'ランキング');
         this.settingsButton = new Button(rightColX, buttonsStartY + btnHeight + gapY, btnWidth, btnHeight, '設定');
@@ -167,7 +167,7 @@ export class MainScene {
             ctx.fillRect(0, 0, width, height); // 画面全体を覆う
 
             ctx.fillStyle = 'white';
-            ctx.font = `${FONT_SIZE.LARGE}px ${FONT_FAMILY}`; // テキストを大きくする
+            ctx.font = `${FONT_SIZE.LARGE}px ${FONT_FAMILY}`;
             ctx.textAlign = 'center';
             ctx.fillText(this.promptMessage, width / 2, height / 2); // 画面中央に配置
         } else {
