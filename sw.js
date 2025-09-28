@@ -4,12 +4,12 @@ import { assetsToCache } from './js/asset_list.js';
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('Opened cache. Caching assets individually.');
-      // cache.addAll is all-or-nothing. We add individually for robustness.
+      console.log('キャッシュを開きました。アセットを個別にキャッシュしています。');
+      // cache.addAll はすべて成功かすべて失敗かです。堅牢性のために個別にキャッシュします。
       const promises = assetsToCache.map((url) => {
         return cache.add(url).catch(err => {
-          // Log failed caches but don't fail the entire install
-          console.error(`Failed to cache ${url}:`, err);
+          // キャッシュ失敗をログに記録しますが、インストール全体を失敗させません
+          console.error(`${url} のキャッシュに失敗しました:`, err);
         });
       });
       return Promise.all(promises);
@@ -21,7 +21,7 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
-        // Cache-first strategy
+        // キャッシュファースト戦略
         return response || fetch(event.request);
       })
   );

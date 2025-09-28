@@ -1,4 +1,4 @@
-import { BLOCK_SIZE, STUMP_WIDTH_IN_BLOCKS, PLATFORM_HEIGHT_IN_BLOCKS } from './config.js'; // ★STUMP_WIDTH_IN_BLOCKSをインポート
+import { BLOCK_SIZE, STUMP_WIDTH_IN_BLOCKS, PLATFORM_HEIGHT_IN_BLOCKS } from './config.js'; // STUMP_WIDTH_IN_BLOCKSをインポート
 import { soundPlayer } from "../soundPlayer.js";
 
 const PLAYER_WIDTH_IN_BLOCKS = 2.0;
@@ -79,7 +79,7 @@ export class Player {
             }
         }
 
-        // ★ここから新しい衝突判定ロジック
+        // ここから新しい衝突判定ロジック
         let canMoveRight = true;
         let canMoveLeft = true;
 
@@ -117,7 +117,7 @@ export class Player {
         if (this.vx < 0 && !canMoveLeft) {
             this.vx = 0;
         }
-        // ★ここまで新しい衝突判定ロジック
+        // ここまで新しい衝突判定ロジック
 
         this.x += this.vx; // 調整されたvxでx座標を更新
 
@@ -158,7 +158,7 @@ export class Player {
         const allGrounds = [...platforms, ...trees];
         allGrounds.forEach(ground => {
             let cbox = { x: ground.x, width: ground.width };
-            if (ground.isBreakable) { // ★木なら当たり判定を幹の幅に
+            if (ground.isBreakable) { // 木なら当たり判定を幹の幅に
                 cbox.width = STUMP_WIDTH_IN_BLOCKS * BLOCK_SIZE;
                 cbox.x = ground.x + (ground.width - cbox.width) / 2;
             }

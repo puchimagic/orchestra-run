@@ -1,11 +1,11 @@
 export const assetsToCache = [
-  // --- Core Files ---
+  // --- コアファイル ---
   './',
   './index.html',
   './style.css',
   './soundPlayer.js',
 
-  // --- JavaScript Files ---
+  // --- JavaScriptファイル ---
   './js/config.js',
   './js/input_handler.js',
   './js/main.js',
@@ -23,7 +23,7 @@ export const assetsToCache = [
   './js/ui/button.js',
   './js/ui/volume_slider.js',
 
-  // --- Image Files ---
+  // --- 画像ファイル ---
   './img/character_jump.png',
   './img/character_wait.png',
   './img/character_woke.png',
@@ -48,7 +48,7 @@ export const assetsToCache = [
   './img/title_rank_select.png',
   './img/toraianguru.png',
 
-  // --- Sound Files ---
+  // --- サウンドファイル ---
   './sound/drum/track01.wav',
   './sound/drum/track02.wav',
   './sound/drum/track03.wav',

@@ -11,7 +11,7 @@ export class InputHandler {
         this.fixedGamepadConnectedStatus = null;
 
         this.activated = false;
-        this.mouseDown = false; // ★マウスボタンの状態を追加
+        this.mouseDown = false; // マウスボタンの状態を追加
 
         const activateOnce = () => {
             this.activated = true;
@@ -26,7 +26,7 @@ export class InputHandler {
         window.addEventListener('keydown', this.handleKeyDown.bind(this));
         window.addEventListener('keyup', this.handleKeyUp.bind(this));
 
-        // ★マウスイベントをInputHandlerで管理
+        // マウスイベントをInputHandlerで管理
         window.addEventListener('mousedown', () => { this.mouseDown = true; });
         window.addEventListener('mouseup', () => { this.mouseDown = false; });
 
@@ -45,7 +45,7 @@ export class InputHandler {
         return this.activated;
     }
 
-    // ★マウスボタンが押されているか
+    // マウスボタンが押されているか
     isMouseDown() {
         return this.mouseDown;
     }

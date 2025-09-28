@@ -15,7 +15,7 @@ export class GameOverScene {
             this.isBackgroundLoaded = true;
         };
         this.backgroundImage.onerror = () => {
-            console.error('Failed to load background image: img/gameover.png');
+            console.error('背景画像の読み込みに失敗しました: img/gameover.png');
         };
     }
 
@@ -51,7 +51,8 @@ export class GameOverScene {
         //背景設定
         if (this.isBackgroundLoaded) {
             ctx.drawImage(this.backgroundImage, 0, 0, width, height);
-        } else {
+        }
+        else {
             ctx.clearRect(0, 0, width, height);
             ctx.fillStyle = '#a0a0a0';
             ctx.fillRect(0, 0, width, height);

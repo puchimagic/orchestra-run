@@ -10,7 +10,7 @@ export class ScaffoldBlock {
         this.y = y;
         this.width = widthInBlocks * BLOCK_SIZE;
         this.height = heightInBlocks * BLOCK_SIZE;
-        this.requiredKeys = requiredKeys; // e.g., ['J'] or ['L']
+        this.requiredKeys = requiredKeys; // 例: ['J'] または ['L']
 
         this.state = 'ACTIVE';
         this.solidUntil = 0;

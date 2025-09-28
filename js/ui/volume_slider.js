@@ -7,7 +7,7 @@ export class VolumeSlider {
         this.width = width;
         this.height = height;
         this.label = label;
-        this.value = initialValue; // 0.0 to 1.0
+        this.value = initialValue; // 0.0 から 1.0 の範囲
         this.setterFunction = setterFunction;
 
         this.isDragging = false;

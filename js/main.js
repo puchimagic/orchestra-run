@@ -60,7 +60,7 @@ class Game {
                 soundPlayer.setGameSoundVolume(settings.gameSoundVolume !== undefined ? settings.gameSoundVolume : 0.7);
             }
         } catch (e) {
-            console.error('Failed to load settings:', e);
+            console.error('設定の読み込みに失敗しました:', e);
             this.inputMethod = 'keyboard';
         }
     }
@@ -76,7 +76,7 @@ class Game {
             };
             localStorage.setItem('okerun-settings', JSON.stringify(settings));
         } catch (e) {
-            console.error('Failed to save settings:', e);
+            console.error('設定の保存に失敗しました:', e);
         }
     }
 

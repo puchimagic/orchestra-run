@@ -52,7 +52,7 @@ export class SoundPlayer {
       this.gameSounds.home_bgm.volume = volume;
       localStorage.setItem('bgmVolume', volume);
     } else {
-      console.warn('BGM volume must be between 0 and 1.');
+      console.warn('BGM音量は0から1の間に設定してください。');
     }
   }
 
@@ -68,7 +68,7 @@ export class SoundPlayer {
       }
       localStorage.setItem('instrumentVolume', volume);
     } else {
-      console.warn('Instrument volume must be between 0 and 1.');
+      console.warn('楽器音量は0から1の間に設定してください。');
     }
   }
 
@@ -82,7 +82,7 @@ export class SoundPlayer {
       this.gameSounds.tree_fall.volume = volume;
       localStorage.setItem('gameSoundVolume', volume);
     } else {
-      console.warn('Game sound volume must be between 0 and 1.');
+      console.warn('ゲーム効果音量は0から1の間に設定してください。');
     }
   }
 
@@ -98,7 +98,7 @@ export class SoundPlayer {
       newBGM.play();
       this.currentBGM = newBGM;
     } else {
-      console.warn(`BGM not found: ${bgmName}`);
+      console.warn(`BGMが見つかりません: ${bgmName}`);
     }
   }
 
@@ -119,11 +119,11 @@ export class SoundPlayer {
 
   playSound(name) {
     if (this.sounds[name]) {
-      console.log(`Playing sound: ${name}`);
+      console.log(`サウンドを再生中: ${name}`);
       this.sounds[name].currentTime = 0;
       this.sounds[name].play();
     } else {
-      console.warn(`Sound not found: ${name}`);
+      console.warn(`サウンドが見つかりません: ${name}`);
     }
   }
 

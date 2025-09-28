@@ -20,16 +20,16 @@ export class Button {
             this.isHovered = true;
             if (mouse.clicked) {
                 soundPlayer.playGameSound("score"); // ボタンクリック音を再生
-                return true; // Button was clicked
+                return true; // ボタンがクリックされた
             }
         } else {
             this.isHovered = false;
         }
-        return false; // Button was not clicked
+        return false; // ボタンはクリックされなかった
     }
 
     draw(ctx, scale = 1) {
-        // Draw button
+        // ボタンを描画
         let currentColor = this.color;
         let currentHoverColor = this.hoverColor;
 
@@ -41,9 +41,9 @@ export class Button {
         ctx.fillStyle = this.isHovered ? currentHoverColor : currentColor;
         ctx.fillRect(this.x, this.y, this.width, this.height);
 
-        // Draw text
+        // テキストを描画
         ctx.fillStyle = '#fff';
-        // Apply scale to font size
+        // フォントサイズにスケールを適用
         const scaledFontSize = FONT_SIZE.MEDIUM; // FONT_SIZE.SMALL から FONT_SIZE.MEDIUM に変更
         ctx.font = `${scaledFontSize}px ${FONT_FAMILY}`;
         ctx.textAlign = 'center';

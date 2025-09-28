@@ -24,18 +24,18 @@ export class MainScene {
         this.logoWidth = 0; // ロゴの幅
         this.logoHeight = 0; // ロゴの高さ
 
-        // --- Mode-dependent logic ---
+        // --- モード依存ロジック ---
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
 
         if (isStandalone) {
-            // PWA mode: strict cache verification
+            // PWAモード: 厳密なキャッシュ検証
             this.cacheStatus = 'verifying';
             this.promptMessage = 'キャッシュを確認中...';
             this.verifyAssetCache();
             window.addEventListener('online', () => this.handleNetworkChange());
             window.addEventListener('offline', () => this.handleNetworkChange());
         } else {
-            // Browser mode: skip cache check and start directly
+            // ブラウザモード: キャッシュチェックをスキップして直接開始
             this.cacheStatus = 'complete';
             this.promptMessage = '画面を押してください';
         }
@@ -57,7 +57,8 @@ export class MainScene {
             if (allCached) {
                 this.cacheStatus = 'complete';
                 this.promptMessage = '画面を押してください';
-            } else {
+            }
+            else {
                 if (navigator.onLine) {
                     this.cacheStatus = 'caching';
                     this.promptMessage = 'アセットを準備中です...';
@@ -68,7 +69,7 @@ export class MainScene {
                 }
             }
         } catch (error) {
-            console.error('Cache verification failed:', error);
+            console.error('キャッシュ検証に失敗しました:', error);
             this.cacheStatus = 'incomplete_offline';
             this.promptMessage = 'エラーが発生しました';
         }
@@ -158,7 +159,7 @@ export class MainScene {
         } else {
             ctx.fillStyle = 'black'; ctx.font = `${FONT_SIZE.LARGE}px ${FONT_FAMILY}`;
             ctx.textAlign = 'center';
-            ctx.fillText('オケラン', width / 2, height / 2 - 250); // Fallback text position might need adjustment too
+            ctx.fillText('オケラン', width / 2, height / 2 - 250); // フォールバックテキストの位置も調整が必要な場合あり
         }
 
         // 3. ゲームがアクティブでない場合、オーバーレイとプロンプトメッセージを表示
@@ -170,7 +171,8 @@ export class MainScene {
             ctx.font = `${FONT_SIZE.LARGE}px ${FONT_FAMILY}`;
             ctx.textAlign = 'center';
             ctx.fillText(this.promptMessage, width / 2, height / 2); // 画面中央に配置
-        } else {
+        }
+        else {
             // 4. ゲームがアクティブな場合、ボタンを描画
             this.startButton.draw(ctx);
             this.rankingButton.draw(ctx);

@@ -20,7 +20,7 @@ export class SettingsScene {
         this.isBackgroundLoaded = false;
         this.backgroundImage.onload = () => { this.isBackgroundLoaded = true; };
 
-        // Volume Sliders (3種類に修正)
+        // 音量スライダー (3種類に修正)
         this.bgmSlider = new VolumeSlider(0, 0, 500, 40, 'BGM音量', soundPlayer.bgmVolume, (v) => { // サイズ変更
             soundPlayer.setBgmVolume(v);
             this.game.saveSettings();
@@ -34,11 +34,11 @@ export class SettingsScene {
             this.game.saveSettings();
         });
 
-        // Input Method Buttons
+        // 入力方法ボタン
         this.keyboardButton = new Button(0, 0, 450, 100, 'キーボード'); // サイズ変更
         this.gamepadButton = new Button(0, 0, 450, 100, 'ゲームパッド'); // サイズ変更
 
-        // Back Button
+        // 戻るボタン
         this.backButton = new Button(0, 0, 500, 100, '戻る'); // サイズ変更とテキスト変更
 
         this.onResize();

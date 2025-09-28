@@ -27,8 +27,8 @@ class TemporaryAnimation {
             this.animationTimer = 0;
             this.animationFrame++;
             if (this.animationFrame >= this.images.length - 1) {
-                this.animationFrame = this.images.length - 1; // Stay on the last frame
-                this.isFinished = true; // Mark as finished
+                this.animationFrame = this.images.length - 1; // 最後のフレームで停止
+                this.isFinished = true; // 完了としてマーク
             }
         }
     }

@@ -41,7 +41,7 @@ export class GameScene {
             this.isBackgroundLoaded = true;
         };
         this.backgroundImage.onerror = () => {
-            console.error('Failed to load background image: img/mein.png');
+            console.error('背景画像の読み込みに失敗しました: img/mein.png');
         };
 
         // 楽器アイコン画像用
@@ -89,7 +89,7 @@ export class GameScene {
         this.game.inputHandler.stage = this.stage;
         this.player2Input.init();
 
-        // Countdown properties
+        // カウントダウンプロパティ
         this.isCountdown = true;
         this.countdownNumber = 3;
         this.countdownTimer = 0;
@@ -111,7 +111,7 @@ export class GameScene {
             this.isInstrumentLoaded = true;
         };
         this.instrumentImage.onerror = () => {
-            console.error(`Failed to load instrument image for: ${this.instrumentName}`);
+            console.error(`楽器画像の読み込みに失敗しました: ${this.instrumentName}`);
         };
 
         this.loadInstrumentSounds(); // 楽器の音源をロード
@@ -122,13 +122,13 @@ export class GameScene {
     loadInstrumentSounds() {
         const instrumentConfig = KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName];
         if (!instrumentConfig) {
-            console.warn(`Instrument config not found for: ${this.instrumentName}`);
+            console.warn(`楽器設定が見つかりません: ${this.instrumentName}`);
             return;
         }
 
         this.instrumentDirName = this.instrumentDirMap[this.instrumentName]; // プロパティに設定
         if (!this.instrumentDirName) {
-            console.warn(`Instrument directory name not found for: ${this.instrumentName}`);
+            console.warn(`楽器のディレクトリ名が見つかりません: ${this.instrumentName}`);
             return;
         }
 
@@ -200,7 +200,7 @@ export class GameScene {
                 this.countdownNumber--;
                 if (this.countdownNumber < 0) {
                     this.isCountdown = false;
-                    this.startTime = Date.now(); // Reset start time after countdown
+                    this.startTime = Date.now(); // カウントダウン後に開始時間をリセット
                     this.lastTime = this.startTime;
                 }
             }
@@ -402,16 +402,16 @@ export class GameScene {
                         for (let i = 0; i < numSoundsToPlay; i++) {
                             const trackNumber = startIndex + i + 1;
                             const soundName = `${this.instrumentDirName}_track${trackNumber}`;
-                            console.log(`Attempting to play piano sound: ${soundName}`);
+                            console.log(`ピアノの音を再生しようとしています: ${soundName}`);
                             this.instrumentSoundPlayer.playSound(soundName);
                         }
                     }
                     else {
-                        console.warn(`Not enough piano tracks for ${numSoundsToPlay} required actions.`);
+                        console.warn(`必要なアクション数 ${numSoundsToPlay} に対してピアノのトラックが足りません。`);
                         for (let i = 0; i < numSoundsToPlay; i++) {
                             const trackNumber = (startIndex + i) % availableTracks + 1;
                             const soundName = `${this.instrumentDirName}_track${trackNumber}`;
-                            console.log(`Attempting to play piano sound (looped): ${soundName}`);
+                            console.log(`ピアノの音を再生しようとしています (ループ): ${soundName}`);
                             this.instrumentSoundPlayer.playSound(soundName);
                         }
                     }
@@ -422,11 +422,11 @@ export class GameScene {
                     
                     if (trackNumber >= 0 && trackNumber < KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName].maxChord) {
                         const soundName = `${this.instrumentDirName}_track${trackNumber + 1}`;
-                        console.log(`Attempting to play guitar sound: ${soundName}`);
+                        console.log(`ギターの音を再生しようとしています: ${soundName}`);
                         this.instrumentSoundPlayer.playSound(soundName);
                     }
                     else {
-                        console.warn(`No guitar sound for track number ${trackNumber + 1}.`);
+                        console.warn(`トラック番号 ${trackNumber + 1} のギターの音が見つかりません。`);
                     }
                 }
                 else {
@@ -436,7 +436,7 @@ export class GameScene {
                         const keyIndex = instrumentConfig.keys.indexOf(key);
                         if (keyIndex !== -1) {
                             const soundName = `${this.instrumentDirName}_track${keyIndex + 1}`;
-                            console.log(`Attempting to play sound: ${soundName}`);
+                            console.log(`音を再生しようとしています: ${soundName}`);
                             this.instrumentSoundPlayer.playSound(soundName);
                         }
                     });

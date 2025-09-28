@@ -14,7 +14,7 @@ export class RankingScene {
             this.isBackgroundLoaded = true;
         };
         this.backgroundImage.onerror = () => {
-            console.error('Failed to load background image: img/title_rank_select.png');
+            console.error('背景画像の読み込みに失敗しました: img/title_rank_select.png');
         };
 
         this.onResize();
@@ -48,7 +48,8 @@ export class RankingScene {
         //背景設定
         if (this.isBackgroundLoaded) {
             ctx.drawImage(this.backgroundImage, 0, 0, width, height);
-        } else {
+        }
+        else {
             ctx.clearRect(0, 0, width, height);
             ctx.fillStyle = '#f0f0f0';
             ctx.fillRect(0, 0, width, height);

@@ -6,7 +6,7 @@ import { soundPlayer } from '../../soundPlayer.js';
 export class VolumeSettingsScene {
     constructor(game) {
         this.game = game;
-        this.inputHandler = this.game.inputHandler; // Get reference to the input handler
+        this.inputHandler = this.game.inputHandler; // 入力ハンドラへの参照を取得
         this.activeSlider = null;
     }
 

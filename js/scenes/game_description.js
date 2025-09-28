@@ -11,11 +11,11 @@ export class GameDescriptionScene {
             this.isBackgroundLoaded = true;
         };
         this.backgroundImage.onerror = () => {
-            console.error('Failed to load background image: img/title_rank_select.png');
+            console.error('背景画像の読み込みに失敗しました: img/title_rank_select.png');
         };
         this.inputHandler = this.game.inputHandler;
 
-        this.currentPage = 0; // 0-indexed
+        this.currentPage = 0; // 0から始まるインデックス
         this.descriptionPages = [
             // ページ1: ゲーム概要
             [
