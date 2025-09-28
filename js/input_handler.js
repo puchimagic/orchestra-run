@@ -15,11 +15,11 @@ export class InputHandler {
 
         const activateOnce = () => {
             this.activated = true;
-            window.removeEventListener('keydown', activateOnce);
+            // window.removeEventListener('keydown', activateOnce); // 削除
             window.removeEventListener('mousedown', activateOnce);
             window.removeEventListener('touchstart', activateOnce);
         };
-        window.addEventListener('keydown', activateOnce);
+        // window.addEventListener('keydown', activateOnce); // この行を削除
         window.addEventListener('mousedown', activateOnce);
         window.addEventListener('touchstart', activateOnce);
 
