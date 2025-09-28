@@ -19,6 +19,11 @@ export class MainScene {
         this.isLogoLoaded = false;
         this.logoImage.onload = () => { this.isLogoLoaded = true; };
 
+        this.logoX = 0; // ロゴのX座標
+        this.logoY = 0; // ロゴのY座標
+        this.logoWidth = 0; // ロゴの幅
+        this.logoHeight = 0; // ロゴの高さ
+
         // --- Mode-dependent logic ---
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
 
@@ -80,14 +85,44 @@ export class MainScene {
     }
 
     onResize() {
-        const btnWidth = 300, btnHeight = 75, gapX = 50, gapY = 20;
-        const cx = this.game.canvas.width / 2, cy = this.game.canvas.height / 2;
-        const leftColX = cx - btnWidth - gapX / 2, rightColX = cx + gapX / 2;
+        const { width, height } = this.game.canvas;
+        const cx = width / 2;
 
-        this.startButton = new Button(leftColX, cy - btnHeight - gapY / 2, btnWidth, btnHeight, 'ゲームスタート');
-        this.descButton = new Button(leftColX, cy + gapY / 2, btnWidth, btnHeight, 'あそびかた');
-        this.rankingButton = new Button(rightColX, cy - btnHeight - gapY / 2, btnWidth, btnHeight, 'ランキング');
-        this.settingsButton = new Button(rightColX, cy + gapY / 2, btnWidth, btnHeight, '設定');
+        // --- ロゴの配置 --- 
+        // ロゴの幅を画面幅の約70%に設定
+        const logoDisplayWidth = width * 0.7;
+        // ロゴの高さをアスペクト比を維持して計算
+        const logoDisplayHeight = this.logoImage.height * (logoDisplayWidth / this.logoImage.width);
+        // ロゴを画面上部から約10%の位置に配置
+        const logoY = height * 0.1;
+
+        // ロゴの描画位置を更新 (draw メソッドで使用するため、プロパティとして保存)
+        this.logoX = cx - logoDisplayWidth / 2;
+        this.logoY = logoY;
+        this.logoWidth = logoDisplayWidth;
+        this.logoHeight = logoDisplayHeight;
+
+
+        // --- ボタンの配置 --- 
+        // ボタンのサイズを大きくする
+        const btnWidth = 450; // 300 -> 450
+        const btnHeight = 120; // 75 -> 120
+
+        // ボタン間のギャップを広げる
+        const gapX = 80; // 50 -> 80
+        const gapY = 40; // 20 -> 40
+
+        // ボタンのY座標の基準点を画面の高さの約60%あたりに設定
+        const buttonsStartY = height * 0.6;
+
+        // 2列のボタン配置
+        const leftColX = cx - btnWidth - gapX / 2;
+        const rightColX = cx + gapX / 2;
+
+        this.startButton = new Button(leftColX, buttonsStartY, btnWidth, btnHeight, 'ゲームスタート');
+        this.descButton = new Button(leftColX, buttonsStartY + btnHeight + gapY, btnWidth, btnHeight, 'あそびかた');
+        this.rankingButton = new Button(rightColX, buttonsStartY, btnWidth, btnHeight, 'ランキング');
+        this.settingsButton = new Button(rightColX, buttonsStartY + btnHeight + gapY, btnWidth, btnHeight, '設定');
     }
 
     update() {
@@ -112,30 +147,35 @@ export class MainScene {
         const ctx = this.game.ctx;
         const { width, height } = this.game.canvas;
 
+        // 1. 背景画像を描画
         if (this.isBackgroundLoaded) ctx.drawImage(this.backgroundImage, 0, 0, width, height);
         else { ctx.clearRect(0, 0, width, height); ctx.fillStyle = '#f0f0f0'; ctx.fillRect(0, 0, width, height); }
 
+        // 2. ロゴを描画
         if (this.isLogoLoaded) {
-            const logoWidth = 600, logoHeight = this.logoImage.height * (logoWidth / this.logoImage.width);
-            ctx.drawImage(this.logoImage, width / 2 - logoWidth / 2, height / 2 - 250 - logoHeight / 2, logoWidth, logoHeight);
+            // onResizeで計算したプロパティを使用
+            ctx.drawImage(this.logoImage, this.logoX, this.logoY, this.logoWidth, this.logoHeight);
         } else {
             ctx.fillStyle = 'black'; ctx.font = `${FONT_SIZE.LARGE}px ${FONT_FAMILY}`;
             ctx.textAlign = 'center';
-            ctx.fillText('オケラン', width / 2, height / 2 - 250);
+            ctx.fillText('オケラン', width / 2, height / 2 - 250); // Fallback text position might need adjustment too
         }
 
-        this.startButton.draw(ctx);
-        this.rankingButton.draw(ctx);
-        this.descButton.draw(ctx);
-        this.settingsButton.draw(ctx);
-
+        // 3. ゲームがアクティブでない場合、オーバーレイとプロンプトメッセージを表示
         if (!this.game.isGameActive) {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            ctx.fillRect(0, 0, width, height);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)'; // 半透明のオーバーレイ
+            ctx.fillRect(0, 0, width, height); // 画面全体を覆う
+
             ctx.fillStyle = 'white';
-            ctx.font = `${FONT_SIZE.MEDIUM}px ${FONT_FAMILY}`;
+            ctx.font = `${FONT_SIZE.LARGE}px ${FONT_FAMILY}`; // テキストを大きくする
             ctx.textAlign = 'center';
-            ctx.fillText(this.promptMessage, width / 2, height / 2 + 150);
+            ctx.fillText(this.promptMessage, width / 2, height / 2); // 画面中央に配置
+        } else {
+            // 4. ゲームがアクティブな場合、ボタンを描画
+            this.startButton.draw(ctx);
+            this.rankingButton.draw(ctx);
+            this.descButton.draw(ctx);
+            this.settingsButton.draw(ctx);
         }
     }
 }
