@@ -1,3 +1,5 @@
+import { INSTRUMENT_ORDER, INSTRUMENT_FOLDER_MAP } from './js/config.js';
+
 export class SoundPlayer {
   constructor() {
     // localStorageから音量設定を読み込むか、デフォルト値を設定
@@ -39,8 +41,17 @@ export class SoundPlayer {
     this.gameSounds.home_bgm.loop = true;
     this.gameSounds.game_bgm.loop = true;
 
-    // プレビュー用の楽器音を事前にロード
-    this.loadSound('guitar_preview', './sound/guitar/track01.wav');
+    // 各楽器のtrack01.wavをロード
+    INSTRUMENT_ORDER.forEach(instrumentName => {
+      // INSTRUMENT_FOLDER_MAP を使用して正しいフォルダ名を取得
+      const folderName = INSTRUMENT_FOLDER_MAP[instrumentName];
+      if (folderName) { // マッピングが存在する場合のみロード
+        const soundPath = `./sound/${folderName}/track01.wav`;
+        this.loadSound(`${instrumentName}_track01`, soundPath);
+      } else {
+        console.warn(`楽器名 "${instrumentName}" に対応するフォルダ名が見つかりません。`);
+      }
+    });
   }
 
   // BGM音量を設定するセッター

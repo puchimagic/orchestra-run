@@ -68,3 +68,13 @@ export const GAMEPAD_INSTRUMENT_CONFIG = {
 };
 
 export const INSTRUMENT_ORDER = ['トライアングル', 'タンバリン', '太鼓', 'ドラム', 'ピアノ', 'ギター'];
+
+// 日本語の楽器名とフォルダ名のマッピング
+export const INSTRUMENT_FOLDER_MAP = {
+    'トライアングル': 'triangle',
+    'タンバリン': 'tambourie',
+    '太鼓': 'taiko',
+    'ドラム': 'drum',
+    'ピアノ': 'piano',
+    'ギター': 'guitar',
+};

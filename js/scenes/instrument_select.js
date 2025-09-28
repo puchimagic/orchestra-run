@@ -1,4 +1,4 @@
-import { SCENE, FONT_SIZE, FONT_FAMILY, KEYBOARD_INSTRUMENT_CONFIG, INSTRUMENT_ORDER } from '../config.js';
+import { SCENE, FONT_SIZE, FONT_FAMILY, KEYBOARD_INSTRUMENT_CONFIG, INSTRUMENT_ORDER, DEFAULT_BUTTON_COLOR, DEFAULT_BUTTON_HOVER_COLOR } from '../config.js';
 import { Button } from '../ui/button.js';
 
 export class InstrumentSelectScene {
@@ -53,7 +53,7 @@ export class InstrumentSelectScene {
                 x = col2_x;
                 y = [y1, y2, y3][i - 3];
             }
-            this.instrumentButtons[name] = new Button(x, y, btnWidth, btnHeight, name);
+            this.instrumentButtons[name] = new Button(x, y, btnWidth, btnHeight, name, DEFAULT_BUTTON_COLOR, DEFAULT_BUTTON_HOVER_COLOR, `${name}_track01`, "instrumentSound");
         });
 
         // スタートボタンと戻るボタンをグループとして中央に配置
