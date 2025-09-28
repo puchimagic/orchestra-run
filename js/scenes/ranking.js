@@ -24,6 +24,10 @@ export class RankingScene {
 
         this.onResize();
         this.loadScores();
+
+        // wheel イベントリスナーを追加
+        // this.handleWheelBound = this.handleWheel.bind(this); // 削除
+        this.game.canvas.addEventListener('wheel', this.handleWheel);
     }
 
     async loadScores() {
@@ -47,7 +51,7 @@ export class RankingScene {
         const rankingContentEndY = backButtonY - 50;
         const availableHeight = rankingContentEndY - rankingContentStartY;
 
-        const maxDisplayWidth = 900;
+        const maxDisplayWidth = 900; // ランキングテキストの表示幅
         const displayStartX = (width - maxDisplayWidth) / 2;
 
         this.rankingDisplayArea = {
@@ -59,7 +63,8 @@ export class RankingScene {
 
         // スクロールバーの位置とサイズを設定
         const scrollbarWidth = 20;
-        this.scrollbar.x = this.rankingDisplayArea.x + this.rankingDisplayArea.width - scrollbarWidth;
+        const scrollbarMarginRight = 10; // ランキングテキストとの間のマージン
+        this.scrollbar.x = this.rankingDisplayArea.x + this.rankingDisplayArea.width + scrollbarMarginRight; // ランキング表示領域の右端からマージンを空けて配置
         this.scrollbar.y = this.rankingDisplayArea.y;
         this.scrollbar.width = scrollbarWidth;
         this.scrollbar.height = this.rankingDisplayArea.height;
@@ -67,11 +72,11 @@ export class RankingScene {
         // スクロール可能なコンテンツの総高さを計算
         const lineHeight = 60;
         const maxDisplayCount = 50; // draw メソッドの maxDisplayCount と合わせる
-        const totalScoresHeight = maxDisplayCount * lineHeight; // 常に50行分の高さを確保
+        const totalScoresHeight = maxDisplayCount * lineHeight;
         this.scrollbar.updateContentHeight(totalScoresHeight);
 
-        console.log("totalScoresHeight:", totalScoresHeight); // デバッグ情報
-        console.log("scrollbar.height (rankingDisplayArea.height):", this.scrollbar.height); // デバッグ情報
+        console.log("totalScoresHeight:", totalScoresHeight);
+        console.log("scrollbar.height (rankingDisplayArea.height):", this.scrollbar.height);
     }
 
     update() {
@@ -209,7 +214,7 @@ export class RankingScene {
         // const mouseX = this.game.mouse.x;
         // const mouseY = this.game.mouse.y;
 
-        // if (mouseX >= this.rankingDisplayArea.x && mouseX <= this.rankingDisplayArea.x + this.rankingDisplayArea.width &&
+        // if (mouseX >= this.rankingDisplayArea.x && mouseX <= this.rankingDisplayArea.x + this.rankingDisplayArea.width + this.scrollbar.width + 20 &&
         //     mouseY >= this.rankingDisplayArea.y && mouseY <= this.rankingDisplayArea.y + this.rankingDisplayArea.height) {
             event.preventDefault(); // デフォルトのスクロール動作を抑制
             this.scrollbar.scrollBy(event.deltaY * 0.5); // スクロール感度を調整
