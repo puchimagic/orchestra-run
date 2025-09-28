@@ -24,6 +24,9 @@ export class MainScene {
         this.logoWidth = 0; // ロゴの幅
         this.logoHeight = 0; // ロゴの高さ
 
+        // キャッシュの進捗状況を保持するプロパティを追加
+        this.cacheProgress = 0; // 0から1の範囲で進捗を表す
+
         // --- モード依存ロジック ---
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
 
@@ -50,28 +53,45 @@ export class MainScene {
 
         try {
             const cache = await caches.open(CACHE_NAME);
-            const promises = assetsToCache.map(url => cache.match(url).then(res => res !== undefined));
-            const results = await Promise.all(promises);
+            const totalAssets = assetsToCache.length;
+            let loadedAssetsCount = 0;
+
+            // 各アセットのキャッシュ状況をチェックし、進捗を更新
+            const checkPromises = assetsToCache.map(async url => {
+                const res = await cache.match(url);
+                if (res !== undefined) {
+                    loadedAssetsCount++;
+                }
+                // 進捗を更新
+                this.cacheProgress = loadedAssetsCount / totalAssets;
+                this.promptMessage = `アセットを準備中です... (${Math.floor(this.cacheProgress * 100)}%)`;
+                return res !== undefined;
+            });
+
+            const results = await Promise.all(checkPromises);
             const allCached = results.every(result => result);
 
             if (allCached) {
                 this.cacheStatus = 'complete';
                 this.promptMessage = '画面を押してください';
+                this.cacheProgress = 1; // 完了したら100%
             }
             else {
                 if (navigator.onLine) {
                     this.cacheStatus = 'caching';
-                    this.promptMessage = 'アセットを準備中です...';
+                    // promptMessageはcheckPromises内で更新される
                     setTimeout(() => this.verifyAssetCache(), 2000);
                 } else {
                     this.cacheStatus = 'incomplete_offline';
                     this.promptMessage = 'ネットワークに繋いでください';
+                    this.cacheProgress = 0; // オフラインの場合は進捗をリセット
                 }
             }
         } catch (error) {
             console.error('キャッシュ検証に失敗しました:', error);
             this.cacheStatus = 'incomplete_offline';
             this.promptMessage = 'エラーが発生しました';
+            this.cacheProgress = 0; // エラー時は進捗をリセット
         }
     }
 
@@ -89,7 +109,7 @@ export class MainScene {
         const { width, height } = this.game.canvas;
         const cx = width / 2;
 
-        // --- ロゴの配置 --- 
+        // --- ロゴの配置 ---
         // ロゴの幅を画面幅の約70%に設定
         const logoDisplayWidth = width * 0.7;
         // ロゴの高さをアスペクト比を維持して計算
@@ -104,7 +124,7 @@ export class MainScene {
         this.logoHeight = logoDisplayHeight;
 
 
-        // --- ボタンの配置 --- 
+        // --- ボタンの配置 ---
         // ボタンのサイズをさらに大きくする
         const btnWidth = 550; // 450 -> 550
         const btnHeight = 150; // 120 -> 150
@@ -172,6 +192,27 @@ export class MainScene {
             ctx.font = `${FONT_SIZE.LARGE}px ${FONT_FAMILY}`;
             ctx.textAlign = 'center';
             ctx.fillText(this.promptMessage, width / 2, height / 2); // 画面中央に配置
+
+            // キャッシュ中であればプログレスバーを描画
+            if (this.cacheStatus === 'caching') {
+                const barWidth = width * 0.6; // バーの幅
+                const barHeight = 30; // バーの高さ
+                const barX = (width - barWidth) / 2;
+                const barY = height / 2 + 50; // メッセージの下に配置
+
+                // プログレスバーの背景
+                ctx.fillStyle = '#555';
+                ctx.fillRect(barX, barY, barWidth, barHeight);
+
+                // プログレスバーの進捗部分
+                ctx.fillStyle = '#00ff00'; // 緑色
+                ctx.fillRect(barX, barY, barWidth * this.cacheProgress, barHeight);
+
+                // プログレスバーの枠線
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(barX, barY, barWidth, barHeight);
+            }
         }
         else {
             // ゲームがアクティブな場合、ボタンを描画
