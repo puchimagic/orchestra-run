@@ -42,6 +42,9 @@ class Game {
 
         this.loadSettings(); // 追加
 
+        this.canvasOffsetX = 0; // 追加
+        this.canvasOffsetY = 0; // 追加
+
         window.addEventListener('resize', () => this.resizeCanvas());
         this.resizeCanvas();
 
@@ -87,9 +90,13 @@ class Game {
         if (window.innerWidth / window.innerHeight > aspectRatio) {
             newHeight = window.innerHeight;
             newWidth = newHeight * aspectRatio;
+            this.canvasOffsetX = (window.innerWidth - newWidth) / 2; // 左右の余白
+            this.canvasOffsetY = 0; // 上下の余白なし
         } else {
             newWidth = window.innerWidth;
             newHeight = newWidth / aspectRatio;
+            this.canvasOffsetX = 0; // 左右の余白なし
+            this.canvasOffsetY = (window.innerHeight - newHeight) / 2; // 上下の余白
         }
 
         this.canvas.style.width = `${newWidth}px`;
@@ -104,11 +111,13 @@ class Game {
 
     getScaledMousePos(event) {
         const rect = this.canvas.getBoundingClientRect();
-        const scaleX = this.canvas.width / rect.width;
-        const scaleY = this.canvas.height / rect.height;
+        // Canvas要素の表示領域内での座標から、さらに余白を考慮した描画領域内での座標を計算
+        const clientXInCanvas = event.clientX - rect.left - this.canvasOffsetX;
+        const clientYInCanvas = event.clientY - rect.top - this.canvasOffsetY;
+
         return {
-            x: (event.clientX - rect.left) * scaleX,
-            y: (event.clientY - rect.top) * scaleY
+            x: clientXInCanvas / this.scale,
+            y: clientYInCanvas / this.scale
         };
     }
 
@@ -127,7 +136,7 @@ class Game {
     }
 
     init() {
-        this.inputHandler = new InputHandler(null, null);
+        this.inputHandler = new InputHandler(this.mouse);
         this.scenes[SCENE.MAIN] = new MainScene(this);
         this.scenes[SCENE.GAME_DESCRIPTION] = new GameDescriptionScene(this);
         this.scenes[SCENE.RANKING] = new RankingScene(this);

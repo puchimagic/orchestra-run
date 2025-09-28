@@ -1,5 +1,6 @@
 export class InputHandler {
-    constructor() {
+    constructor(mouse) {
+        this.mouse = mouse;
         this.keyboardInstrumentConfig = null;
         this.gamepadInstrumentConfig = null;
         this.activeKeyMap = {};
@@ -11,24 +12,17 @@ export class InputHandler {
         this.fixedGamepadConnectedStatus = null;
 
         this.activated = false;
-        this.mouseDown = false; // マウスボタンの状態を追加
 
         const activateOnce = () => {
             this.activated = true;
-            // window.removeEventListener('keydown', activateOnce); // 削除
             window.removeEventListener('mousedown', activateOnce);
             window.removeEventListener('touchstart', activateOnce);
         };
-        // window.addEventListener('keydown', activateOnce); // この行を削除
         window.addEventListener('mousedown', activateOnce);
         window.addEventListener('touchstart', activateOnce);
 
         window.addEventListener('keydown', this.handleKeyDown.bind(this));
         window.addEventListener('keyup', this.handleKeyUp.bind(this));
-
-        // マウスイベントをInputHandlerで管理
-        window.addEventListener('mousedown', () => { this.mouseDown = true; });
-        window.addEventListener('mouseup', () => { this.mouseDown = false; });
 
         window.addEventListener('gamepadconnected', e => {
             this.gamepads[e.gamepad.index] = e.gamepad;
@@ -45,9 +39,16 @@ export class InputHandler {
         return this.activated;
     }
 
-    // マウスボタンが押されているか
     isMouseDown() {
-        return this.mouseDown;
+        return this.mouse.clicked;
+    }
+
+    getMouseX() {
+        return this.mouse.x;
+    }
+
+    getMouseY() {
+        return this.mouse.y;
     }
 
     setInstrumentKeyMaps(keyboardConfig, gamepadConfig, fixedConnectedStatus = null) {
