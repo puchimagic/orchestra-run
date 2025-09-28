@@ -40,7 +40,7 @@ export class InputHandler {
     }
 
     isMouseDown() {
-        return this.mouse.clicked;
+        return this.mouse.isDown;
     }
 
     getMouseX() {

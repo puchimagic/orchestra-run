@@ -33,7 +33,7 @@ class Game {
 
         this.scenes = {};
         this.currentScene = null;
-        this.mouse = { x: 0, y: 0, clicked: false };
+        this.mouse = { x: 0, y: 0, clicked: false, isDown: false }; // isDown を追加
         this.isGameActive = false;
 
         this.scoreManager = new ScoreManager();
@@ -132,6 +132,11 @@ class Game {
             this.mouse.x = pos.x;
             this.mouse.y = pos.y;
             this.mouse.clicked = true;
+            this.mouse.isDown = true; // isDown を true に設定
+        });
+        // mouseup イベントリスナーを追加
+        this.canvas.addEventListener('mouseup', (e) => {
+            this.mouse.isDown = false; // isDown を false に設定
         });
     }
 

@@ -51,7 +51,7 @@ export class VolumeSlider {
         const thumbX = this.x + this.width * this.value;
         const thumbY = this.y + this.height / 2;
         // 見た目の半径(this.thumbRadius)より当たり判定を2.5倍に拡大
-        const hitboxRadius = this.thumbRadius * 2.5;
+        const hitboxRadius = this.thumbRadius * 2.5; // 4倍から2.5倍に戻す
         const distance = Math.sqrt(Math.pow(mouseX - thumbX, 2) + Math.pow(mouseY - thumbY, 2));
         return distance < hitboxRadius;
     }
