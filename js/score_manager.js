@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'superGeminiRunnerHighScores';
-const MAX_SCORES = 5; // ランキングに保存する最大数
+const MAX_SCORES = 50; // ランキングに保存する最大数
 
 export class ScoreManager {
     constructor() {}
@@ -8,7 +8,9 @@ export class ScoreManager {
         const response = await fetch("https://ocherun.s3.ap-southeast-2.amazonaws.com/test.json");
         const scores = await response.json();
         // 念のためスコアで降順ソートして返す
-        return scores.sort((a, b) => b.score - a.score);
+        const sortedScores = scores.sort((a, b) => b.score - a.score);
+        // 上位MAX_SCORES件だけを返す
+        return sortedScores.slice(0, MAX_SCORES);
     }
 
     async addScore(score, instrument) {
@@ -22,7 +24,7 @@ export class ScoreManager {
         scores.push(newScore);
         scores.sort((a, b) => b.score - a.score);
 
-        // 上位5件だけを残す
+        // 上位MAX_SCORES件だけを残す
         const topScores = scores.slice(0, MAX_SCORES);
 
         this.sendJson(JSON.stringify(topScores));
