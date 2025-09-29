@@ -172,17 +172,6 @@ export class MainScene {
         if (this.isBackgroundLoaded) ctx.drawImage(this.backgroundImage, 0, 0, width, height);
         else { ctx.clearRect(0, 0, width, height); ctx.fillStyle = '#f0f0f0'; ctx.fillRect(0, 0, width, height); }
 
-        // 2. ロゴを常に描画
-        if (this.isLogoLoaded) {
-            // onResizeで計算したプロパティを使用
-            ctx.drawImage(this.logoImage, this.logoX, this.logoY, this.logoWidth, this.logoHeight);
-        } 
-        // else {
-        //     ctx.fillStyle = 'black'; ctx.font = `${FONT_SIZE.LARGE}px ${FONT_FAMILY}`;
-        //     ctx.textAlign = 'center';
-        //     ctx.fillText('オケラン', width / 2, height / 2 - 250); // フォールバックテキストの位置も調整が必要な場合あり
-        // }
-
         // 3. ゲームの状態に応じてプロンプトかボタンを描画
         if (!this.game.isGameActive) {
             // ゲームがアクティブでない場合、オーバーレイとプロンプトメッセージを表示
@@ -216,7 +205,12 @@ export class MainScene {
             }
         }
         else {
-            // ゲームがアクティブな場合、ボタンを描画
+            // ゲームがアクティブな場合、ロゴとボタンを描画
+            if (this.isLogoLoaded) {
+                // onResizeで計算したプロパティを使用
+                ctx.drawImage(this.logoImage, this.logoX, this.logoY, this.logoWidth, this.logoHeight);
+            }
+
             this.startButton.draw(ctx);
             this.rankingButton.draw(ctx);
             this.descButton.draw(ctx);
