@@ -64,9 +64,9 @@ const INSTRUMENT_BASE_CONFIG = {
         multiplier: 1.0,         // 獲得スコアの倍率
         volumeMultiplier: 1.0    // 音量の補正倍率 (1.0が基準)
     },
-    'タンバリン':   { name: 'タンバリン',   maxChord: 1, multiplier: 1.1, volumeMultiplier: 1.8 },
-    '太鼓':         { name: '太鼓',         maxChord: 1, multiplier: 1.2, volumeMultiplier: 1.0 },
-    'ドラム':       { name: 'ドラム',       maxChord: 1, multiplier: 1.4, volumeMultiplier: 1.8 },
+    'タンバリン':   { name: 'タンバリン',   maxChord: 1, multiplier: 1.1, volumeMultiplier: 3.0 },
+    '太鼓':         { name: '太鼓',         maxChord: 1, multiplier: 1.2, volumeMultiplier: 2.0 },
+    'ドラム':       { name: 'ドラム',       maxChord: 1, multiplier: 1.4, volumeMultiplier: 3.0 },
     'ピアノ':       { name: 'ピアノ',       maxChord: 1, multiplier: 1.6, volumeMultiplier: 1.0 },
     'ギター':       { name: 'ギター',       maxChord: 4, multiplier: 1.9, volumeMultiplier: 1.0 },
 };
