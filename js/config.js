@@ -54,23 +54,59 @@ export const TREE_TEXT_BACKGROUND_COLOR = 'rgba(0, 0, 0, 0.7)'; // 木に表示�
 export const TREE_TEXT_BACKGROUND_PADDING = 10; // 木に表示されるキーテキストの背景のパディング (現在 10)
 
 
-export const KEYBOARD_INSTRUMENT_CONFIG = {
-    'トライアングル': { name: 'トライアングル', keys: ['U'], maxChord: 1, multiplier: 1.0, volumeMultiplier: 1.0 },
-    'タンバリン':   { name: 'タンバリン',   keys: ['U', 'I'], maxChord: 1, multiplier: 1.1, volumeMultiplier: 1.8 },
-    '太鼓':         { name: '太鼓',         keys: ['U', 'I', 'O'], maxChord: 1, multiplier: 1.2, volumeMultiplier: 1.0 },
-    'ドラム':       { name: 'ドラム',       keys: ['U', 'I', 'O', 'P', 'J'], maxChord: 1, multiplier: 1.4, volumeMultiplier: 1.8 },
-    'ピアノ':       { name: 'ピアノ',       keys: ['U', 'I', 'O', 'P', 'J', 'K', 'L'], maxChord: 1, multiplier: 1.6, volumeMultiplier: 1.0 },
-    'ギター':       { name: 'ギター',       keys: ['U', 'I', 'O', 'P', 'J', 'K'], maxChord: 4, multiplier: 1.9, volumeMultiplier: 1.0 },
+// --- 楽器設定 --- 
+
+// 楽器ごとの共通設定
+const INSTRUMENT_BASE_CONFIG = {
+    'トライアングル': {
+        name: 'トライアングル',      // 画面に表示される楽器名
+        maxChord: 1,             // ギター演奏時に読み込む音声トラック数
+        multiplier: 1.0,         // 獲得スコアの倍率
+        volumeMultiplier: 1.0    // 音量の補正倍率 (1.0が基準)
+    },
+    'タンバリン':   { name: 'タンバリン',   maxChord: 1, multiplier: 1.1, volumeMultiplier: 1.8 },
+    '太鼓':         { name: '太鼓',         maxChord: 1, multiplier: 1.2, volumeMultiplier: 1.0 },
+    'ドラム':       { name: 'ドラム',       maxChord: 1, multiplier: 1.4, volumeMultiplier: 1.8 },
+    'ピアノ':       { name: 'ピアノ',       maxChord: 1, multiplier: 1.6, volumeMultiplier: 1.0 },
+    'ギター':       { name: 'ギター',       maxChord: 4, multiplier: 1.9, volumeMultiplier: 1.0 },
 };
 
-export const GAMEPAD_INSTRUMENT_CONFIG = {
-    'トライアングル': { name: 'トライアングル', keys: ['A'], maxChord: 1, multiplier: 1.0, volumeMultiplier: 1.0 },
-    'タンバリン':   { name: 'タンバリン',   keys: ['A', 'S'], maxChord: 1, multiplier: 1.1, volumeMultiplier: 1.8 },
-    '太鼓':         { name: '太鼓',         keys: ['A', 'S', 'D'], maxChord: 1, multiplier: 1.2, volumeMultiplier: 1.0 },
-    'ドラム':       { name: 'ドラム',       keys: ['A', 'S', 'D', 'F', 'J'], maxChord: 1, multiplier: 1.4, volumeMultiplier: 1.8 },
-    'ピアノ':       { name: 'ピアノ',       keys: ['A', 'S', 'D', 'F', 'J', 'K', 'L'], maxChord: 1, multiplier: 1.6, volumeMultiplier: 1.0 },
-    'ギター':       { name: 'ギター',       keys: ['A', 'S', 'D', 'F', 'J', 'K'], maxChord: 4, multiplier: 1.9, volumeMultiplier: 1.0 },
+// キーボード演奏時のキー割り当て
+const KEYBOARD_KEYS = {
+    'トライアングル': { keys: ['U'] }, // 演奏に使用するキー
+    'タンバリン':   { keys: ['U', 'I'] },
+    '太鼓':         { keys: ['U', 'I', 'O'] },
+    'ドラム':       { keys: ['U', 'I', 'O', 'P', 'J'] },
+    'ピアノ':       { keys: ['U', 'I', 'O', 'P', 'J', 'K', 'L'] },
+    'ギター':       { keys: ['U', 'I', 'O', 'P', 'J', 'K'] },
 };
+
+// ゲームパッド演奏時のボタン割り当て
+const GAMEPAD_KEYS = {
+    'トライアングル': { keys: ['A'] }, // 演奏に使用するボタン
+    'タンバリン':   { keys: ['A', 'S'] },
+    '太鼓':         { keys: ['A', 'S', 'D'] },
+    'ドラム':       { keys: ['A', 'S', 'D', 'F', 'J'] },
+    'ピアノ':       { keys: ['A', 'S', 'D', 'F', 'J', 'K', 'L'] },
+    'ギター':       { keys: ['A', 'S', 'D', 'F', 'J', 'K'] },
+};
+
+// --- 設定を結合して最終的なコンフィグを生成 ---
+
+// ヘルパー関数: 2つのオブジェクトをマージする
+const mergeConfigs = (base, specific) => {
+    const finalConfig = {};
+    for (const key in base) {
+        if (Object.hasOwnProperty.call(base, key) && Object.hasOwnProperty.call(specific, key)) {
+            finalConfig[key] = { ...base[key], ...specific[key] };
+        }
+    }
+    return finalConfig;
+};
+
+export const KEYBOARD_INSTRUMENT_CONFIG = mergeConfigs(INSTRUMENT_BASE_CONFIG, KEYBOARD_KEYS);
+export const GAMEPAD_INSTRUMENT_CONFIG = mergeConfigs(INSTRUMENT_BASE_CONFIG, GAMEPAD_KEYS);
+
 
 export const INSTRUMENT_ORDER = ['トライアングル', 'タンバリン', '太鼓', 'ドラム', 'ピアノ', 'ギター'];
 
