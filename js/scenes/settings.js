@@ -27,10 +27,12 @@ export class SettingsScene {
         });
         this.instrumentSlider = new VolumeSlider(0, 0, 500, 40, '楽器音量', soundPlayer.instrumentVolume, (v) => { // サイズ変更
             soundPlayer.setInstrumentVolume(v);
+            soundPlayer.playSound('ギター_track01'); // プレビュー音を再生
             this.game.saveSettings();
         });
         this.gameSoundSlider = new VolumeSlider(0, 0, 500, 40, '効果音量', soundPlayer.gameSoundVolume, (v) => { // サイズ変更
             soundPlayer.setGameSoundVolume(v);
+            soundPlayer.playGameSound('jump'); // プレビュー音を再生
             this.game.saveSettings();
         });
 
