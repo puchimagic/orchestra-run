@@ -135,19 +135,21 @@ export class GameScene {
             return;
         }
 
+        const volumeMultiplier = instrumentConfig.volumeMultiplier || 1.0;
+
         if (this.instrumentName === 'ギター') {
             // ギターの場合、maxChordの数だけ音源をロード
             for (let i = 0; i < instrumentConfig.maxChord; i++) {
                 const soundName = `${this.instrumentDirName}_track${i + 1}`;
                 const soundPath = `sound/${this.instrumentDirName}/track0${i + 1}.wav`;
-                this.instrumentSoundPlayer.loadSound(soundName, soundPath);
+                this.instrumentSoundPlayer.loadSound(soundName, soundPath, volumeMultiplier);
             }
         } else {
             // その他の楽器の場合 (既存のロジック)
             instrumentConfig.keys.forEach((key, index) => {
                 const soundName = `${this.instrumentDirName}_track${index + 1}`;
                 const soundPath = `sound/${this.instrumentDirName}/track0${index + 1}.wav`;
-                this.instrumentSoundPlayer.loadSound(soundName, soundPath);
+                this.instrumentSoundPlayer.loadSound(soundName, soundPath, volumeMultiplier);
             });
         }
     }

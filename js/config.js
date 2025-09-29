@@ -55,21 +55,21 @@ export const TREE_TEXT_BACKGROUND_PADDING = 10; // 木に表示されるキー�
 
 
 export const KEYBOARD_INSTRUMENT_CONFIG = {
-    'トライアングル': { name: 'トライアングル', keys: ['U'], maxChord: 1, multiplier: 1.0 },
-    'タンバリン':   { name: 'タンバリン',   keys: ['U', 'I'], maxChord: 1, multiplier: 1.1 },
-    '太鼓':         { name: '太鼓',         keys: ['U', 'I', 'O'], maxChord: 1, multiplier: 1.2 },
-    'ドラム':       { name: 'ドラム',       keys: ['U', 'I', 'O', 'P', 'J'], maxChord: 1, multiplier: 1.4 },
-    'ピアノ':       { name: 'ピアノ',       keys: ['U', 'I', 'O', 'P', 'J', 'K', 'L'], maxChord: 1, multiplier: 1.6 },
-    'ギター':       { name: 'ギター',       keys: ['U', 'I', 'O', 'P', 'J', 'K'], maxChord: 4, multiplier: 1.9 },
+    'トライアングル': { name: 'トライアングル', keys: ['U'], maxChord: 1, multiplier: 1.0, volumeMultiplier: 1.0 },
+    'タンバリン':   { name: 'タンバリン',   keys: ['U', 'I'], maxChord: 1, multiplier: 1.1, volumeMultiplier: 1.8 },
+    '太鼓':         { name: '太鼓',         keys: ['U', 'I', 'O'], maxChord: 1, multiplier: 1.2, volumeMultiplier: 1.0 },
+    'ドラム':       { name: 'ドラム',       keys: ['U', 'I', 'O', 'P', 'J'], maxChord: 1, multiplier: 1.4, volumeMultiplier: 1.8 },
+    'ピアノ':       { name: 'ピアノ',       keys: ['U', 'I', 'O', 'P', 'J', 'K', 'L'], maxChord: 1, multiplier: 1.6, volumeMultiplier: 1.0 },
+    'ギター':       { name: 'ギター',       keys: ['U', 'I', 'O', 'P', 'J', 'K'], maxChord: 4, multiplier: 1.9, volumeMultiplier: 1.0 },
 };
 
 export const GAMEPAD_INSTRUMENT_CONFIG = {
-    'トライアングル': { name: 'トライアングル', keys: ['A'], maxChord: 1, multiplier: 1.0 },
-    'タンバリン':   { name: 'タンバリン',   keys: ['A', 'S'], maxChord: 1, multiplier: 1.1 },
-    '太鼓':         { name: '太鼓',         keys: ['A', 'S', 'D'], maxChord: 1, multiplier: 1.2 },
-    'ドラム':       { name: 'ドラム',       keys: ['A', 'S', 'D', 'F', 'J'], maxChord: 1, multiplier: 1.4 },
-    'ピアノ':       { name: 'ピアノ',       keys: ['A', 'S', 'D', 'F', 'J', 'K', 'L'], maxChord: 1, multiplier: 1.6 },
-    'ギター':       { name: 'ギター',       keys: ['A', 'S', 'D', 'F', 'J', 'K'], maxChord: 4, multiplier: 1.9 },
+    'トライアングル': { name: 'トライアングル', keys: ['A'], maxChord: 1, multiplier: 1.0, volumeMultiplier: 1.0 },
+    'タンバリン':   { name: 'タンバリン',   keys: ['A', 'S'], maxChord: 1, multiplier: 1.1, volumeMultiplier: 1.8 },
+    '太鼓':         { name: '太鼓',         keys: ['A', 'S', 'D'], maxChord: 1, multiplier: 1.2, volumeMultiplier: 1.0 },
+    'ドラム':       { name: 'ドラム',       keys: ['A', 'S', 'D', 'F', 'J'], maxChord: 1, multiplier: 1.4, volumeMultiplier: 1.8 },
+    'ピアノ':       { name: 'ピアノ',       keys: ['A', 'S', 'D', 'F', 'J', 'K', 'L'], maxChord: 1, multiplier: 1.6, volumeMultiplier: 1.0 },
+    'ギター':       { name: 'ギター',       keys: ['A', 'S', 'D', 'F', 'J', 'K'], maxChord: 4, multiplier: 1.9, volumeMultiplier: 1.0 },
 };
 
 export const INSTRUMENT_ORDER = ['トライアングル', 'タンバリン', '太鼓', 'ドラム', 'ピアノ', 'ギター'];

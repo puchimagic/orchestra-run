@@ -74,7 +74,8 @@ export class SoundPlayer {
       // ロード済みの楽器音の音量も更新
       for (const name in this.sounds) {
         if (this.sounds[name]) {
-          this.sounds[name].volume = volume;
+          const multiplier = this.sounds[name].customMultiplier || 1.0;
+          this.sounds[name].volume = Math.min(1.0, volume * multiplier);
         }
       }
       localStorage.setItem('instrumentVolume', volume);
@@ -138,9 +139,10 @@ export class SoundPlayer {
     }
   }
 
-  loadSound(name, path) {
+  loadSound(name, path, volumeMultiplier = 1.0) {
     const audio = new Audio(path);
-    audio.volume = this.instrumentVolume; // 楽器用音量を適用
+    audio.customMultiplier = volumeMultiplier; // カスタムプロパティとして倍率を保持
+    audio.volume = Math.min(1.0, this.instrumentVolume * volumeMultiplier);
     this.sounds[name] = audio;
   }
 
