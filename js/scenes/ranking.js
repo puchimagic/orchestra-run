@@ -51,7 +51,7 @@ export class RankingScene {
         const rankingContentEndY = backButtonY - 50;
         const availableHeight = rankingContentEndY - rankingContentStartY;
 
-        const maxDisplayWidth = 900; // ランキングテキストの表示幅
+        const maxDisplayWidth = 1000; // ランキングテキストの表示幅
         const displayStartX = (width - maxDisplayWidth) / 2;
 
         this.rankingDisplayArea = {

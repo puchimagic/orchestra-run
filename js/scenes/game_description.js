@@ -135,13 +135,13 @@ export class GameDescriptionScene {
         ctx.textAlign = 'center';
 
         ctx.font = `${FONT_SIZE.MEDIUM}px ${FONT_FAMILY}`;
-        ctx.fillText('あそびかた', width / 2, 80);
+        ctx.fillText('あそびかた', width / 2, 120);
 
         const descriptionFontSize = 30;
         ctx.font = `${descriptionFontSize}px ${FONT_FAMILY}`;
         ctx.textAlign = 'left';
         const lineHeight = 40;
-        let currentY = 150;
+        let currentY = 200;
 
         const maxTextWidth = 1000;
         const startX = (width - maxTextWidth) / 2 - 200;

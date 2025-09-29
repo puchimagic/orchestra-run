@@ -97,7 +97,7 @@ export class InstrumentSelectScene {
         ctx.fillStyle = 'black';
         ctx.textAlign = 'center';
         ctx.font = `${FONT_SIZE.MEDIUM}px ${FONT_FAMILY}`;
-        ctx.fillText('楽器をえらんでね', width / 2, 100);
+        ctx.fillText('楽器をえらんでね', width / 2, 120);
 
         for (const name of INSTRUMENT_ORDER) {
             const button = this.instrumentButtons[name];

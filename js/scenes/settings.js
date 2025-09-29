@@ -61,7 +61,7 @@ export class SettingsScene {
         const leftSectionStartX = leftSectionCenterX - sliderWidth / 2;
 
         // メインタイトルの下から開始Y座標を調整
-        let currentYLeft = 120 + mainTitleLineHeight + elementPadding / 2;
+        let currentYLeft = 200 + mainTitleLineHeight + elementPadding / 2;
 
         // 「音量調整」セクションタイトル
         this.volumeTitleY = currentYLeft;
@@ -94,7 +94,7 @@ export class SettingsScene {
         const rightSectionStartX = rightSectionCenterX - buttonWidth / 2;
 
         // メインタイトルの下から開始Y座標を調整
-        let currentYRight = 120 + mainTitleLineHeight + elementPadding / 2;
+        let currentYRight = 200 + mainTitleLineHeight + elementPadding / 2;
 
         // 「入力方法」セクションタイトル
         this.inputTitleY = currentYRight;
