@@ -64,7 +64,7 @@ export class MainScene {
                 }
                 // 進捗を更新
                 this.cacheProgress = loadedAssetsCount / totalAssets;
-                this.promptMessage = `アセットを準備中です... (${Math.floor(this.cacheProgress * 100)}%)`;
+                this.promptMessage = `ロード中... (${Math.floor(this.cacheProgress * 100)}%)`;
                 return res !== undefined;
             });
 
