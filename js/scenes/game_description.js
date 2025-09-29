@@ -144,7 +144,7 @@ export class GameDescriptionScene {
         let currentY = 150;
 
         const maxTextWidth = 1000;
-        const startX = (width - maxTextWidth) / 2;
+        const startX = (width - maxTextWidth) / 2 - 200;
 
         // 現在のページの内容を描画
         const currentPageContent = this.descriptionPages[this.currentPage];
