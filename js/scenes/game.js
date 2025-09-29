@@ -1,7 +1,7 @@
 import { 
     SCENE, FONT_SIZE, FONT_FAMILY, BLOCK_SIZE, PLATFORM_HEIGHT_IN_BLOCKS, 
     KEYBOARD_INSTRUMENT_CONFIG, GAMEPAD_INSTRUMENT_CONFIG, 
-    INITIAL_SCROLL_SPEED, PLAYER_MAX_JUMP_IN_BLOCKS, 
+    INITIAL_SCROLL_SPEED, SPEED_INCREASE_INTERVAL, PLAYER_MAX_JUMP_IN_BLOCKS, 
     TREE_TEXT_COLOR, TREE_TEXT_STROKE_COLOR, TREE_TEXT_STROKE_WIDTH, 
     TREE_TEXT_BACKGROUND_COLOR, TREE_TEXT_BACKGROUND_PADDING 
 } from '../config.js';
@@ -215,9 +215,8 @@ export class GameScene {
         this.baseScore += scorePerSecond * timeBonus * deltaTime;
         this.score = Math.floor(this.baseScore * this.scoreMultiplier);
 
-        const speedIncreaseInterval = 30;
         const speedIncreaseAmount = 0.5;
-        const newScrollSpeed = INITIAL_SCROLL_SPEED + Math.floor(elapsedTimeInSeconds / speedIncreaseInterval) * speedIncreaseAmount;
+        const newScrollSpeed = INITIAL_SCROLL_SPEED + Math.floor(elapsedTimeInSeconds / SPEED_INCREASE_INTERVAL) * speedIncreaseAmount;
         this.stage.setScrollSpeed(newScrollSpeed);
 
         this.stage.elapsedTimeInSeconds = elapsedTimeInSeconds; // 経過時間をStageに渡す
@@ -228,7 +227,7 @@ export class GameScene {
 
         const solidScaffolds = this.scaffolds.filter(s => s.state === 'SOLID');
         const allPlatforms = [...this.stage.platforms, ...solidScaffolds];
-        this.player.update(allPlatforms, this.stage.trees);
+        this.player.update(allPlatforms, this.stage.trees, newScrollSpeed);
 
         this.scaffolds = this.scaffolds.filter(s => s.state !== 'EXPIRED' && s.x + s.width > this.stage.cameraX);
 
@@ -236,112 +235,42 @@ export class GameScene {
         this.player2Input.clearPressedActions();
     }
 
-    handlePlayer2Input() {
-        // ゲームパッドが選択されている場合は楽器演奏を行わない
-        if (this.game.inputMethod === 'gamepad') {
-            // ただし、足場生成や木破壊のロジックは引き続き実行する
-            // 楽器音を鳴らす部分だけをスキップする
-            const activeScaffolds = this.scaffolds.filter(s => 
-                s.state === 'ACTIVE' && 
-                s.x < this.stage.cameraX + this.game.canvas.width && 
-                s.x + s.width > this.stage.cameraX
-            );
-            const activeTrees = Array.from(this.breakableTrees.keys()).filter(t => 
-                t.x < this.stage.cameraX + this.game.canvas.width && 
-                t.x + t.width > this.stage.cameraX
-            );
-            const allInteractiveObjects = [...activeScaffolds, ...activeTrees];
-    
-            if (allInteractiveObjects.length === 0) return;
-    
-            const target = allInteractiveObjects.reduce((prev, curr) => prev.x < curr.x ? prev : curr);
-    
-            if (target instanceof ScaffoldBlock) {
-                const requiredActions = target.requiredKeys.map(key => `ACTION_${key}`);
-                
-                let isPerfectMatch = true;
-                const requiredPhysicalKeys = new Set();
-                requiredActions.forEach(action => {
-                    const physicalKey = this.player2Input.actionMap[action];
-                    if (physicalKey) {
-                        requiredPhysicalKeys.add(physicalKey);
-                    }
-                });
-    
-                const instrumentPhysicalKeys = this.player2Input.getInstrumentPhysicalKeys();
-    
-                const currentlyPressedInstrumentKeys = new Set();
-                for (const pressedKey of this.player2Input.pressedKeys) {
-                    if (instrumentPhysicalKeys.has(pressedKey)) {
-                        currentlyPressedInstrumentKeys.add(pressedKey);
-                    }
-                }
-    
-                if (currentlyPressedInstrumentKeys.size !== requiredPhysicalKeys.size) {
-                    isPerfectMatch = false;
-                } else {
-                    for (const requiredKey of requiredPhysicalKeys) {
-                        if (!currentlyPressedInstrumentKeys.has(requiredKey)) {
-                            isPerfectMatch = false;
-                            break;
-                        }
-                    }
-                }
-    
-                if (requiredActions.every(action => this.player2Input.isActionDown(action)) && 
-                    requiredActions.some(action => this.player2Input.isActionPressed(action)) &&
-                    isPerfectMatch
-                ) {
-                    target.solidify();
-                    // ゲームパッド選択時は楽器音を鳴らさない
-                }
+    // 要求されたキー入力が過不足なく行われているかをチェックするヘルパーメソッド
+    isChordPerfectlyMatched(requiredKeys) {
+        const requiredPhysicalKeys = new Set();
+        requiredKeys.forEach(key => {
+            const action = `ACTION_${key}`;
+            const physicalKey = this.player2Input.actionMap[action];
+            if (physicalKey) {
+                requiredPhysicalKeys.add(physicalKey);
             }
-            else if (target instanceof Tree) {
-                const treeData = this.breakableTrees.get(target);
-                const requiredActions = treeData.requiredKeys.map(key => `ACTION_${key}`);
-    
-                let isPerfectMatch = true;
-                const requiredPhysicalKeys = new Set();
-                requiredActions.forEach(action => {
-                    const physicalKey = this.player2Input.actionMap[action];
-                    if (physicalKey) {
-                        requiredPhysicalKeys.add(physicalKey);
-                    }
-                });
-    
-                const instrumentPhysicalKeys = this.player2Input.getInstrumentPhysicalKeys();
-    
-                const currentlyPressedInstrumentKeys = new Set();
-                for (const pressedKey of this.player2Input.pressedKeys) {
-                    if (instrumentPhysicalKeys.has(pressedKey)) {
-                        currentlyPressedInstrumentKeys.add(pressedKey);
-                    }
-                }
-    
-                if (currentlyPressedInstrumentKeys.size !== requiredPhysicalKeys.size) {
-                    isPerfectMatch = false;
-                } else {
-                    for (const requiredKey of requiredPhysicalKeys) {
-                        if (!currentlyPressedInstrumentKeys.has(requiredKey)) {
-                            isPerfectMatch = false;
-                            break;
-                        }
-                    }
-                }
-    
-                if (requiredActions.every(action => this.player2Input.isActionDown(action)) && 
-                    requiredActions.some(action => this.player2Input.isActionPressed(action)) &&
-                    isPerfectMatch
-                ) {
-                    this.stage.spawnFallingTreeAnimation(target);
-                    target.break();
-                    this.breakableTrees.delete(target);
-                }
+        });
+
+        const instrumentPhysicalKeys = this.player2Input.getInstrumentPhysicalKeys();
+        
+        // 現在押されている楽器キーのセットを作成
+        const currentlyPressedInstrumentKeys = new Set();
+        for (const pressedKey of this.player2Input.pressedKeys) {
+            if (instrumentPhysicalKeys.has(pressedKey)) {
+                currentlyPressedInstrumentKeys.add(pressedKey);
             }
-            return; // ゲームパッド選択時は楽器音を鳴らさないため、ここで処理を終了
         }
 
-        // キーボード選択時、またはゲームパッド選択時でも楽器音以外の処理は続行
+        // 現在、要求されたキーが過不足なく押されているか
+        if (currentlyPressedInstrumentKeys.size !== requiredPhysicalKeys.size) {
+            return false;
+        }
+
+        for (const requiredKey of requiredPhysicalKeys) {
+            if (!currentlyPressedInstrumentKeys.has(requiredKey)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    handlePlayer2Input() {
         const activeScaffolds = this.scaffolds.filter(s => 
             s.state === 'ACTIVE' && 
             s.x < this.stage.cameraX + this.game.canvas.width && 
@@ -357,130 +286,58 @@ export class GameScene {
 
         const target = allInteractiveObjects.reduce((prev, curr) => prev.x < curr.x ? prev : curr);
 
-        if (target instanceof ScaffoldBlock) {
-            const requiredActions = target.requiredKeys.map(key => `ACTION_${key}`);
-            
-            let isPerfectMatch = true;
-            const requiredPhysicalKeys = new Set();
-            requiredActions.forEach(action => {
-                const physicalKey = this.player2Input.actionMap[action];
-                if (physicalKey) {
-                    requiredPhysicalKeys.add(physicalKey);
-                }
-            });
+        const requiredKeys = (target instanceof ScaffoldBlock) ? target.requiredKeys : this.breakableTrees.get(target)?.requiredKeys;
+        if (!requiredKeys) return;
 
-            const instrumentPhysicalKeys = this.player2Input.getInstrumentPhysicalKeys();
+        const isMatched = this.isChordPerfectlyMatched(requiredKeys);
 
-            const currentlyPressedInstrumentKeys = new Set();
-            for (const pressedKey of this.player2Input.pressedKeys) {
-                if (instrumentPhysicalKeys.has(pressedKey)) {
-                    currentlyPressedInstrumentKeys.add(pressedKey);
-                }
-            }
-
-            if (currentlyPressedInstrumentKeys.size !== requiredPhysicalKeys.size) {
-                isPerfectMatch = false;
-            } else {
-                for (const requiredKey of requiredPhysicalKeys) {
-                    if (!currentlyPressedInstrumentKeys.has(requiredKey)) {
-                        isPerfectMatch = false;
-                        break;
-                    }
-                }
-            }
-
-            if (requiredActions.every(action => this.player2Input.isActionDown(action)) && 
-                requiredActions.some(action => this.player2Input.isActionPressed(action)) &&
-                isPerfectMatch
-            ) {
+        if (isMatched) {
+            if (target instanceof ScaffoldBlock) {
                 target.solidify();
+                
+                // ゲームパッド選択時は楽器音を鳴らさない
+                if (this.game.inputMethod === 'gamepad') return;
+
                 // 足場が生成されたときに音を鳴らす
                 if (this.instrumentName === 'ピアノ') {
                     const availableTracks = KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName].keys.length;
-                    const numSoundsToPlay = requiredActions.length;
+                    const numSoundsToPlay = requiredKeys.length;
                     if (availableTracks >= numSoundsToPlay) {
                         const startIndex = Math.floor(Math.random() * (availableTracks - numSoundsToPlay + 1));
                         for (let i = 0; i < numSoundsToPlay; i++) {
                             const trackNumber = startIndex + i + 1;
                             const soundName = `${this.instrumentDirName}_track${trackNumber}`;
-                            console.log(`ピアノの音を再生しようとしています: ${soundName}`);
                             this.instrumentSoundPlayer.playSound(soundName);
                         }
                     }
                     else {
-                        console.warn(`必要なアクション数 ${numSoundsToPlay} に対してピアノのトラックが足りません。`);
                         for (let i = 0; i < numSoundsToPlay; i++) {
-                            const trackNumber = (startIndex + i) % availableTracks + 1;
+                            const trackNumber = (i % availableTracks) + 1;
                             const soundName = `${this.instrumentDirName}_track${trackNumber}`;
-                            console.log(`ピアノの音を再生しようとしています (ループ): ${soundName}`);
                             this.instrumentSoundPlayer.playSound(soundName);
                         }
                     }
                 }
                 else if (this.instrumentName === 'ギター') {
-                    const numPressedKeys = requiredActions.length;
                     const trackNumber = Math.floor(Math.random() * KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName].maxChord);
                     
                     if (trackNumber >= 0 && trackNumber < KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName].maxChord) {
                         const soundName = `${this.instrumentDirName}_track${trackNumber + 1}`;
-                        console.log(`ギターの音を再生しようとしています: ${soundName}`);
                         this.instrumentSoundPlayer.playSound(soundName);
-                    }
-                    else {
-                        console.warn(`トラック番号 ${trackNumber + 1} のギターの音が見つかりません。`);
                     }
                 }
                 else {
-                    requiredActions.forEach(action => {
-                        const key = action.replace('ACTION_', '');
+                    requiredKeys.forEach(key => {
                         const instrumentConfig = KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName];
                         const keyIndex = instrumentConfig.keys.indexOf(key);
                         if (keyIndex !== -1) {
                             const soundName = `${this.instrumentDirName}_track${keyIndex + 1}`;
-                            console.log(`音を再生しようとしています: ${soundName}`);
                             this.instrumentSoundPlayer.playSound(soundName);
                         }
                     });
                 }
             }
-        }
-        else if (target instanceof Tree) {
-            const treeData = this.breakableTrees.get(target);
-            const requiredActions = treeData.requiredKeys.map(key => `ACTION_${key}`);
-
-            let isPerfectMatch = true;
-            const requiredPhysicalKeys = new Set();
-            requiredActions.forEach(action => {
-                const physicalKey = this.player2Input.actionMap[action];
-                if (physicalKey) {
-                    requiredPhysicalKeys.add(physicalKey);
-                }
-            });
-
-            const instrumentPhysicalKeys = this.player2Input.getInstrumentPhysicalKeys();
-
-            const currentlyPressedInstrumentKeys = new Set();
-            for (const pressedKey of this.player2Input.pressedKeys) {
-                if (instrumentPhysicalKeys.has(pressedKey)) {
-                    currentlyPressedInstrumentKeys.add(pressedKey);
-                }
-            }
-
-            if (currentlyPressedInstrumentKeys.size !== requiredPhysicalKeys.size) {
-                isPerfectMatch = false;
-            } else {
-                for (const requiredKey of requiredPhysicalKeys) {
-                    if (!currentlyPressedInstrumentKeys.has(requiredKey)) {
-                        isPerfectMatch = false;
-                        break;
-                    }
-                }
-            }
-
-            if (requiredActions.every(action => this.player2Input.isActionDown(action)) && 
-                requiredActions.some(action => this.player2Input.isActionPressed(action)) &&
-                isPerfectMatch
-            ) {
+            else if (target instanceof Tree) {
                 this.stage.spawnFallingTreeAnimation(target);
                 target.break();
                 this.breakableTrees.delete(target);

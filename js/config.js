@@ -21,9 +21,14 @@ export const BLOCK_SIZE = 60;
 export const PLATFORM_HEIGHT_IN_BLOCKS = 1;
 
 export const INITIAL_SCROLL_SPEED = 3; // スクロール速度の初期値
+export const SPEED_INCREASE_INTERVAL = 15; // スクロール速度が上がる間隔（秒）
 
 // ★プレイヤーのジャンプ力を共通設定に
 export const PLAYER_MAX_JUMP_IN_BLOCKS = 8;
+export const PLAYER_INITIAL_SPEED = 11; // キャラクターの歩行速度の初期値
+// スクロール速度の上昇に合わせ、キャラクターの速度がどれだけ影響を受けるかの倍率。
+// 1.0に設定すると、スクロール速度と同じだけキャラクターの速度が上がります。0.5なら、スクロール速度の半分の量だけ上がります。
+export const PLAYER_SPEED_INCREASE_RATE = 1.0;
 
 export const STUMP_WIDTH_IN_BLOCKS = 3.4; // ★追加：切り株の幅
 

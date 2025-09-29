@@ -1,10 +1,9 @@
-import { BLOCK_SIZE, STUMP_WIDTH_IN_BLOCKS, PLATFORM_HEIGHT_IN_BLOCKS } from './config.js'; // STUMP_WIDTH_IN_BLOCKSをインポート
+import { BLOCK_SIZE, STUMP_WIDTH_IN_BLOCKS, PLATFORM_HEIGHT_IN_BLOCKS, PLAYER_INITIAL_SPEED, PLAYER_SPEED_INCREASE_RATE, INITIAL_SCROLL_SPEED } from './config.js'; // STUMP_WIDTH_IN_BLOCKSをインポート
 import { soundPlayer } from "../soundPlayer.js";
 
 const PLAYER_WIDTH_IN_BLOCKS = 2.0;
 const PLAYER_HEIGHT_IN_BLOCKS = 2.5;
 const PLAYER_COLOR = 'blue';
-const MOVE_SPEED = 11;
 const JUMP_POWER = 34;
 const GRAVITY = 1.7;
 
@@ -19,6 +18,7 @@ export class Player {
         this.vx = 0;
         this.vy = 0;
         this.onGround = false;
+        this.moveSpeed = PLAYER_INITIAL_SPEED;
 
         this.waitImage = waitImage;
         this.jumpImage = jumpImage;
@@ -57,11 +57,16 @@ export class Player {
     handleKeyDown(e) { this.keys[e.code] = true; }
     handleKeyUp(e) { this.keys[e.code] = false; }
 
-    update(platforms, trees) {
+    update(platforms, trees, currentScrollSpeed) {
+        if (typeof currentScrollSpeed !== 'undefined') {
+            const speedOffset = currentScrollSpeed - INITIAL_SCROLL_SPEED;
+            this.moveSpeed = PLAYER_INITIAL_SPEED + (speedOffset * PLAYER_SPEED_INCREASE_RATE);
+        }
+
         const useGamepadForPlayer = this.game.inputMethod === 'gamepad'; // 変更
         if (useGamepadForPlayer) {
             const gamepadXAxis = this.input.getGamepadAxis(0, 0);
-            this.vx = gamepadXAxis !== 0 ? MOVE_SPEED * gamepadXAxis : 0;
+            this.vx = gamepadXAxis !== 0 ? this.moveSpeed * gamepadXAxis : 0;
             if (this.input.isGamepadButtonPressed(0, 3) && this.onGround) {
                 this.vy = -JUMP_POWER;
                 this.onGround = false;
@@ -69,8 +74,8 @@ export class Player {
             }
         }
         else {
-            if (this.keys['KeyA']) this.vx = -MOVE_SPEED;
-            else if (this.keys['KeyD']) this.vx = MOVE_SPEED;
+            if (this.keys['KeyA']) this.vx = -this.moveSpeed;
+            else if (this.keys['KeyD']) this.vx = this.moveSpeed;
             else this.vx = 0;
             if (this.keys['Space'] && this.onGround) {
                 soundPlayer.playGameSound("jump");
