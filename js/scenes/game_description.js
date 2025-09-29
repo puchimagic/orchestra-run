@@ -35,7 +35,8 @@ export class GameDescriptionScene {
                 '',
                 '注意点:',
                 '  ・穴に落ちたり、敵にぶつかるとゲームオーバーです。',
-                '  ・木にぶつかるだけではゲームオーバーにはなりません。画面左端と木に挟まれるとゲームオーバーになります。',
+                '  ・木にぶつかるだけではゲームオーバーにはなりません。',
+                '  ・画面左端と木に挟まれるとゲームオーバーになります。',
             ],
             // ページ3: プレイヤー2の説明
             [
@@ -136,7 +137,7 @@ export class GameDescriptionScene {
         ctx.font = `${FONT_SIZE.MEDIUM}px ${FONT_FAMILY}`;
         ctx.fillText('あそびかた', width / 2, 80);
 
-        const descriptionFontSize = 28;
+        const descriptionFontSize = 30;
         ctx.font = `${descriptionFontSize}px ${FONT_FAMILY}`;
         ctx.textAlign = 'left';
         const lineHeight = 40;

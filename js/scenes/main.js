@@ -176,11 +176,12 @@ export class MainScene {
         if (this.isLogoLoaded) {
             // onResizeで計算したプロパティを使用
             ctx.drawImage(this.logoImage, this.logoX, this.logoY, this.logoWidth, this.logoHeight);
-        } else {
-            ctx.fillStyle = 'black'; ctx.font = `${FONT_SIZE.LARGE}px ${FONT_FAMILY}`;
-            ctx.textAlign = 'center';
-            ctx.fillText('オケラン', width / 2, height / 2 - 250); // フォールバックテキストの位置も調整が必要な場合あり
-        }
+        } 
+        // else {
+        //     ctx.fillStyle = 'black'; ctx.font = `${FONT_SIZE.LARGE}px ${FONT_FAMILY}`;
+        //     ctx.textAlign = 'center';
+        //     ctx.fillText('オケラン', width / 2, height / 2 - 250); // フォールバックテキストの位置も調整が必要な場合あり
+        // }
 
         // 3. ゲームの状態に応じてプロンプトかボタンを描画
         if (!this.game.isGameActive) {
