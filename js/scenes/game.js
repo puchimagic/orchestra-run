@@ -180,8 +180,9 @@ export class GameScene {
         let numKeysToPress;
         if (this.instrument.name === 'ギター') {
             // 2から5の範囲でランダムな数を生成
-            numKeysToPress = 2 + Math.floor(Math.random() * 4); // 2, 3, 4, 5
-        } else {
+            numKeysToPress = 1 + Math.floor(Math.random() * 4); // 2, 3, 4, 5
+        } 
+        else {
             numKeysToPress = 1;
         }
         const shuffledKeys = [...availableKeys].sort(() => 0.5 - Math.random());
