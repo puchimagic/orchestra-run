@@ -94,6 +94,9 @@ export class GameScene {
         this.countdownNumber = 3;
         this.countdownTimer = 0;
 
+        // 連続入力を防ぐためのロックフラグ
+        this.inputLocked = false;
+
         // 楽器名ごとに対応する画像URLをマッピング
         const instrumentImageMap = {
             "トライアングル": "https://github.com/puchimagic/oic_hack/blob/main/img/toraianguru.png?raw=true",
@@ -271,6 +274,22 @@ export class GameScene {
     }
 
     handlePlayer2Input() {
+        // 1. 楽器キーが何か押されているかをチェック
+        const instrumentPhysicalKeys = this.player2Input.getInstrumentPhysicalKeys();
+        const instrumentKeysPressed = Array.from(this.player2Input.pressedKeys).some(key => instrumentPhysicalKeys.has(key));
+
+        // 2. 楽器キーが一つも押されていなければ、ロックを解除して処理を終了
+        if (!instrumentKeysPressed) {
+            this.inputLocked = false;
+            return;
+        }
+
+        // 3. 入力がロックされている場合は、処理を終了
+        if (this.inputLocked) {
+            return;
+        }
+
+        // 4. 操作対象のターゲットを決定
         const activeScaffolds = this.scaffolds.filter(s => 
             s.state === 'ACTIVE' && 
             s.x < this.stage.cameraX + this.game.canvas.width && 
@@ -286,55 +305,57 @@ export class GameScene {
 
         const target = allInteractiveObjects.reduce((prev, curr) => prev.x < curr.x ? prev : curr);
 
+        // 5. キー入力がターゲットの要求と一致するかチェック
         const requiredKeys = (target instanceof ScaffoldBlock) ? target.requiredKeys : this.breakableTrees.get(target)?.requiredKeys;
         if (!requiredKeys) return;
 
         const isMatched = this.isChordPerfectlyMatched(requiredKeys);
 
+        // 6. 一致した場合、成功処理を行い、入力をロックする
         if (isMatched) {
             if (target instanceof ScaffoldBlock) {
                 target.solidify();
                 
                 // ゲームパッド選択時は楽器音を鳴らさない
-                if (this.game.inputMethod === 'gamepad') return;
-
-                // 足場が生成されたときに音を鳴らす
-                if (this.instrumentName === 'ピアノ') {
-                    const availableTracks = KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName].keys.length;
-                    const numSoundsToPlay = requiredKeys.length;
-                    if (availableTracks >= numSoundsToPlay) {
-                        const startIndex = Math.floor(Math.random() * (availableTracks - numSoundsToPlay + 1));
-                        for (let i = 0; i < numSoundsToPlay; i++) {
-                            const trackNumber = startIndex + i + 1;
-                            const soundName = `${this.instrumentDirName}_track${trackNumber}`;
+                if (this.game.inputMethod !== 'gamepad') {
+                    // 足場が生成されたときに音を鳴らす
+                    if (this.instrumentName === 'ピアノ') {
+                        const availableTracks = KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName].keys.length;
+                        const numSoundsToPlay = requiredKeys.length;
+                        if (availableTracks >= numSoundsToPlay) {
+                            const startIndex = Math.floor(Math.random() * (availableTracks - numSoundsToPlay + 1));
+                            for (let i = 0; i < numSoundsToPlay; i++) {
+                                const trackNumber = startIndex + i + 1;
+                                const soundName = `${this.instrumentDirName}_track${trackNumber}`;
+                                this.instrumentSoundPlayer.playSound(soundName);
+                            }
+                        }
+                        else {
+                            for (let i = 0; i < numSoundsToPlay; i++) {
+                                const trackNumber = (i % availableTracks) + 1;
+                                const soundName = `${this.instrumentDirName}_track${trackNumber}`;
+                                this.instrumentSoundPlayer.playSound(soundName);
+                            }
+                        }
+                    }
+                    else if (this.instrumentName === 'ギター') {
+                        const trackNumber = Math.floor(Math.random() * KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName].maxChord);
+                        
+                        if (trackNumber >= 0 && trackNumber < KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName].maxChord) {
+                            const soundName = `${this.instrumentDirName}_track${trackNumber + 1}`;
                             this.instrumentSoundPlayer.playSound(soundName);
                         }
                     }
                     else {
-                        for (let i = 0; i < numSoundsToPlay; i++) {
-                            const trackNumber = (i % availableTracks) + 1;
-                            const soundName = `${this.instrumentDirName}_track${trackNumber}`;
-                            this.instrumentSoundPlayer.playSound(soundName);
-                        }
+                        requiredKeys.forEach(key => {
+                            const instrumentConfig = KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName];
+                            const keyIndex = instrumentConfig.keys.indexOf(key);
+                            if (keyIndex !== -1) {
+                                const soundName = `${this.instrumentDirName}_track${keyIndex + 1}`;
+                                this.instrumentSoundPlayer.playSound(soundName);
+                            }
+                        });
                     }
-                }
-                else if (this.instrumentName === 'ギター') {
-                    const trackNumber = Math.floor(Math.random() * KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName].maxChord);
-                    
-                    if (trackNumber >= 0 && trackNumber < KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName].maxChord) {
-                        const soundName = `${this.instrumentDirName}_track${trackNumber + 1}`;
-                        this.instrumentSoundPlayer.playSound(soundName);
-                    }
-                }
-                else {
-                    requiredKeys.forEach(key => {
-                        const instrumentConfig = KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName];
-                        const keyIndex = instrumentConfig.keys.indexOf(key);
-                        if (keyIndex !== -1) {
-                            const soundName = `${this.instrumentDirName}_track${keyIndex + 1}`;
-                            this.instrumentSoundPlayer.playSound(soundName);
-                        }
-                    });
                 }
             }
             else if (target instanceof Tree) {
@@ -342,6 +363,9 @@ export class GameScene {
                 target.break();
                 this.breakableTrees.delete(target);
             }
+
+            // 入力をロック
+            this.inputLocked = true;
         }
     }
 
@@ -450,7 +474,6 @@ export class GameScene {
                 ctx.fillText(this.countdownNumber, width / 2, height / 2);
             }
             else if (this.countdownNumber === 0) {
-                ctx.font = `96px ${FONT_FAMILY}`;
                 ctx.fillText("Start!", width / 2, height / 2);
             }
         }
