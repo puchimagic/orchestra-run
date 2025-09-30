@@ -26,8 +26,8 @@ export class RankingScene {
         this.loadScores();
 
         // wheel イベントリスナーを追加
-        // this.handleWheelBound = this.handleWheel.bind(this); // 削除
-        this.game.canvas.addEventListener('wheel', this.handleWheel);
+        this.handleWheelBound = this.handleWheel.bind(this);
+        this.game.canvas.addEventListener('wheel', this.handleWheelBound);
     }
 
     async loadScores() {
@@ -201,11 +201,11 @@ export class RankingScene {
 
     destroy() {
         // シーンが破棄されるときにイベントリスナーを削除
-        this.game.canvas.removeEventListener('wheel', this.handleWheel);
+        this.game.canvas.removeEventListener('wheel', this.handleWheelBound);
     }
 
     // handleWheel メソッドをアロー関数としてクラスプロパティで定義
-    handleWheel = (event) => {
+    handleWheel(event) {
            event.preventDefault(); // デフォルトのスクロール動作を抑制
             this.scrollbar.scrollBy(event.deltaY * 0.5); // スクロール感度を調整
     }

@@ -144,7 +144,7 @@ class Game {
         this.inputHandler = new InputHandler(this.mouse);
         this.scenes[SCENE.MAIN] = new MainScene(this);
         this.scenes[SCENE.GAME_DESCRIPTION] = new GameDescriptionScene(this);
-        this.scenes[SCENE.RANKING] = new RankingScene(this);
+        // this.scenes[SCENE.RANKING] = new RankingScene(this); // ランキングシーンは毎回新しく作成するためコメントアウト
         this.scenes[SCENE.INSTRUMENT_SELECT] = new InstrumentSelectScene(this);
         this.scenes[SCENE.GAME_OVER] = new GameOverScene(this);
         this.scenes[SCENE.SETTINGS] = new SettingsScene(this); // VOLUME_SETTINGS を SETTINGS に変更
@@ -169,6 +169,8 @@ class Game {
 
         if (sceneName === SCENE.GAME) {
             this.currentScene = new GameScene(this, this.selectedInstrument);
+        } else if (sceneName === SCENE.RANKING) { // ランキングシーンは毎回新しく作成
+            this.currentScene = new RankingScene(this);
         } else {
             this.currentScene = this.scenes[sceneName];
         }
