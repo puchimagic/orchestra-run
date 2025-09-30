@@ -74,9 +74,6 @@ export class RankingScene {
         const maxDisplayCount = 50; // draw メソッドの maxDisplayCount と合わせる
         const totalScoresHeight = maxDisplayCount * lineHeight;
         this.scrollbar.updateContentHeight(totalScoresHeight);
-
-        console.log("totalScoresHeight:", totalScoresHeight);
-        console.log("scrollbar.height (rankingDisplayArea.height):", this.scrollbar.height);
     }
 
     update() {
@@ -204,23 +201,12 @@ export class RankingScene {
 
     destroy() {
         // シーンが破棄されるときにイベントリスナーを削除
-        // this.game.canvas.removeEventListener('wheel', this.handleWheelBound); // 削除
         this.game.canvas.removeEventListener('wheel', this.handleWheel);
     }
 
     // handleWheel メソッドをアロー関数としてクラスプロパティで定義
     handleWheel = (event) => {
-        // マウスがランキング表示領域内にある場合のみ処理 (一時的にコメントアウト)
-        // const mouseX = this.game.mouse.x;
-        // const mouseY = this.game.mouse.y;
-
-        // if (mouseX >= this.rankingDisplayArea.x && mouseX <= this.rankingDisplayArea.x + this.rankingDisplayArea.width + this.scrollbar.width + 20 &&
-        //     mouseY >= this.rankingDisplayArea.y && mouseY <= this.rankingDisplayArea.y + this.rankingDisplayArea.height) {
-            event.preventDefault(); // デフォルトのスクロール動作を抑制
+           event.preventDefault(); // デフォルトのスクロール動作を抑制
             this.scrollbar.scrollBy(event.deltaY * 0.5); // スクロール感度を調整
-
-            console.log("deltaY:", event.deltaY); // デバッグ情報
-            console.log("scrollPosition:", this.scrollbar.scrollPosition); // デバッグ情報
-        // }
     }
 }
