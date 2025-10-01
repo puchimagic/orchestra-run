@@ -453,14 +453,14 @@ export class GameScene {
 
         ctx.fillStyle = 'black';
         ctx.textAlign = 'left';
-        ctx.font = `${FONT_SIZE.SMALL}px ${FONT_FAMILY}`;
+        ctx.font = `${FONT_SIZE.MEDIUM}px ${FONT_FAMILY}`;
         ctx.fillText(`スコア: ${this.score}`, 20, 50);
 
         // 楽器アイコンを右上に描画
         if (this.isInstrumentLoaded) {
-            const x = width - 100 - 10;
-            const y = 10;
-            ctx.drawImage(this.instrumentImage, x, y, 100, 110);
+            const x = width - 100 - 40;
+            const y = 20;
+            ctx.drawImage(this.instrumentImage, x, y, 140, 150);
         }
 
         if (this.isCountdown) {
