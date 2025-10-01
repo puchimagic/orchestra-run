@@ -1,39 +1,64 @@
 import { SCENE, FONT_SIZE, FONT_FAMILY } from '../config.js';
 import { Button } from '../ui/button.js';
-import { Scrollbar } from '../ui/scrollbar.js'; // Scrollbar をインポート
+import { Scrollbar } from '../ui/scrollbar.js';
 
 export class RankingScene {
     constructor(game) {
         this.game = game;
         this.scores = [];
 
-        // 背景画像を読み込む
+        // 背景画像
         this.backgroundImage = new Image();
         this.backgroundImage.src = 'img/title_rank_select.png';
         this.isBackgroundLoaded = false;
-        this.backgroundImage.onload = () => {
-            this.isBackgroundLoaded = true;
-        };
+        this.backgroundImage.onload = () => { this.isBackgroundLoaded = true; };
         this.backgroundImage.onerror = () => {
             console.error('背景画像の読み込みに失敗しました: img/title_rank_select.png');
         };
 
-        // this.rankingDisplayArea と this.scrollbar をコンストラクタで完全に初期化する
         this.rankingDisplayArea = { x: 0, y: 0, width: 0, height: 0 };
-        this.scrollbar = new Scrollbar(0, 0, 20, 100, 0); // 仮の値で初期化
+        this.scrollbar = new Scrollbar(0, 0, 20, 100, 0);
 
         this.onResize();
         this.loadScores();
 
-        // wheel イベントリスナーを追加
         this.handleWheelBound = this.handleWheel.bind(this);
         this.game.canvas.addEventListener('wheel', this.handleWheelBound);
     }
 
+    // テキストを最大幅に合わせて省略（必要なら…で切る）
+    truncateTextToWidth(ctx, text, maxWidth) {
+        if (!text) return '';
+        if (ctx.measureText(text).width <= maxWidth) return text;
+        const ellipsis = '…';
+        let low = 0;
+        let high = text.length;
+        while (low < high) {
+            const mid = Math.ceil((low + high) / 2);
+            const candidate = text.slice(0, mid) + ellipsis;
+            if (ctx.measureText(candidate).width <= maxWidth) low = mid;
+            else high = mid - 1;
+            // 防止無限ループ
+            if (high - low <= 1) break;
+        }
+        // 最終調整（lowかlow-1）
+        for (let len = low; len >= 0; len--) {
+            const candidate = text.slice(0, len) + ellipsis;
+            if (ctx.measureText(candidate).width <= maxWidth) return candidate;
+        }
+        return ellipsis;
+    }
+
     async loadScores() {
         this.scores = await this.game.scoreManager.getScores();
-        // this.scores = this.scores.slice(0, 50); // ScoreManager 側で制限されるため削除
-        this.onResize(); // スコアがロードされたら再計算
+
+        // username が無い場合は "guest" を補完
+        this.scores = this.scores.map(s => ({
+            ...s,
+            username: s.username && s.username.trim() !== "" ? s.username : "guest"
+        }));
+
+        this.onResize();
     }
 
     onResize() {
@@ -45,33 +70,40 @@ export class RankingScene {
         const y = height - btnHeight - 100;
         this.backButton = new Button(x, y, btnWidth, btnHeight, '戻る');
 
-        // ランキングリストの表示領域を定義
-        const rankingContentStartY = 120 + 50;
-        const backButtonY = y; // backButton の y 座標を直接使用
-        const rankingContentEndY = backButtonY - 50;
+        const rankingContentStartY = 170; // タイトルから少し余白
+        const rankingContentEndY = y - 50;
         const availableHeight = rankingContentEndY - rankingContentStartY;
 
-        const maxDisplayWidth = 1200; // ランキングテキストの表示幅を広くする
-        const displayStartX = (width - maxDisplayWidth) / 2;
+        // ===== 幅の決定（画面幅の 85% を使う、過度に広くしない） =====
+        const scrollbarWidth = 20;
+        const scrollbarMarginRight = 12;
+        const horizontalPadding = 40; // 左右合計での余白（内部余白）
+        const MAX_RANKING_WIDTH = 1600;
+        const MIN_RANKING_WIDTH = 800;
+
+        let computedMaxWidth = Math.floor(width * 0.85);
+        computedMaxWidth = Math.min(computedMaxWidth, MAX_RANKING_WIDTH);
+        computedMaxWidth = Math.max(computedMaxWidth, Math.min(MIN_RANKING_WIDTH, width - scrollbarWidth - scrollbarMarginRight - 20));
+
+        // ランキング領域とスクロールバーを含む全体幅を中央寄せ
+        const totalBlockWidth = computedMaxWidth + scrollbarWidth + scrollbarMarginRight;
+        const displayStartX = Math.floor((width - totalBlockWidth) / 2);
 
         this.rankingDisplayArea = {
             x: displayStartX,
             y: rankingContentStartY,
-            width: maxDisplayWidth,
+            width: computedMaxWidth,
             height: availableHeight
         };
 
-        // スクロールバーの位置とサイズを設定
-        const scrollbarWidth = 20;
-        const scrollbarMarginRight = 10; // ランキングテキストとの間のマージン
-        this.scrollbar.x = this.rankingDisplayArea.x + this.rankingDisplayArea.width + scrollbarMarginRight; // ランキング表示領域の右端からマージンを空けて配置
+        // スクロールバーの位置（ランキング表示領域の右に配置）
+        this.scrollbar.x = this.rankingDisplayArea.x + this.rankingDisplayArea.width + scrollbarMarginRight;
         this.scrollbar.y = this.rankingDisplayArea.y;
         this.scrollbar.width = scrollbarWidth;
         this.scrollbar.height = this.rankingDisplayArea.height;
 
-        // スクロール可能なコンテンツの総高さを計算
         const lineHeight = 60;
-        const maxDisplayCount = 50; // draw メソッドの maxDisplayCount と合わせる
+        const maxDisplayCount = 50;
         const totalScoresHeight = maxDisplayCount * lineHeight;
         this.scrollbar.updateContentHeight(totalScoresHeight);
     }
@@ -79,25 +111,20 @@ export class RankingScene {
     update() {
         const mouse = this.game.mouse;
 
-        // スクロールバーの処理
         if (mouse.clicked) {
             if (this.scrollbar.handleMouseDown(mouse.x, mouse.y)) {
-                // スクロールバーがクリックされたら、他のボタン処理は行わない
                 return;
             }
         }
 
-        // マウスボタンが離されたらドラッグ終了
         if (!mouse.isDown && this.scrollbar.isDragging) {
             this.scrollbar.handleMouseUp();
         }
 
-        // ドラッグ中は常にマウス移動を処理
         if (this.scrollbar.isDragging) {
             this.scrollbar.handleMouseMove(mouse.x, mouse.y);
         }
 
-        // 戻るボタンの処理
         if (this.backButton && this.backButton.update(mouse)) {
             this.game.changeScene(SCENE.MAIN);
         }
@@ -107,11 +134,9 @@ export class RankingScene {
         const ctx = this.game.ctx;
         const { width, height } = this.game.canvas;
 
-        //背景設定
         if (this.isBackgroundLoaded) {
             ctx.drawImage(this.backgroundImage, 0, 0, width, height);
-        }
-        else {
+        } else {
             ctx.clearRect(0, 0, width, height);
             ctx.fillStyle = '#f0f0f0';
             ctx.fillRect(0, 0, width, height);
@@ -119,15 +144,13 @@ export class RankingScene {
 
         ctx.fillStyle = 'black';
         ctx.textAlign = 'center';
-
         ctx.font = `${FONT_SIZE.MEDIUM}px ${FONT_FAMILY}`;
         ctx.fillText('ランキング', width / 2, 120);
 
-        // ランキングリストの描画
+        // 小フォントをセット（これで measureText する）
         ctx.font = `${FONT_SIZE.SMALL}px ${FONT_FAMILY}`;
         const lineHeight = 60;
 
-        // クリッピング領域を設定
         ctx.save();
         ctx.beginPath();
         ctx.rect(this.rankingDisplayArea.x, this.rankingDisplayArea.y, this.rankingDisplayArea.width, this.rankingDisplayArea.height);
@@ -140,63 +163,77 @@ export class RankingScene {
             const maxDisplayWidth = this.rankingDisplayArea.width;
             const displayStartX = this.rankingDisplayArea.x;
 
+            // 列位置（広めに確保）
             const rankX = displayStartX + maxDisplayWidth * 0.02;
-            const usernameX = displayStartX + maxDisplayWidth * 0.15; // ユーザー名表示位置
-            const scoreX = displayStartX + maxDisplayWidth * 0.45;
-            const instrumentX = displayStartX + maxDisplayWidth * 0.5;
-            const dateX = displayStartX + maxDisplayWidth * 0.98;
+            const usernameX = displayStartX + maxDisplayWidth * 0.16;
+            const scoreX = displayStartX + maxDisplayWidth * 0.48; // 右寄せでスコア
+            const instrumentX = displayStartX + maxDisplayWidth * 0.55; // 楽器はここから左寄せ
+            const dateX = displayStartX + maxDisplayWidth * 0.98; // 日付は右端
 
-            // スクロールオフセットを適用
+            // 楽器名の最大幅（date と重ならないように余裕を持たせる）
+            const gapBetweenInstrumentAndDate = 14; // px
+            let instrumentMaxWidth = dateX - instrumentX - gapBetweenInstrumentAndDate;
+            if (instrumentMaxWidth < 60) instrumentMaxWidth = 60; // 最低幅確保
+
+            // ユーザー名の最大幅（スコアと被らないように）
+            const gapBetweenUsernameAndScore = 12;
+            let usernameMaxWidth = scoreX - usernameX - gapBetweenUsernameAndScore;
+            if (usernameMaxWidth < 80) usernameMaxWidth = 80;
+
             let currentY = this.rankingDisplayArea.y + lineHeight / 2 - this.scrollbar.getScrollOffset();
 
-            // 最大50件まで表示し、足りない場合は「---」で埋める
             const maxDisplayCount = 50;
             for (let i = 0; i < maxDisplayCount; i++) {
                 const entry = this.scores[i];
                 const rank = `${i + 1}位`;
+
                 let scoreText = '---';
                 let instrumentText = '---';
                 let dateText = '---';
-                let usernameText = '---'; // ユーザー名を追加
+                let usernameText = 'guest';
 
                 if (entry) {
                     scoreText = `${entry.score.toLocaleString()} pt`;
-                    instrumentText = `(${entry.instrument})`;
-                    dateText = entry.date;
-                    usernameText = entry.username || '名無し'; // ユーザー名がなければ「名無し」
+                    instrumentText = entry.instrument ? `(${entry.instrument})` : '';
+                    dateText = entry.date || '';
+                    usernameText = entry.username || 'guest';
                 }
 
-                // 描画範囲外のスコアはスキップ
                 const textTop = currentY - lineHeight / 2;
                 const textBottom = currentY + lineHeight / 2;
 
                 if (textBottom < this.rankingDisplayArea.y || textTop > this.rankingDisplayArea.y + this.rankingDisplayArea.height) {
                     currentY += lineHeight;
-                    continue; // スキップではなく continue に変更
+                    continue;
                 }
 
+                // 順位
                 ctx.textAlign = 'left';
                 ctx.fillText(rank, rankX, currentY);
 
-                ctx.textAlign = 'left'; // ユーザー名を左寄せで描画
-                ctx.fillText(usernameText, usernameX, currentY);
+                // ユーザー名（長ければ省略）
+                ctx.textAlign = 'left';
+                const usernameToDraw = this.truncateTextToWidth(ctx, usernameText, usernameMaxWidth);
+                ctx.fillText(usernameToDraw, usernameX, currentY);
 
+                // スコア（右寄せ）
                 ctx.textAlign = 'right';
                 ctx.fillText(scoreText, scoreX, currentY);
 
+                // 楽器（長ければ省略）
                 ctx.textAlign = 'left';
-                ctx.fillText(instrumentText, instrumentX, currentY);
+                const instrumentToDraw = this.truncateTextToWidth(ctx, instrumentText, instrumentMaxWidth);
+                ctx.fillText(instrumentToDraw, instrumentX, currentY);
 
+                // 日付（右寄せ）
                 ctx.textAlign = 'right';
                 ctx.fillText(dateText, dateX, currentY);
-                
+
                 currentY += lineHeight;
             }
         }
 
-        ctx.restore(); // クリッピング領域を解除
-
-        // スクロールバーの描画
+        ctx.restore();
         this.scrollbar.draw(ctx);
 
         ctx.textAlign = 'center';
@@ -206,13 +243,11 @@ export class RankingScene {
     }
 
     destroy() {
-        // シーンが破棄されるときにイベントリスナーを削除
         this.game.canvas.removeEventListener('wheel', this.handleWheelBound);
     }
 
-    // handleWheel メソッドをアロー関数としてクラスプロパティで定義
     handleWheel(event) {
-           event.preventDefault(); // デフォルトのスクロール動作を抑制
-            this.scrollbar.scrollBy(event.deltaY * 0.5); // スクロール感度を調整
+        event.preventDefault();
+        this.scrollbar.scrollBy(event.deltaY * 0.5);
     }
 }
