@@ -32,27 +32,27 @@ export class SettingsScene {
         this.username = this.game.username;
 
         // 音量スライダー (3種類に修正)
-        this.bgmSlider = new VolumeSlider(0, 0, 500, 40, 'BGM音量', soundPlayer.bgmVolume, (v) => { // サイズ変更
+        this.bgmSlider = new VolumeSlider(0, 0, 500, 40, 'BGM音量', soundPlayer.bgmVolume, (v) => {
             soundPlayer.setBgmVolume(v);
             this.game.saveSettings();
         });
-        this.instrumentSlider = new VolumeSlider(0, 0, 500, 40, '楽器音量', soundPlayer.instrumentVolume, (v) => { // サイズ変更
+        this.instrumentSlider = new VolumeSlider(0, 0, 500, 40, '楽器音量', soundPlayer.instrumentVolume, (v) => {
             soundPlayer.setInstrumentVolume(v);
             soundPlayer.playSound('ギター_track01'); // プレビュー音を再生
             this.game.saveSettings();
         });
-        this.gameSoundSlider = new VolumeSlider(0, 0, 500, 40, '効果音量', soundPlayer.gameSoundVolume, (v) => { // サイズ変更
+        this.gameSoundSlider = new VolumeSlider(0, 0, 500, 40, '効果音量', soundPlayer.gameSoundVolume, (v) => {
             soundPlayer.setGameSoundVolume(v);
             soundPlayer.playGameSound('jump'); // プレビュー音を再生
             this.game.saveSettings();
         });
 
         // 入力方法ボタン
-        this.keyboardButton = new Button(0, 0, 450, 100, 'キーボード'); // サイズ変更
-        this.gamepadButton = new Button(0, 0, 450, 100, 'ゲームパッド'); // サイズ変更
+        this.keyboardButton = new Button(0, 0, 450, 100, 'キーボード');
+        this.gamepadButton = new Button(0, 0, 450, 100, 'ゲームパッド');
 
         // 戻るボタン
-        this.backButton = new Button(0, 0, 500, 100, '戻る'); // サイズ変更とテキスト変更
+        this.backButton = new Button(0, 0, 500, 100, '戻る');
 
         // キーボードイベントリスナー
         document.addEventListener('keydown', this.handleKeyDown);
@@ -63,10 +63,11 @@ export class SettingsScene {
     onResize() {
         const { width, height } = this.game.canvas;
         const columnWidth = width / 3; // 3カラムの幅
-        const elementPadding = 70;
-        const sectionPadding = 140;
+        const elementPadding = 90; // 70から90に増加
+        const sectionPadding = 180; // 140から180に増加
         const mainTitleLineHeight = 60;
         const sectionTitleLineHeight = 40;
+        const sliderTextSpacing = 40; // 30から40に増加
 
         // --- 左セクション (音量) ---
         const leftColumnCenterX = columnWidth / 2;
@@ -76,7 +77,7 @@ export class SettingsScene {
         let currentYLeft = 200 + mainTitleLineHeight + elementPadding / 2;
         this.volumeTitleY = currentYLeft;
         this.volumeTitleX = leftColumnCenterX;
-        currentYLeft += sectionTitleLineHeight + elementPadding;
+        currentYLeft += sectionTitleLineHeight + elementPadding + sliderTextSpacing;
 
         this.bgmSlider.x = leftSectionStartX;
         this.bgmSlider.y = currentYLeft;
@@ -120,7 +121,7 @@ export class SettingsScene {
         // --- 右セクション (ユーザー名入力欄) ---
         const rightColumnCenterX = columnWidth * 2.5;
         const usernameInputWidth = 450;
-        const usernameInputHeight = 50;
+        const usernameInputHeight = 60; // 50から60に増加
         const rightSectionStartX = rightColumnCenterX - usernameInputWidth / 2;
 
         let currentYRight = 200 + mainTitleLineHeight + elementPadding / 2;
@@ -239,7 +240,7 @@ export class SettingsScene {
         if (this.isEditingUsername && Math.floor(Date.now() / 500) % 2 === 0) {
             displayText += '|'; // カーソル
         }
-        ctx.fillText(displayText, this.inputRect.x + 10, this.inputRect.y + this.inputRect.height / 2);
+        ctx.fillText(displayText, this.inputRect.x + 10, this.inputRect.y + this.inputRect.height / 2 + 8); // Y座標を微調整
 
         // --- 戻るボタン (中央揃え) ---
         this.backButton.draw(ctx);
@@ -260,7 +261,7 @@ export class SettingsScene {
                 changed = true;
             }
         } else if (e.key.length === 1 && e.key.match(/^[a-zA-Z0-9_]$/)) { // 英数字とアンダースコアのみ許可
-            if (this.username.length < 15) { // 最大文字数制限
+            if (this.username.length < 8) { // 最大文字数制限を8に変更
                 this.username += e.key;
                 changed = true;
             }

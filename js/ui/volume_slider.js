@@ -1,4 +1,4 @@
-import { FONT_FAMILY } from '../config.js';
+import { FONT_FAMILY, FONT_SIZE } from '../config.js';
 
 export class VolumeSlider {
     constructor(x, y, width, height, label, initialValue, setterFunction) {
@@ -37,13 +37,13 @@ export class VolumeSlider {
 
         // ラベルと値
         ctx.fillStyle = 'black';
-        ctx.font = `45px ${FONT_FAMILY}`;
+        ctx.font = `${FONT_SIZE.SMALL}px ${FONT_FAMILY}`;
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
-        ctx.fillText(this.label, this.x, this.y - 20); // ラベルの位置を少し上に
+        ctx.fillText(this.label, this.x, this.y - 30); // ラベルの位置を少し上に
 
         ctx.textAlign = 'right';
-        ctx.fillText(`${(this.value * 100).toFixed(0)}%`, this.x + this.width, this.y - 20); // 値の位置を少し上に
+        ctx.fillText(`${(this.value * 100).toFixed(0)}%`, this.x + this.width, this.y - 30); // 値の位置を少し上に
     }
 
     // マウスがスライダーのつまみの上にあるか（当たり判定を拡大）
