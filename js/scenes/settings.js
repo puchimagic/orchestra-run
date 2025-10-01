@@ -138,17 +138,12 @@ export class SettingsScene {
         };
 
         // --- 戻るボタン (下部中央) ---
-        const backButtonWidth = 500;
+        const backButtonWidth = 400;
         const backButtonHeight = 100;
-        const maxSectionY = Math.max(
-            currentYLeft + this.gameSoundSlider.height,
-            currentYCenter + this.gamepadButton.height,
-            currentYRight + usernameInputHeight // ユーザー名入力欄の高さも考慮
-        );
-        this.backButton.x = width / 2 - backButtonWidth / 2;
-        this.backButton.y = maxSectionY + sectionPadding;
         this.backButton.width = backButtonWidth;
         this.backButton.height = backButtonHeight;
+        this.backButton.x = width / 2 - this.backButton.width / 2;
+        this.backButton.y = height - this.backButton.height - 60;
     }
 
     update() {

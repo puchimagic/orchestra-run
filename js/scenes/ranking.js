@@ -67,7 +67,7 @@ export class RankingScene {
         const btnWidth = 400;
         const btnHeight = 100;
         const x = (width - btnWidth) / 2;
-        const y = height - btnHeight - 100;
+        const y = height - btnHeight - 60;
         this.backButton = new Button(x, y, btnWidth, btnHeight, '戻る');
 
         const rankingContentStartY = 170; // タイトルから少し余白
