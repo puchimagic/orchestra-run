@@ -36,7 +36,7 @@ class Game {
         this.mouse = { x: 0, y: 0, clicked: false, isDown: false }; // isDown を追加
         this.isGameActive = false;
 
-        this.scoreManager = new ScoreManager();
+        this.scoreManager = new ScoreManager(this);
         this.selectedInstrument = null;
         this.inputMethod = 'keyboard'; // 追加
         this.username = 'Guest'; // ユーザー名を追加

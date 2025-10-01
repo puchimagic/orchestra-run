@@ -2,7 +2,9 @@ const STORAGE_KEY = 'superGeminiRunnerHighScores';
 const MAX_SCORES = 50; // ランキングに保存する最大数
 
 export class ScoreManager {
-    constructor() {}
+    constructor(game) {
+        this.game = game;
+    }
 
     async getScores() {
         const response = await fetch("https://ocherun.s3.ap-southeast-2.amazonaws.com/test.json");
@@ -19,6 +21,7 @@ export class ScoreManager {
             score: score,
             instrument: instrument,
             date: this.getFormattedDate(),
+            username: this.game.username, // ユーザー名を追加
         };
 
         scores.push(newScore);

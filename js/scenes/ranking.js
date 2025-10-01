@@ -51,7 +51,7 @@ export class RankingScene {
         const rankingContentEndY = backButtonY - 50;
         const availableHeight = rankingContentEndY - rankingContentStartY;
 
-        const maxDisplayWidth = 1000; // ランキングテキストの表示幅
+        const maxDisplayWidth = 1200; // ランキングテキストの表示幅を広くする
         const displayStartX = (width - maxDisplayWidth) / 2;
 
         this.rankingDisplayArea = {
@@ -141,8 +141,9 @@ export class RankingScene {
             const displayStartX = this.rankingDisplayArea.x;
 
             const rankX = displayStartX + maxDisplayWidth * 0.02;
-            const scoreX = displayStartX + maxDisplayWidth * 0.25;
-            const instrumentX = displayStartX + maxDisplayWidth * 0.3;
+            const usernameX = displayStartX + maxDisplayWidth * 0.15; // ユーザー名表示位置
+            const scoreX = displayStartX + maxDisplayWidth * 0.45;
+            const instrumentX = displayStartX + maxDisplayWidth * 0.5;
             const dateX = displayStartX + maxDisplayWidth * 0.98;
 
             // スクロールオフセットを適用
@@ -156,11 +157,13 @@ export class RankingScene {
                 let scoreText = '---';
                 let instrumentText = '---';
                 let dateText = '---';
+                let usernameText = '---'; // ユーザー名を追加
 
                 if (entry) {
                     scoreText = `${entry.score.toLocaleString()} pt`;
                     instrumentText = `(${entry.instrument})`;
                     dateText = entry.date;
+                    usernameText = entry.username || '名無し'; // ユーザー名がなければ「名無し」
                 }
 
                 // 描画範囲外のスコアはスキップ
@@ -174,6 +177,9 @@ export class RankingScene {
 
                 ctx.textAlign = 'left';
                 ctx.fillText(rank, rankX, currentY);
+
+                ctx.textAlign = 'left'; // ユーザー名を左寄せで描画
+                ctx.fillText(usernameText, usernameX, currentY);
 
                 ctx.textAlign = 'right';
                 ctx.fillText(scoreText, scoreX, currentY);
