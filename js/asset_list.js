@@ -19,8 +19,9 @@ export const assetsToCache = [
   './js/scenes/instrument_select.js',
   './js/scenes/main.js',
   './js/scenes/ranking.js',
-  './js/scenes/volume_settings.js',
+  './js/scenes/settings.js', // volume_settings.js から settings.js に変更
   './js/ui/button.js',
+  './js/ui/scrollbar.js', // 追加
   './js/ui/volume_slider.js',
 
   // --- 画像ファイル ---
@@ -55,12 +56,11 @@ export const assetsToCache = [
   './sound/drum/track04.wav',
   './sound/drum/track05.wav',
   './sound/drum/track06.wav',
+  './sound/game/click.wav',
   './sound/game/game_bgm.wav',
   './sound/game/gameover_bgm.wav',
   './sound/game/home_bgm.wav',
-  // './sound/game/track01.wav', // 削除
-  // './sound/game/track02.wav', // 削除
-  // './sound/game/track03.wav', // 削除
+  './sound/game/jump.wav',
   './sound/game/tree_fall.wav',
   './sound/guitar/track01.wav',
   './sound/guitar/track02.wav',
