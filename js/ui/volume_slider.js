@@ -37,7 +37,7 @@ export class VolumeSlider {
 
         // ラベルと値
         ctx.fillStyle = 'black';
-        ctx.font = `24px ${FONT_FAMILY}`;
+        ctx.font = `45px ${FONT_FAMILY}`;
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
         ctx.fillText(this.label, this.x, this.y - 20); // ラベルの位置を少し上に

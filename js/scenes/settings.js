@@ -16,7 +16,7 @@ export class SettingsScene {
         this.usernameTitleX = 0;
 
         // ユーザー名関連
-        this.username = 'Guest';
+        this.username = 'guest';
         this.isEditingUsername = false;
         this.inputRect = { x: 0, y: 0, width: 0, height: 0 };
         this.handleKeyDown = this.handleKeyDown.bind(this);
@@ -227,7 +227,7 @@ export class SettingsScene {
         ctx.fillText('ユーザー名', this.usernameTitleX, this.usernameTitleY);
 
         // ユーザー名入力ボックス
-        ctx.strokeStyle = 'white';
+        ctx.strokeStyle = 'black';
         ctx.lineWidth = 2;
         ctx.strokeRect(this.inputRect.x, this.inputRect.y, this.inputRect.width, this.inputRect.height);
 
