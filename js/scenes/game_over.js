@@ -58,12 +58,21 @@ export class GameOverScene {
             ctx.fillRect(0, 0, width, height);
         }
 
-        ctx.fillStyle = 'black';
+        // ゲームオーバーテキスト
         ctx.font = `${FONT_SIZE.LARGE}px ${FONT_FAMILY}`;
         ctx.textAlign = 'center';
+        ctx.strokeStyle = 'black'; // 枠の色を黒に
+        ctx.lineWidth = 12;
+        ctx.strokeText('ゲームオーバー', width / 2, height / 2 - 120);
+        ctx.fillStyle = 'white';   // 文字の色を白に
         ctx.fillText('ゲームオーバー', width / 2, height / 2 - 120);
 
+        // スコアテキスト
         ctx.font = `${FONT_SIZE.MEDIUM}px ${FONT_FAMILY}`;
+        ctx.strokeStyle = 'black'; // 枠の色を黒に
+        ctx.lineWidth = 10;
+        ctx.strokeText(`スコア: ${this.finalScore}`, width / 2, height / 2 - 30);
+        ctx.fillStyle = 'white';   // 文字の色を白に
         ctx.fillText(`スコア: ${this.finalScore}`, width / 2, height / 2 - 30);
 
         this.continueButton.draw(ctx);
