@@ -39,6 +39,7 @@ class Game {
         this.scoreManager = new ScoreManager();
         this.selectedInstrument = null;
         this.inputMethod = 'keyboard'; // 追加
+        this.username = 'Guest'; // ユーザー名を追加
 
         this.loadSettings(); // 追加
 
@@ -61,10 +62,12 @@ class Game {
                 soundPlayer.setBgmVolume(settings.bgmVolume !== undefined ? settings.bgmVolume : 0.5);
                 soundPlayer.setInstrumentVolume(settings.instrumentVolume !== undefined ? settings.instrumentVolume : 1.0);
                 soundPlayer.setGameSoundVolume(settings.gameSoundVolume !== undefined ? settings.gameSoundVolume : 0.7);
+                this.username = settings.username || 'Guest'; // ユーザー名を読み込む
             }
         } catch (e) {
             console.error('設定の読み込みに失敗しました:', e);
             this.inputMethod = 'keyboard';
+            this.username = 'Guest'; // エラー時にもデフォルト値を設定
         }
     }
 
@@ -76,6 +79,7 @@ class Game {
                 bgmVolume: soundPlayer.bgmVolume,
                 instrumentVolume: soundPlayer.instrumentVolume,
                 gameSoundVolume: soundPlayer.gameSoundVolume,
+                username: this.username, // ユーザー名を追加
             };
             localStorage.setItem('okerun-settings', JSON.stringify(settings));
         } catch (e) {

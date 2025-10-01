@@ -10,8 +10,16 @@ export class SettingsScene {
         this.activeSlider = null;
         this.volumeTitleY = 0;
         this.inputTitleY = 0;
-        this.volumeTitleX = 0; // 左寄せタイトルの新しいプロパティ
-        this.inputTitleX = 0;  // 右寄せタイトルの新しいプロパティ
+        this.usernameTitleY = 0;
+        this.volumeTitleX = 0;
+        this.inputTitleX = 0;
+        this.usernameTitleX = 0;
+
+        // ユーザー名関連
+        this.username = 'Guest';
+        this.isEditingUsername = false;
+        this.inputRect = { x: 0, y: 0, width: 0, height: 0 };
+        this.handleKeyDown = this.handleKeyDown.bind(this);
     }
 
     init() {
@@ -19,6 +27,9 @@ export class SettingsScene {
         this.backgroundImage.src = 'img/title_rank_select.png';
         this.isBackgroundLoaded = false;
         this.backgroundImage.onload = () => { this.isBackgroundLoaded = true; };
+
+        // gameオブジェクトから現在のユーザー名を取得して初期化
+        this.username = this.game.username;
 
         // 音量スライダー (3種類に修正)
         this.bgmSlider = new VolumeSlider(0, 0, 500, 40, 'BGM音量', soundPlayer.bgmVolume, (v) => { // サイズ変更
@@ -43,34 +54,30 @@ export class SettingsScene {
         // 戻るボタン
         this.backButton = new Button(0, 0, 500, 100, '戻る'); // サイズ変更とテキスト変更
 
+        // キーボードイベントリスナー
+        document.addEventListener('keydown', this.handleKeyDown);
+
         this.onResize();
     }
 
     onResize() {
         const { width, height } = this.game.canvas;
-        const cx = width / 2;
-
-        const mainTitleLineHeight = 60; // FONT_SIZE.LARGE の推定行の高さ
-        const sectionTitleLineHeight = 40; // FONT_SIZE.MEDIUM の推定行の高さ
-
-        const elementPadding = 70; // 要素間のパディング (スライダー、ボタン)
-        const sectionPadding = 140; // 主要セクション間のパディング (音量、入力、戻るボタン)
+        const columnWidth = width / 3; // 3カラムの幅
+        const elementPadding = 70;
+        const sectionPadding = 140;
+        const mainTitleLineHeight = 60;
+        const sectionTitleLineHeight = 40;
 
         // --- 左セクション (音量) ---
+        const leftColumnCenterX = columnWidth / 2;
         const sliderWidth = 500;
-        // 左半分の中心に配置
-        const leftSectionCenterX = width / 4;
-        const leftSectionStartX = leftSectionCenterX - sliderWidth / 2;
+        const leftSectionStartX = leftColumnCenterX - sliderWidth / 2;
 
-        // メインタイトルの下から開始Y座標を調整
         let currentYLeft = 200 + mainTitleLineHeight + elementPadding / 2;
-
-        // 「音量調整」セクションタイトル
         this.volumeTitleY = currentYLeft;
-        this.volumeTitleX = leftSectionCenterX; // タイトルは左半分の中心に
+        this.volumeTitleX = leftColumnCenterX;
         currentYLeft += sectionTitleLineHeight + elementPadding;
 
-        // 音量スライダー
         this.bgmSlider.x = leftSectionStartX;
         this.bgmSlider.y = currentYLeft;
         this.bgmSlider.width = sliderWidth;
@@ -88,38 +95,56 @@ export class SettingsScene {
         this.gameSoundSlider.width = sliderWidth;
         this.gameSoundSlider.height = 40;
 
-        // --- 右セクション (入力方法) ---
-        const buttonWidth = 450; // 350から増加
+        // --- 中央セクション (入力方法) ---
+        const centerColumnCenterX = columnWidth * 1.5;
+        const buttonWidth = 450;
         const buttonHeight = 100;
-        // 右半分の中心に配置
-        const rightSectionCenterX = width * 3 / 4;
-        const rightSectionStartX = rightSectionCenterX - buttonWidth / 2;
+        const centerSectionStartX = centerColumnCenterX - buttonWidth / 2;
 
-        // メインタイトルの下から開始Y座標を調整
-        let currentYRight = 200 + mainTitleLineHeight + elementPadding / 2;
+        let currentYCenter = 200 + mainTitleLineHeight + elementPadding / 2;
+        this.inputTitleY = currentYCenter;
+        this.inputTitleX = centerColumnCenterX;
+        currentYCenter += sectionTitleLineHeight + elementPadding;
 
-        // 「入力方法」セクションタイトル
-        this.inputTitleY = currentYRight;
-        this.inputTitleX = rightSectionCenterX; // タイトルは右半分の中心に
-        currentYRight += sectionTitleLineHeight + elementPadding;
-
-        // 入力方法ボタン
-        this.keyboardButton.x = rightSectionStartX;
-        this.keyboardButton.y = currentYRight;
+        this.keyboardButton.x = centerSectionStartX;
+        this.keyboardButton.y = currentYCenter;
         this.keyboardButton.width = buttonWidth;
         this.keyboardButton.height = buttonHeight;
-        currentYRight += this.keyboardButton.height + elementPadding;
+        currentYCenter += this.keyboardButton.height + elementPadding;
 
-        this.gamepadButton.x = rightSectionStartX;
-        this.gamepadButton.y = currentYRight;
+        this.gamepadButton.x = centerSectionStartX;
+        this.gamepadButton.y = currentYCenter;
         this.gamepadButton.width = buttonWidth;
         this.gamepadButton.height = buttonHeight;
+
+        // --- 右セクション (ユーザー名入力欄) ---
+        const rightColumnCenterX = columnWidth * 2.5;
+        const usernameInputWidth = 450;
+        const usernameInputHeight = 50;
+        const rightSectionStartX = rightColumnCenterX - usernameInputWidth / 2;
+
+        let currentYRight = 200 + mainTitleLineHeight + elementPadding / 2;
+        this.usernameTitleY = currentYRight;
+        this.usernameTitleX = rightColumnCenterX;
+        currentYRight += sectionTitleLineHeight + elementPadding;
+
+        // ユーザー名入力欄の矩形を更新
+        this.inputRect = {
+            x: rightSectionStartX,
+            y: currentYRight,
+            width: usernameInputWidth,
+            height: usernameInputHeight
+        };
 
         // --- 戻るボタン (下部中央) ---
         const backButtonWidth = 500;
         const backButtonHeight = 100;
-        const maxSectionY = Math.max(currentYLeft + this.gameSoundSlider.height, currentYRight + this.gamepadButton.height);
-        this.backButton.x = cx - backButtonWidth / 2;
+        const maxSectionY = Math.max(
+            currentYLeft + this.gameSoundSlider.height,
+            currentYCenter + this.gamepadButton.height,
+            currentYRight + usernameInputHeight // ユーザー名入力欄の高さも考慮
+        );
+        this.backButton.x = width / 2 - backButtonWidth / 2;
         this.backButton.y = maxSectionY + sectionPadding;
         this.backButton.width = backButtonWidth;
         this.backButton.height = backButtonHeight;
@@ -132,6 +157,14 @@ export class SettingsScene {
             if (this.bgmSlider.handleMouseDown(mouse.x, mouse.y)) this.activeSlider = this.bgmSlider;
             else if (this.instrumentSlider.handleMouseDown(mouse.x, mouse.y)) this.activeSlider = this.instrumentSlider;
             else if (this.gameSoundSlider.handleMouseDown(mouse.x, mouse.y)) this.activeSlider = this.gameSoundSlider;
+            // ユーザー名入力欄のクリック判定
+            else if (mouse.x >= this.inputRect.x && mouse.x <= this.inputRect.x + this.inputRect.width &&
+                     mouse.y >= this.inputRect.y && mouse.y <= this.inputRect.y + this.inputRect.height) {
+                this.isEditingUsername = true;
+            } else {
+                // スライダーでも入力欄でもない場所がクリックされたら、入力モードを解除
+                this.isEditingUsername = false;
+            }
         }
 
         if (!this.inputHandler.isMouseDown() && this.activeSlider) {
@@ -172,33 +205,74 @@ export class SettingsScene {
         ctx.fillText('設定', width / 2, 120);
 
         // --- 左セクション (音量) ---
-        // セクションタイトル (左半分の中心に)
         ctx.font = `${FONT_SIZE.MEDIUM}px ${FONT_FAMILY}`;
-        ctx.textAlign = 'center'; // 中央揃えに変更
+        ctx.textAlign = 'center';
         ctx.fillText('音量調整', this.volumeTitleX, this.volumeTitleY);
-
-        // スライダー (x, y で既に配置済み)
         this.bgmSlider.draw(ctx);
         this.instrumentSlider.draw(ctx);
         this.gameSoundSlider.draw(ctx);
 
-        // --- 右セクション (入力方法) ---
-        // セクションタイトル (右半分の中心に)
+        // --- 中央セクション (入力方法) ---
         ctx.font = `${FONT_SIZE.MEDIUM}px ${FONT_FAMILY}`;
-        ctx.textAlign = 'center'; // 中央揃えに変更
+        ctx.textAlign = 'center';
         ctx.fillText('入力方法', this.inputTitleX, this.inputTitleY);
-
-        // 選択された入力方法をハイライト (このロジックはそのまま)
         this.keyboardButton.isHighlighted = (this.game.inputMethod === 'keyboard');
         this.gamepadButton.isHighlighted = (this.game.inputMethod === 'gamepad');
-
-        // ボタン (x, y で既に配置済み)
         this.keyboardButton.draw(ctx);
         this.gamepadButton.draw(ctx);
+
+        // --- 右セクション (ユーザー名入力欄) ---
+        ctx.font = `${FONT_SIZE.MEDIUM}px ${FONT_FAMILY}`;
+        ctx.textAlign = 'center';
+        ctx.fillText('ユーザー名', this.usernameTitleX, this.usernameTitleY);
+
+        // ユーザー名入力ボックス
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(this.inputRect.x, this.inputRect.y, this.inputRect.width, this.inputRect.height);
+
+        ctx.fillStyle = 'black';
+        ctx.font = `${FONT_SIZE.MEDIUM}px ${FONT_FAMILY}`;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        let displayText = this.username;
+        if (this.isEditingUsername && Math.floor(Date.now() / 500) % 2 === 0) {
+            displayText += '|'; // カーソル
+        }
+        ctx.fillText(displayText, this.inputRect.x + 10, this.inputRect.y + this.inputRect.height / 2);
 
         // --- 戻るボタン (中央揃え) ---
         this.backButton.draw(ctx);
     }
 
-    destroy() {}
+    destroy() {
+        document.removeEventListener('keydown', this.handleKeyDown);
+    }
+
+    handleKeyDown(e) {
+        if (!this.isEditingUsername) return;
+
+        let changed = false; // 変更があったかどうかのフラグ
+
+        if (e.key === 'Backspace') {
+            if (this.username.length > 0) {
+                this.username = this.username.slice(0, -1);
+                changed = true;
+            }
+        } else if (e.key.length === 1 && e.key.match(/^[a-zA-Z0-9_]$/)) { // 英数字とアンダースコアのみ許可
+            if (this.username.length < 15) { // 最大文字数制限
+                this.username += e.key;
+                changed = true;
+            }
+        } else if (e.key === 'Enter') {
+            // Enterキーでの登録処理は不要になるため、入力モードを解除するのみ
+            this.isEditingUsername = false;
+        }
+
+        if (changed) {
+            // gameオブジェクトのユーザー名を更新し、保存
+            this.game.username = this.username;
+            this.game.saveSettings();
+        }
+    }
 }
