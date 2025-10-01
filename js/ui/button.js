@@ -36,6 +36,8 @@ export class Button {
     }
 
     draw(ctx, scale = 1) {
+        ctx.save(); // 現在の描画状態を保存
+
         // ボタンを描画
         let currentColor = this.color;
         let currentHoverColor = this.hoverColor;
@@ -51,10 +53,12 @@ export class Button {
         // テキストを描画
         ctx.fillStyle = '#fff';
         // フォントサイズにスケールを適用
-        const scaledFontSize = FONT_SIZE.MEDIUM; // FONT_SIZE.SMALL から FONT_SIZE.MEDIUM に変更
+        const scaledFontSize = FONT_SIZE.MEDIUM;
         ctx.font = `${scaledFontSize}px ${FONT_FAMILY}`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(this.text, this.x + this.width / 2, this.y + this.height / 2);
+
+        ctx.restore(); // 保存した描画状態を復元
     }
 }
