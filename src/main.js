@@ -33,6 +33,7 @@ class Game {
 
         this.scenes = {};
         this.currentScene = null;
+        this.currentSceneName = null;
         this.mouse = { x: 0, y: 0, clicked: false, isDown: false };
         this.isGameActive = false;
 
@@ -160,11 +161,12 @@ class Game {
             this.currentScene.destroy();
         }
 
-        soundPlayer.stopAllSounds();
         const targetBGM = SCENE_BGM_MAP[sceneName];
-        if (targetBGM) {
-            soundPlayer.playBGM(targetBGM);
+        if (targetBGM !== SCENE_BGM_MAP[this.currentSceneName]) {
+            soundPlayer.stopAllSounds();
+            if (targetBGM) soundPlayer.playBGM(targetBGM);
         }
+        this.currentSceneName = sceneName;
 
         if (sceneName === SCENE.GAME) {
             this.currentScene = new GameScene(this, this.selectedInstrument);
