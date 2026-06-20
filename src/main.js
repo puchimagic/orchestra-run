@@ -5,7 +5,7 @@ import { RankingScene } from './scenes/ranking.js';
 import { InstrumentSelectScene } from './scenes/instrument_select.js';
 import { GameScene } from './scenes/game.js';
 import { GameOverScene } from './scenes/game_over.js';
-import { SettingsScene } from './scenes/settings.js'; // VolumeSettingsScene を SettingsScene に変更
+import { SettingsScene } from './scenes/settings.js';
 import { ScoreManager } from './score_manager.js';
 import { InputHandler } from './input_handler.js';
 import { soundPlayer } from './soundPlayer.js';
@@ -15,7 +15,7 @@ const SCENE_BGM_MAP = {
     [SCENE.INSTRUMENT_SELECT]: 'home_bgm',
     [SCENE.RANKING]: 'home_bgm',
     [SCENE.GAME_DESCRIPTION]: 'home_bgm',
-    [SCENE.SETTINGS]: 'home_bgm', // VOLUME_SETTINGS を SETTINGS に変更
+    [SCENE.SETTINGS]: 'home_bgm',
     [SCENE.GAME]: 'game_bgm',
     [SCENE.GAME_OVER]: 'gameover_bgm',
 };
@@ -38,13 +38,13 @@ class Game {
 
         this.scoreManager = new ScoreManager(this);
         this.selectedInstrument = null;
-        this.inputMethod = 'keyboard'; // 追加
-        this.username = 'Guest'; // ユーザー名を追加
+        this.inputMethod = 'keyboard';
+        this.username = 'Guest';
 
-        this.loadSettings(); // 追加
+        this.loadSettings();
 
-        this.canvasOffsetX = 0; // 追加
-        this.canvasOffsetY = 0; // 追加
+        this.canvasOffsetX = 0;
+        this.canvasOffsetY = 0;
 
         window.addEventListener('resize', () => this.resizeCanvas());
         this.resizeCanvas();
@@ -53,7 +53,7 @@ class Game {
         this.setupMouseHandlers();
     }
 
-    // 追加: 設定の読み込み
+
     loadSettings() {
         try {
             const settings = JSON.parse(localStorage.getItem('okerun-settings'));
@@ -62,16 +62,16 @@ class Game {
                 soundPlayer.setBgmVolume(settings.bgmVolume !== undefined ? settings.bgmVolume : 0.5);
                 soundPlayer.setInstrumentVolume(settings.instrumentVolume !== undefined ? settings.instrumentVolume : 1.0);
                 soundPlayer.setGameSoundVolume(settings.gameSoundVolume !== undefined ? settings.gameSoundVolume : 0.7);
-                this.username = settings.username || 'Guest'; // ユーザー名を読み込む
+                this.username = settings.username || 'Guest';
             }
         } catch (e) {
             console.error('設定の読み込みに失敗しました:', e);
             this.inputMethod = 'keyboard';
-            this.username = 'Guest'; // エラー時にもデフォルト値を設定
+            this.username = 'Guest';
         }
     }
 
-    // 追加: 設定の保存
+
     saveSettings() {
         try {
             const settings = {
@@ -79,7 +79,7 @@ class Game {
                 bgmVolume: soundPlayer.bgmVolume,
                 instrumentVolume: soundPlayer.instrumentVolume,
                 gameSoundVolume: soundPlayer.gameSoundVolume,
-                username: this.username, // ユーザー名を追加
+                username: this.username,
             };
             localStorage.setItem('okerun-settings', JSON.stringify(settings));
         } catch (e) {
@@ -94,13 +94,13 @@ class Game {
         if (window.innerWidth / window.innerHeight > aspectRatio) {
             newHeight = window.innerHeight;
             newWidth = newHeight * aspectRatio;
-            this.canvasOffsetX = (window.innerWidth - newWidth) / 2; // 左右の余白
-            this.canvasOffsetY = 0; // 上下の余白なし
+            this.canvasOffsetX = (window.innerWidth - newWidth) / 2;
+            this.canvasOffsetY = 0;
         } else {
             newWidth = window.innerWidth;
             newHeight = newWidth / aspectRatio;
-            this.canvasOffsetX = 0; // 左右の余白なし
-            this.canvasOffsetY = (window.innerHeight - newHeight) / 2; // 上下の余白
+            this.canvasOffsetX = 0;
+            this.canvasOffsetY = (window.innerHeight - newHeight) / 2;
         }
 
         this.canvas.style.width = `${newWidth}px`;
@@ -115,7 +115,7 @@ class Game {
 
     getScaledMousePos(event) {
         const rect = this.canvas.getBoundingClientRect();
-        // Canvas要素の表示領域内での座標から、さらに余白を考慮した描画領域内での座標を計算
+       
         const clientXInCanvas = event.clientX - rect.left - this.canvasOffsetX;
         const clientYInCanvas = event.clientY - rect.top - this.canvasOffsetY;
 
@@ -136,11 +136,10 @@ class Game {
             this.mouse.x = pos.x;
             this.mouse.y = pos.y;
             this.mouse.clicked = true;
-            this.mouse.isDown = true; // isDown を true に設定
+            this.mouse.isDown = true;
         });
-        // mouseup イベントリスナーを追加
         this.canvas.addEventListener('mouseup', (e) => {
-            this.mouse.isDown = false; // isDown を false に設定
+            this.mouse.isDown = false;
         });
     }
 
@@ -148,10 +147,9 @@ class Game {
         this.inputHandler = new InputHandler(this.mouse);
         this.scenes[SCENE.MAIN] = new MainScene(this);
         this.scenes[SCENE.GAME_DESCRIPTION] = new GameDescriptionScene(this);
-        // this.scenes[SCENE.RANKING] = new RankingScene(this); // ランキングシーンは毎回新しく作成するためコメントアウト
         this.scenes[SCENE.INSTRUMENT_SELECT] = new InstrumentSelectScene(this);
         this.scenes[SCENE.GAME_OVER] = new GameOverScene(this);
-        this.scenes[SCENE.SETTINGS] = new SettingsScene(this); // VOLUME_SETTINGS を SETTINGS に変更
+        this.scenes[SCENE.SETTINGS] = new SettingsScene(this);
         
         this.changeScene(SCENE.MAIN);
         this.gameLoop();
@@ -170,7 +168,7 @@ class Game {
 
         if (sceneName === SCENE.GAME) {
             this.currentScene = new GameScene(this, this.selectedInstrument);
-        } else if (sceneName === SCENE.RANKING) { // ランキングシーンは毎回新しく作成
+        } else if (sceneName === SCENE.RANKING) {
             this.currentScene = new RankingScene(this);
         } else {
             this.currentScene = this.scenes[sceneName];

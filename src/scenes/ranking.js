@@ -1,20 +1,13 @@
 import { SCENE, FONT_SIZE, FONT_FAMILY } from '../config.js';
 import { Button } from '../ui/button.js';
 import { Scrollbar } from '../ui/scrollbar.js';
+import { loadImage, drawBackground } from '../ui/scene_utils.js';
 
 export class RankingScene {
     constructor(game) {
         this.game = game;
         this.scores = [];
-
-        // 背景画像
-        this.backgroundImage = new Image();
-        this.backgroundImage.src = 'assets/img/bg_title.png';
-        this.isBackgroundLoaded = false;
-        this.backgroundImage.onload = () => { this.isBackgroundLoaded = true; };
-        this.backgroundImage.onerror = () => {
-            console.error('背景画像の読み込みに失敗しました: assets/img/bg_title.png');
-        };
+        this.backgroundImage = loadImage('assets/img/bg_title.png');
 
         this.rankingDisplayArea = { x: 0, y: 0, width: 0, height: 0 };
         this.scrollbar = new Scrollbar(0, 0, 20, 100, 0);
@@ -134,13 +127,7 @@ export class RankingScene {
         const ctx = this.game.ctx;
         const { width, height } = this.game.canvas;
 
-        if (this.isBackgroundLoaded) {
-            ctx.drawImage(this.backgroundImage, 0, 0, width, height);
-        } else {
-            ctx.clearRect(0, 0, width, height);
-            ctx.fillStyle = '#f0f0f0';
-            ctx.fillRect(0, 0, width, height);
-        }
+        drawBackground(ctx, this.backgroundImage, width, height);
 
         ctx.fillStyle = 'black';
         ctx.textAlign = 'center';

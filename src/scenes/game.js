@@ -10,14 +10,14 @@ import { Stage, Tree } from '../stage.js';
 import { ScaffoldBlock } from '../scaffold.js';
 import { InputHandler } from '../input_handler.js';
 import { SoundPlayer, soundPlayer } from '../soundPlayer.js';
+import { loadImage, drawBackground } from '../ui/scene_utils.js';
 
 export class GameScene {
     constructor(game, selectedInstrument) {
         this.game = game;
         this.selectedInstrument = selectedInstrument;
-        this.inputHandler = this.game.inputHandler; 
-        this.player2Input = new InputHandler(); 
-        this.activeInstrumentConfig = null; 
+        this.player2Input = new InputHandler();
+        this.activeInstrumentConfig = null;
 
         // SoundPlayerのインスタンスを生成
         this.instrumentSoundPlayer = new SoundPlayer();
@@ -31,28 +31,16 @@ export class GameScene {
             "ピアノ": "piano",
             "ギター": "guitar"
         };
-        this.instrumentDirName = null; // 初期化
+        this.instrumentDirName = null;
 
-        // 背景画像を読み込む
-        this.backgroundImage = new Image();
-        this.backgroundImage.src = 'assets/img/bg_game.png';
-        this.isBackgroundLoaded = false;
-        this.backgroundImage.onload = () => {
-            this.isBackgroundLoaded = true;
-        };
-        this.backgroundImage.onerror = () => {
-            console.error('背景画像の読み込みに失敗しました: assets/img/bg_game.png');
-        };
-
-        // 楽器アイコン画像用
+        this.backgroundImage = loadImage('assets/img/bg_game.png');
         this.instrumentImage = null;
-        this.isInstrumentLoaded = false;
     }
 
     init(data) {
         this.instrumentName = this.selectedInstrument || 'トライアングル';
         
-        const useGamepadForScaffold = this.game.inputMethod === 'gamepad'; // 変更
+        const useGamepadForScaffold = this.game.inputMethod === 'gamepad';
         this.player2Input.setInstrumentKeyMaps(
             KEYBOARD_INSTRUMENT_CONFIG, 
             GAMEPAD_INSTRUMENT_CONFIG, 
@@ -84,9 +72,6 @@ export class GameScene {
         );
         this.player.init();
 
-        // playerとstageをInputHandlerに設定し直す
-        this.game.inputHandler.player = this.player;
-        this.game.inputHandler.stage = this.stage;
         this.player2Input.init();
 
         // カウントダウンプロパティ
@@ -107,15 +92,7 @@ export class GameScene {
             "ギター": "assets/img/gita.png"
         };
 
-        // 楽器アイコンをロード
-        this.instrumentImage = new Image();
-        this.instrumentImage.src = instrumentImageMap[this.instrumentName] || "";
-        this.instrumentImage.onload = () => {
-            this.isInstrumentLoaded = true;
-        };
-        this.instrumentImage.onerror = () => {
-            console.error(`楽器画像の読み込みに失敗しました: ${this.instrumentName}`);
-        };
+        this.instrumentImage = loadImage(instrumentImageMap[this.instrumentName] || "");
 
         this.loadInstrumentSounds();
     }
@@ -241,37 +218,15 @@ export class GameScene {
 
     // 要求されたキー入力が過不足なく行われているかをチェックするヘルパーメソッド
     isChordPerfectlyMatched(requiredKeys) {
-        const requiredPhysicalKeys = new Set();
-        requiredKeys.forEach(key => {
-            const action = `ACTION_${key}`;
-            const physicalKey = this.player2Input.actionMap[action];
-            if (physicalKey) {
-                requiredPhysicalKeys.add(physicalKey);
-            }
-        });
-
+        const requiredPhysicalKeys = new Set(
+            requiredKeys.map(key => this.player2Input.actionMap[`ACTION_${key}`]).filter(Boolean)
+        );
         const instrumentPhysicalKeys = this.player2Input.getInstrumentPhysicalKeys();
-        
-        // 現在押されている楽器キーのセットを作成
-        const currentlyPressedInstrumentKeys = new Set();
-        for (const pressedKey of this.player2Input.pressedKeys) {
-            if (instrumentPhysicalKeys.has(pressedKey)) {
-                currentlyPressedInstrumentKeys.add(pressedKey);
-            }
-        }
-
-        // 現在、要求されたキーが過不足なく押されているか
-        if (currentlyPressedInstrumentKeys.size !== requiredPhysicalKeys.size) {
-            return false;
-        }
-
-        for (const requiredKey of requiredPhysicalKeys) {
-            if (!currentlyPressedInstrumentKeys.has(requiredKey)) {
-                return false;
-            }
-        }
-
-        return true;
+        const pressedInstrumentKeys = new Set(
+            [...this.player2Input.pressedKeys].filter(k => instrumentPhysicalKeys.has(k))
+        );
+        return pressedInstrumentKeys.size === requiredPhysicalKeys.size &&
+               [...requiredPhysicalKeys].every(k => pressedInstrumentKeys.has(k));
     }
 
     handlePlayer2Input() {
@@ -381,13 +336,8 @@ export class GameScene {
         const ctx = this.game.ctx;
         const { width, height } = this.game.canvas;
 
-        if (this.isBackgroundLoaded) {
-            ctx.drawImage(this.backgroundImage, 0, 0, width, height);
-        }
-        else {
-            ctx.clearRect(0, 0, width, height);
-            ctx.fillStyle = '#d0d0d0';
-            ctx.fillRect(0, 0, width, height);
+        {
+            drawBackground(ctx, this.backgroundImage, width, height, '#d0d0d0');
         }
 
         ctx.save();
@@ -408,22 +358,22 @@ export class GameScene {
             const textWidth = textMetrics.width;
             const textHeight = BLOCK_SIZE; // フォントサイズと同じくらいと仮定
 
-            const padding = TREE_TEXT_BACKGROUND_PADDING; // configから取得
+            const padding = TREE_TEXT_BACKGROUND_PADDING;
             const bgX = tree.x + tree.width / 2 - textWidth / 2 - padding;
             const bgY = tree.y + tree.height / 2 - textHeight / 2 - padding;
             const bgWidth = textWidth + padding * 2;
             const bgHeight = textHeight + padding * 2;
 
             // 黒い背景を描画
-            ctx.fillStyle = TREE_TEXT_BACKGROUND_COLOR; // configから取得
+            ctx.fillStyle = TREE_TEXT_BACKGROUND_COLOR;
             ctx.fillRect(bgX, bgY, bgWidth, bgHeight);
 
             // テキストに黒い縁取りを追加
-            ctx.strokeStyle = TREE_TEXT_STROKE_COLOR; // configから取得
-            ctx.lineWidth = TREE_TEXT_STROKE_WIDTH; // configから取得
+            ctx.strokeStyle = TREE_TEXT_STROKE_COLOR;
+            ctx.lineWidth = TREE_TEXT_STROKE_WIDTH;
             ctx.strokeText(keyText, tree.x + tree.width / 2, tree.y + tree.height / 2);
             
-            ctx.fillStyle = TREE_TEXT_COLOR; // configから取得
+            ctx.fillStyle = TREE_TEXT_COLOR;
             ctx.fillText(keyText, tree.x + tree.width / 2, tree.y + tree.height / 2);
         });
 
@@ -435,7 +385,7 @@ export class GameScene {
         ctx.fillText(`スコア: ${this.score}`, 20, 50);
 
         // 楽器アイコンを右上に描画
-        if (this.isInstrumentLoaded) {
+        if (this.instrumentImage.complete && this.instrumentImage.naturalHeight !== 0) {
             const x = width - 100 - 40;
             const y = 20;
             ctx.drawImage(this.instrumentImage, x, y, 140, 150);

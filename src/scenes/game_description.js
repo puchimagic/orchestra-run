@@ -1,30 +1,20 @@
 import { SCENE, FONT_SIZE, FONT_FAMILY } from '../config.js';
 import { Button } from '../ui/button.js';
+import { loadImage, drawBackground } from '../ui/scene_utils.js';
 
 export class GameDescriptionScene {
     constructor(game) {
         this.game = game;
-        this.backgroundImage = new Image();
-        this.backgroundImage.src = 'assets/img/bg_title.png';
-        this.isBackgroundLoaded = false;
-        this.backgroundImage.onload = () => {
-            this.isBackgroundLoaded = true;
-        };
-        this.backgroundImage.onerror = () => {
-            console.error('背景画像の読み込みに失敗しました: assets/img/bg_title.png');
-        };
-        this.inputHandler = this.game.inputHandler;
+        this.backgroundImage = loadImage('assets/img/bg_title.png');
 
-        this.currentPage = 0; // 0から始まるインデックス
+        this.currentPage = 0;
         this.descriptionPages = [
-            // ページ1: ゲーム概要
             [
                 '■ ゲームの概要',
                 'このゲームは、2人のプレイヤーが協力してハイスコアを目指すリズムアクションプラットフォーマーです。',
                 'プレイヤー1はキャラクターを操作し、障害物を避けながら右方向へ進み続けます。',
                 'プレイヤー2は音楽を奏でて足場を作り、プレイヤー1をサポートします。',
             ],
-            // ページ2: プレイヤー1の説明
             [
                 '■ プレイヤー1：キャラクター操作',
                 '目的: 画面右方向へ進み続け、できるだけ長く生き残ること。',
@@ -38,7 +28,6 @@ export class GameDescriptionScene {
                 '  ・木にぶつかるだけではゲームオーバーにはなりません。',
                 '  ・画面左端と木に挟まれるとゲームオーバーになります。',
             ],
-            // ページ3: プレイヤー2の説明
             [
                 '■ プレイヤー2：音楽と足場作り',
                 '役割: プレイヤー1が安全に進めるように、足場を生成したり、道を塞ぐ木を破壊したりします。',
@@ -56,7 +45,6 @@ export class GameDescriptionScene {
                 '注意点:',
                 '  ・キーの押し間違いや、タイミングが遅れると足場が生成されず、プレイヤー1が危険に晒されます。',
             ],
-            // ページ4: スコアとゲームオーバーの説明
             [
                 '■ スコアについて',
                 '・進んだ距離に応じてスコアが加算されます。',
@@ -79,42 +67,31 @@ export class GameDescriptionScene {
     onResize() {
         const { width, height } = this.game.canvas;
 
-        // メインに戻るボタンを画面下部に配置
-        const btnWidth = 400; // 300から増加
-        const btnHeight = 100; // 75から増加
-        const backBtnY = height - btnHeight - 60; // 40から調整
+        const btnWidth = 400;
+        const btnHeight = 100;
+        const backBtnY = height - btnHeight - 60;
         const backBtnX = (width - btnWidth) / 2;
-        this.backButton = new Button(backBtnX, backBtnY, btnWidth, btnHeight, '戻る'); // テキストを「戻る」に変更
+        this.backButton = new Button(backBtnX, backBtnY, btnWidth, btnHeight, '戻る');
 
-        // ページ切り替えボタンをその上に配置
-        const navBtnWidth = 100; // 80から増加
-        const navBtnHeight = 80; // 60から増加
-        const navBtnY = backBtnY - navBtnHeight - 60; // 40から調整
-        const navBtnMargin = 30; // 20から増加
+        const navBtnWidth = 100;
+        const navBtnHeight = 80;
+        const navBtnY = backBtnY - navBtnHeight - 60;
+        const navBtnMargin = 30;
 
-        this.prevButton = new Button(
-            width / 2 - navBtnWidth - navBtnMargin - 50, // ページ番号表示のために少し左にずらす
-            navBtnY, navBtnWidth, navBtnHeight, '＜'
-        );
-        this.nextButton = new Button(
-            width / 2 + navBtnMargin + 50, // ページ番号表示のために少し右にずらす
-            navBtnY, navBtnWidth, navBtnHeight, '＞'
-        );
+        this.prevButton = new Button(width / 2 - navBtnWidth - navBtnMargin - 50, navBtnY, navBtnWidth, navBtnHeight, '＜');
+        this.nextButton = new Button(width / 2 + navBtnMargin + 50, navBtnY, navBtnWidth, navBtnHeight, '＞');
     }
 
     update() {
         if (this.backButton.update(this.game.mouse)) {
             this.game.changeScene(SCENE.MAIN);
         }
-
         if (this.prevButton.update(this.game.mouse) && this.currentPage > 0) {
             this.currentPage--;
         }
         if (this.nextButton.update(this.game.mouse) && this.currentPage < this.totalPages - 1) {
             this.currentPage++;
         }
-
-        // ボタンの有効/無効状態を更新
         this.prevButton.isEnabled = (this.currentPage > 0);
         this.nextButton.isEnabled = (this.currentPage < this.totalPages - 1);
     }
@@ -123,46 +100,31 @@ export class GameDescriptionScene {
         const ctx = this.game.ctx;
         const { width, height } = this.game.canvas;
 
-        if (this.isBackgroundLoaded) {
-            ctx.drawImage(this.backgroundImage, 0, 0, width, height);
-        } else {
-            ctx.clearRect(0, 0, width, height);
-            ctx.fillStyle = '#f0f0f0';
-            ctx.fillRect(0, 0, width, height);
-        }
+        drawBackground(ctx, this.backgroundImage, width, height);
 
         ctx.fillStyle = 'black';
         ctx.textAlign = 'center';
-
         ctx.font = `${FONT_SIZE.MEDIUM}px ${FONT_FAMILY}`;
         ctx.fillText('あそびかた', width / 2, 120);
 
         const descriptionFontSize = 30;
-        ctx.font = `${descriptionFontSize}px ${FONT_FAMILY}`;
-        ctx.textAlign = 'left';
         const lineHeight = 40;
         let currentY = 200;
+        const startX = (width - 1000) / 2 - 200;
 
-        const maxTextWidth = 1000;
-        const startX = (width - maxTextWidth) / 2 - 200;
-
-        // 現在のページの内容を描画
-        const currentPageContent = this.descriptionPages[this.currentPage];
-        currentPageContent.forEach(line => {
-            if (line.startsWith('■')) {
-                ctx.font = `bold ${descriptionFontSize}px ${FONT_FAMILY}`;
-            } else {
-                ctx.font = `${descriptionFontSize}px ${FONT_FAMILY}`;
-            }
+        ctx.textAlign = 'left';
+        for (const line of this.descriptionPages[this.currentPage]) {
+            ctx.font = line.startsWith('■')
+                ? `bold ${descriptionFontSize}px ${FONT_FAMILY}`
+                : `${descriptionFontSize}px ${FONT_FAMILY}`;
             ctx.fillText(line, startX, currentY);
             currentY += lineHeight;
-        });
+        }
 
-        // ページ番号の表示
         ctx.font = `${FONT_SIZE.SMALL}px ${FONT_FAMILY}`;
         ctx.textAlign = 'center';
         ctx.fillStyle = '#555';
-        ctx.fillText(`${this.currentPage + 1} / ${this.totalPages}`, this.game.canvas.width / 2, this.prevButton.y + this.prevButton.height / 2 + 5);
+        ctx.fillText(`${this.currentPage + 1} / ${this.totalPages}`, width / 2, this.prevButton.y + this.prevButton.height / 2 + 5);
 
         this.backButton.draw(ctx);
         this.prevButton.draw(ctx);

@@ -1,26 +1,22 @@
 import { SCENE, FONT_SIZE, FONT_FAMILY } from '../config.js';
 import { Button } from '../ui/button.js';
 import { soundPlayer } from '../soundPlayer.js';
+import { loadImage, drawBackground } from '../ui/scene_utils.js';
 
 export class MainScene {
     constructor(game) {
         this.game = game;
 
-        this.backgroundImage = new Image();
-        this.backgroundImage.src = 'assets/img/bg_title.png';
-        this.isBackgroundLoaded = false;
-        this.backgroundImage.onload = () => { this.isBackgroundLoaded = true; };
-
-        this.logoImage = new Image();
-        this.logoImage.src = 'assets/img/logo.png';
-        this.isLogoLoaded = false;
-        this.logoImage.onload = () => { this.isLogoLoaded = true; this.onResize(); };
+        this.backgroundImage = loadImage('assets/img/bg_title.png');
+        this.logoImage = loadImage('assets/img/logo.png');
+        this.logoImage.onload = () => this.onResize();
 
         this.logoX = 0;
         this.logoY = 0;
         this.logoWidth = 0;
         this.logoHeight = 0;
     }
+
 
     init() {
         this.onResize();
@@ -72,8 +68,7 @@ export class MainScene {
         const ctx = this.game.ctx;
         const { width, height } = this.game.canvas;
 
-        if (this.isBackgroundLoaded) ctx.drawImage(this.backgroundImage, 0, 0, width, height);
-        else { ctx.clearRect(0, 0, width, height); ctx.fillStyle = '#f0f0f0'; ctx.fillRect(0, 0, width, height); }
+        drawBackground(ctx, this.backgroundImage, width, height);
 
         if (!this.game.isGameActive) {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
@@ -83,7 +78,7 @@ export class MainScene {
             ctx.textAlign = 'center';
             ctx.fillText('画面をクリックしてください', width / 2, height / 2);
         } else {
-            if (this.isLogoLoaded) {
+            if (this.logoImage.complete && this.logoImage.naturalHeight !== 0) {
                 ctx.drawImage(this.logoImage, this.logoX, this.logoY, this.logoWidth, this.logoHeight);
             }
             this.startButton.draw(ctx);

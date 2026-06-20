@@ -18,37 +18,30 @@ class TemporaryAnimation {
         this.animationSpeed = speed;
         this.animationFrame = 0;
         this.animationTimer = 0;
-        this.isFinished = false;
-        this.finishedTimer = 0;
+        this.holdTimer = 0;
         this.displayDuration = displayDuration;
-        this.isTrulyFinished = false;
-        this.offsets = offsets; // offsetsはBLOCK_SIZEの倍数で受け取る
+        this.done = false;
+        this.offsets = offsets;
     }
 
     update(deltaTime) {
-        if (this.isTrulyFinished) return;
+        if (this.done) return;
 
-        if (this.isFinished) {
-            this.finishedTimer += deltaTime;
-            if (this.finishedTimer >= this.displayDuration) {
-                this.isTrulyFinished = true;
-            }
+        if (this.animationFrame >= this.images.length - 1) {
+            this.holdTimer += deltaTime;
+            if (this.holdTimer >= this.displayDuration) this.done = true;
             return;
         }
 
         this.animationTimer += deltaTime;
         if (this.animationTimer > this.animationSpeed) {
             this.animationTimer = 0;
-            this.animationFrame++;
-            if (this.animationFrame >= this.images.length - 1) {
-                this.animationFrame = this.images.length - 1;
-                this.isFinished = true;
-            }
+            this.animationFrame = Math.min(this.animationFrame + 1, this.images.length - 1);
         }
     }
 
     draw(ctx) {
-        if (this.isTrulyFinished) return;
+        if (this.done) return;
 
         const frameImage = this.images[this.animationFrame];
         if (frameImage && frameImage.complete) {
@@ -283,7 +276,7 @@ export class Stage {
         this.enemies.forEach(e => e.update());
 
         this.animations.forEach(a => a.update(deltaTime));
-        this.animations = this.animations.filter(a => !a.isTrulyFinished); // Keep finished animations to display their last frame
+        this.animations = this.animations.filter(a => !a.done);
     }
 
     draw(ctx) {

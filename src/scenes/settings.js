@@ -2,11 +2,11 @@ import { SCENE, FONT_SIZE, FONT_FAMILY } from '../config.js';
 import { Button } from '../ui/button.js';
 import { VolumeSlider } from '../ui/volume_slider.js';
 import { soundPlayer } from '../soundPlayer.js';
+import { loadImage, drawBackground } from '../ui/scene_utils.js';
 
 export class SettingsScene {
     constructor(game) {
         this.game = game;
-        this.inputHandler = this.game.inputHandler;
         this.activeSlider = null;
         this.volumeTitleY = 0;
         this.inputTitleY = 0;
@@ -23,10 +23,7 @@ export class SettingsScene {
     }
 
     init() {
-        this.backgroundImage = new Image();
-        this.backgroundImage.src = 'assets/img/bg_title.png';
-        this.isBackgroundLoaded = false;
-        this.backgroundImage.onload = () => { this.isBackgroundLoaded = true; };
+        this.backgroundImage = loadImage('assets/img/bg_title.png');
 
         // gameオブジェクトから現在のユーザー名を取得して初期化
         this.username = this.game.username;
@@ -191,8 +188,7 @@ export class SettingsScene {
         const ctx = this.game.ctx;
         const { width, height } = this.game.canvas;
 
-        if (this.isBackgroundLoaded) ctx.drawImage(this.backgroundImage, 0, 0, width, height);
-        else { ctx.clearRect(0, 0, width, height); ctx.fillStyle = '#f0f0f0'; ctx.fillRect(0, 0, width, height); }
+        drawBackground(ctx, this.backgroundImage, width, height);
 
         // メインタイトル (中央揃え)
         ctx.fillStyle = 'black';
