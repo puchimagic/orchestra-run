@@ -160,7 +160,7 @@ export class SettingsScene {
             }
         }
 
-        if (!this.inputHandler.isMouseDown() && this.activeSlider) {
+        if (!mouse.isDown && this.activeSlider) {
             this.activeSlider.handleMouseUp();
             this.activeSlider = null;
         }
