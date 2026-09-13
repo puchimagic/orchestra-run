@@ -1,12 +1,10 @@
-import { SCENE, FONT_SIZE, FONT_FAMILY } from '../config.js';
+import { SCENE, FONT_SIZE } from '../config.js';
 import { Button } from '../ui/button.js';
-import { loadImage, drawBackground } from '../ui/scene_utils.js';
+import { setSceneBackground } from '../ui/scene_utils.js';
 
 export class GameDescriptionScene {
     constructor(game) {
         this.game = game;
-        this.backgroundImage = loadImage('assets/img/bg_title.png');
-
         this.currentPage = 0;
         this.descriptionPages = [
             [
@@ -61,73 +59,84 @@ export class GameDescriptionScene {
     }
 
     init() {
-        this.onResize();
-    }
+        this.currentPage = 0;
+        const sceneEl = this.game.sceneElements[SCENE.GAME_DESCRIPTION];
+        sceneEl.innerHTML = '';
+        setSceneBackground(sceneEl, 'assets/img/bg_title.png');
 
-    onResize() {
-        const { width, height } = this.game.canvas;
+        const title = document.createElement('div');
+        title.textContent = 'あそびかた';
+        title.style.position = 'absolute';
+        title.style.left = '0';
+        title.style.top = '70px';
+        title.style.width = '100%';
+        title.style.textAlign = 'center';
+        title.style.fontSize = `${FONT_SIZE.MEDIUM}px`;
+        title.style.color = 'black';
+        sceneEl.appendChild(title);
+
+        this.contentEl = document.createElement('div');
+        this.contentEl.style.position = 'absolute';
+        this.contentEl.style.left = '360px';
+        this.contentEl.style.top = '200px';
+        this.contentEl.style.width = '1200px';
+        this.contentEl.style.fontSize = '30px';
+        this.contentEl.style.lineHeight = '40px';
+        this.contentEl.style.color = 'black';
+        this.contentEl.style.whiteSpace = 'pre-wrap';
+        sceneEl.appendChild(this.contentEl);
+
+        this.pageIndicator = document.createElement('div');
+        this.pageIndicator.style.position = 'absolute';
+        this.pageIndicator.style.left = '0';
+        this.pageIndicator.style.width = '100%';
+        this.pageIndicator.style.textAlign = 'center';
+        this.pageIndicator.style.fontSize = `${FONT_SIZE.SMALL}px`;
+        this.pageIndicator.style.color = '#555';
+        sceneEl.appendChild(this.pageIndicator);
 
         const btnWidth = 400;
         const btnHeight = 100;
-        const backBtnY = height - btnHeight - 60;
-        const backBtnX = (width - btnWidth) / 2;
+        const backBtnY = this.game.baseHeight - btnHeight - 60;
+        const backBtnX = (this.game.baseWidth - btnWidth) / 2;
         this.backButton = new Button(backBtnX, backBtnY, btnWidth, btnHeight, '戻る');
+        this.backButton.onClick = () => this.game.changeScene(SCENE.MAIN);
 
         const navBtnWidth = 100;
         const navBtnHeight = 80;
         const navBtnY = backBtnY - navBtnHeight - 60;
         const navBtnMargin = 30;
+        this.navBtnY = navBtnY;
+        this.navBtnHeight = navBtnHeight;
 
-        this.prevButton = new Button(width / 2 - navBtnWidth - navBtnMargin - 50, navBtnY, navBtnWidth, navBtnHeight, '＜');
-        this.nextButton = new Button(width / 2 + navBtnMargin + 50, navBtnY, navBtnWidth, navBtnHeight, '＞');
+        this.prevButton = new Button(this.game.baseWidth / 2 - navBtnWidth - navBtnMargin - 50, navBtnY, navBtnWidth, navBtnHeight, '＜');
+        this.nextButton = new Button(this.game.baseWidth / 2 + navBtnMargin + 50, navBtnY, navBtnWidth, navBtnHeight, '＞');
+        this.prevButton.onClick = () => { if (this.currentPage > 0) { this.currentPage--; this.render(); } };
+        this.nextButton.onClick = () => { if (this.currentPage < this.totalPages - 1) { this.currentPage++; this.render(); } };
+
+        this.pageIndicator.style.top = `${navBtnY + navBtnHeight / 2 - 20}px`;
+
+        this.backButton.mount(sceneEl);
+        this.prevButton.mount(sceneEl);
+        this.nextButton.mount(sceneEl);
+
+        this.render();
     }
 
-    update() {
-        if (this.backButton.update(this.game.mouse)) {
-            this.game.changeScene(SCENE.MAIN);
-        }
-        if (this.prevButton.update(this.game.mouse) && this.currentPage > 0) {
-            this.currentPage--;
-        }
-        if (this.nextButton.update(this.game.mouse) && this.currentPage < this.totalPages - 1) {
-            this.currentPage++;
-        }
-        this.prevButton.isEnabled = (this.currentPage > 0);
-        this.nextButton.isEnabled = (this.currentPage < this.totalPages - 1);
-    }
-
-    draw() {
-        const ctx = this.game.ctx;
-        const { width, height } = this.game.canvas;
-
-        drawBackground(ctx, this.backgroundImage, width, height);
-
-        ctx.fillStyle = 'black';
-        ctx.textAlign = 'center';
-        ctx.font = `${FONT_SIZE.MEDIUM}px ${FONT_FAMILY}`;
-        ctx.fillText('あそびかた', width / 2, 120);
-
-        const descriptionFontSize = 30;
-        const lineHeight = 40;
-        let currentY = 200;
-        const startX = (width - 1000) / 2 - 200;
-
-        ctx.textAlign = 'left';
+    render() {
+        this.contentEl.innerHTML = '';
         for (const line of this.descriptionPages[this.currentPage]) {
-            ctx.font = line.startsWith('■')
-                ? `bold ${descriptionFontSize}px ${FONT_FAMILY}`
-                : `${descriptionFontSize}px ${FONT_FAMILY}`;
-            ctx.fillText(line, startX, currentY);
-            currentY += lineHeight;
+            const lineEl = document.createElement('div');
+            lineEl.textContent = line;
+            if (line.startsWith('■')) lineEl.style.fontWeight = 'bold';
+            this.contentEl.appendChild(lineEl);
         }
+        this.pageIndicator.textContent = `${this.currentPage + 1} / ${this.totalPages}`;
+        this.prevButton.setEnabled(this.currentPage > 0);
+        this.nextButton.setEnabled(this.currentPage < this.totalPages - 1);
+    }
 
-        ctx.font = `${FONT_SIZE.SMALL}px ${FONT_FAMILY}`;
-        ctx.textAlign = 'center';
-        ctx.fillStyle = '#555';
-        ctx.fillText(`${this.currentPage + 1} / ${this.totalPages}`, width / 2, this.prevButton.y + this.prevButton.height / 2 + 5);
-
-        this.backButton.draw(ctx);
-        this.prevButton.draw(ctx);
-        this.nextButton.draw(ctx);
+    destroy() {
+        this.game.sceneElements[SCENE.GAME_DESCRIPTION].innerHTML = '';
     }
 }

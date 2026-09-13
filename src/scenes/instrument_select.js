@@ -1,23 +1,33 @@
-import { SCENE, FONT_SIZE, FONT_FAMILY, KEYBOARD_INSTRUMENT_CONFIG, INSTRUMENT_ORDER, DEFAULT_BUTTON_COLOR, DEFAULT_BUTTON_HOVER_COLOR } from '../config.js';
+import { SCENE, FONT_SIZE, KEYBOARD_INSTRUMENT_CONFIG, INSTRUMENT_ORDER } from '../config.js';
 import { Button } from '../ui/button.js';
-import { loadImage, drawBackground } from '../ui/scene_utils.js';
+import { setSceneBackground } from '../ui/scene_utils.js';
 
 export class InstrumentSelectScene {
     constructor(game) {
         this.game = game;
         this.selectedInstrument = INSTRUMENT_ORDER[0];
-        this.backgroundImage = loadImage('assets/img/bg_title.png');
     }
 
     init() {
-        this.onResize();
-    }
+        const sceneEl = this.game.sceneElements[SCENE.INSTRUMENT_SELECT];
+        sceneEl.innerHTML = '';
+        setSceneBackground(sceneEl, 'assets/img/bg_title.png');
 
-    onResize() {
+        const title = document.createElement('div');
+        title.textContent = '楽器をえらんでね';
+        title.style.position = 'absolute';
+        title.style.left = '0';
+        title.style.top = '70px';
+        title.style.width = '100%';
+        title.style.textAlign = 'center';
+        title.style.fontSize = `${FONT_SIZE.MEDIUM}px`;
+        title.style.color = 'black';
+        sceneEl.appendChild(title);
+
         const btnWidth = 500;
         const btnHeight = 100;
-        const cx = this.game.canvas.width / 2;
-        const cy = this.game.canvas.height / 2;
+        const cx = this.game.baseWidth / 2;
+        const cy = this.game.baseHeight / 2;
         const row_margin = 30;
         const col_gap = 60;
         const infoTextWidth = 250;
@@ -35,62 +45,60 @@ export class InstrumentSelectScene {
         INSTRUMENT_ORDER.forEach((name, i) => {
             const x = i < 3 ? col1_x : col2_x;
             const y = [y1, y2, y3][i < 3 ? i : i - 3];
-            this.instrumentButtons[name] = new Button(x, y, btnWidth, btnHeight, name, DEFAULT_BUTTON_COLOR, DEFAULT_BUTTON_HOVER_COLOR, `${name}_track01`, "instrumentSound");
+            const button = new Button(x, y, btnWidth, btnHeight, name, {
+                clickSoundKey: `${name}_track01`,
+                clickSoundType: 'instrumentSound',
+            });
+            button.onClick = () => this.selectInstrument(name);
+            button.mount(sceneEl);
+            this.instrumentButtons[name] = button;
+
+            const config = KEYBOARD_INSTRUMENT_CONFIG[name];
+            let infoText = `キー: ${config.keys.length}種`;
+            if (config.maxChord > 1) infoText += ` / 最大${config.maxChord}音`;
+
+            const infoEl = document.createElement('div');
+            infoEl.textContent = infoText;
+            infoEl.style.position = 'absolute';
+            infoEl.style.left = `${x + btnWidth + 20}px`;
+            infoEl.style.top = `${y}px`;
+            infoEl.style.height = `${btnHeight}px`;
+            infoEl.style.display = 'flex';
+            infoEl.style.alignItems = 'center';
+            infoEl.style.fontSize = '40px';
+            infoEl.style.color = '#555';
+            sceneEl.appendChild(infoEl);
         });
 
         const bottomButtonY = y3 + btnHeight + 100;
         const buttonGroupWidth = btnWidth * 2 + col_gap;
         const buttonGroupStartX = cx - buttonGroupWidth / 2;
 
-        this.startButton = new Button(buttonGroupStartX, bottomButtonY, btnWidth, btnHeight, 'スタート', '#4CAF50', '#66BB6A');
+        this.startButton = new Button(buttonGroupStartX, bottomButtonY, btnWidth, btnHeight, 'スタート');
         this.backButton = new Button(buttonGroupStartX + btnWidth + col_gap, bottomButtonY, btnWidth, btnHeight, '戻る');
-    }
-
-    update() {
-        for (const instrument of INSTRUMENT_ORDER) {
-            if (this.instrumentButtons[instrument].update(this.game.mouse)) {
-                this.selectedInstrument = instrument;
-            }
-        }
-        if (this.startButton.update(this.game.mouse)) {
+        this.startButton.onClick = () => {
             this.game.selectedInstrument = this.selectedInstrument;
             this.game.changeScene(SCENE.GAME);
-        }
-        if (this.backButton.update(this.game.mouse)) {
-            this.game.changeScene(SCENE.MAIN);
+        };
+        this.backButton.onClick = () => this.game.changeScene(SCENE.MAIN);
+        this.startButton.mount(sceneEl);
+        this.backButton.mount(sceneEl);
+
+        this.updateSelectionHighlight();
+    }
+
+    selectInstrument(name) {
+        this.selectedInstrument = name;
+        this.updateSelectionHighlight();
+    }
+
+    updateSelectionHighlight() {
+        for (const name of INSTRUMENT_ORDER) {
+            this.instrumentButtons[name].setSelected(this.selectedInstrument === name);
         }
     }
 
-    draw() {
-        const ctx = this.game.ctx;
-        const { width, height } = this.game.canvas;
-
-        drawBackground(ctx, this.backgroundImage, width, height);
-
-        ctx.fillStyle = 'black';
-        ctx.textAlign = 'center';
-        ctx.font = `${FONT_SIZE.MEDIUM}px ${FONT_FAMILY}`;
-        ctx.fillText('楽器をえらんでね', width / 2, 120);
-
-        for (const name of INSTRUMENT_ORDER) {
-            const button = this.instrumentButtons[name];
-            const instrumentConfig = KEYBOARD_INSTRUMENT_CONFIG[name];
-
-            button.isHighlighted = (this.selectedInstrument === name);
-            button.draw(ctx);
-
-            ctx.fillStyle = '#555';
-            ctx.font = `40px ${FONT_FAMILY}`;
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'middle';
-
-            let infoText = `キー: ${instrumentConfig.keys.length}種`;
-            if (instrumentConfig.maxChord > 1) infoText += ` / 最大${instrumentConfig.maxChord}音`;
-            ctx.fillText(infoText, button.x + button.width + 20, button.y + button.height / 2);
-        }
-
-        ctx.textAlign = 'center';
-        this.startButton.draw(ctx);
-        this.backButton.draw(ctx);
+    destroy() {
+        this.game.sceneElements[SCENE.INSTRUMENT_SELECT].innerHTML = '';
     }
 }

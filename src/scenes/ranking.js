@@ -1,240 +1,134 @@
-import { SCENE, FONT_SIZE, FONT_FAMILY } from '../config.js';
+import { SCENE, FONT_SIZE } from '../config.js';
 import { Button } from '../ui/button.js';
-import { Scrollbar } from '../ui/scrollbar.js';
-import { loadImage, drawBackground } from '../ui/scene_utils.js';
+import { setSceneBackground } from '../ui/scene_utils.js';
+
+const MAX_DISPLAY_COUNT = 50;
 
 export class RankingScene {
     constructor(game) {
         this.game = game;
         this.scores = [];
-        this.backgroundImage = loadImage('assets/img/bg_title.png');
-
-        this.rankingDisplayArea = { x: 0, y: 0, width: 0, height: 0 };
-        this.scrollbar = new Scrollbar(0, 0, 20, 100, 0);
-
-        this.onResize();
-        this.loadScores();
-
-        this.handleWheelBound = this.handleWheel.bind(this);
-        this.game.canvas.addEventListener('wheel', this.handleWheelBound);
     }
 
-    // テキストを最大幅に合わせて省略（必要なら…で切る）
-    truncateTextToWidth(ctx, text, maxWidth) {
-        if (!text) return '';
-        if (ctx.measureText(text).width <= maxWidth) return text;
-        const ellipsis = '…';
-        let low = 0;
-        let high = text.length;
-        while (low < high) {
-            const mid = Math.ceil((low + high) / 2);
-            const candidate = text.slice(0, mid) + ellipsis;
-            if (ctx.measureText(candidate).width <= maxWidth) low = mid;
-            else high = mid - 1;
-            // 防止無限ループ
-            if (high - low <= 1) break;
-        }
-        // 最終調整（lowかlow-1）
-        for (let len = low; len >= 0; len--) {
-            const candidate = text.slice(0, len) + ellipsis;
-            if (ctx.measureText(candidate).width <= maxWidth) return candidate;
-        }
-        return ellipsis;
-    }
+    init() {
+        const sceneEl = this.game.sceneElements[SCENE.RANKING];
+        sceneEl.innerHTML = '';
+        setSceneBackground(sceneEl, 'assets/img/bg_title.png');
 
-    async loadScores() {
-        this.scores = await this.game.scoreManager.getScores();
-
-        // username が無い場合は "guest" を補完
-        this.scores = this.scores.map(s => ({
-            ...s,
-            username: s.username && s.username.trim() !== "" ? s.username : "guest"
-        }));
-
-        this.onResize();
-    }
-
-    onResize() {
-        const { width, height } = this.game.canvas;
+        const title = document.createElement('div');
+        title.textContent = 'ランキング';
+        title.style.position = 'absolute';
+        title.style.left = '0';
+        title.style.top = '70px';
+        title.style.width = '100%';
+        title.style.textAlign = 'center';
+        title.style.fontSize = `${FONT_SIZE.MEDIUM}px`;
+        title.style.color = 'black';
+        sceneEl.appendChild(title);
 
         const btnWidth = 400;
         const btnHeight = 100;
-        const x = (width - btnWidth) / 2;
-        const y = height - btnHeight - 60;
-        this.backButton = new Button(x, y, btnWidth, btnHeight, '戻る');
+        const backBtnX = (this.game.baseWidth - btnWidth) / 2;
+        const backBtnY = this.game.baseHeight - btnHeight - 60;
+        this.backButton = new Button(backBtnX, backBtnY, btnWidth, btnHeight, '戻る');
+        this.backButton.onClick = () => this.game.changeScene(SCENE.MAIN);
+        this.backButton.mount(sceneEl);
 
-        const rankingContentStartY = 170; // タイトルから少し余白
-        const rankingContentEndY = y - 50;
-        const availableHeight = rankingContentEndY - rankingContentStartY;
+        const areaTop = 170;
+        const areaBottom = backBtnY - 50;
+        const areaWidth = 1400;
+        const areaX = (this.game.baseWidth - areaWidth) / 2;
 
-        // ===== 幅の決定（画面幅の 85% を使う、過度に広くしない） =====
-        const scrollbarWidth = 20;
-        const scrollbarMarginRight = 12;
-        const horizontalPadding = 40; // 左右合計での余白（内部余白）
-        const MAX_RANKING_WIDTH = 1600;
-        const MIN_RANKING_WIDTH = 800;
+        this.listEl = document.createElement('div');
+        this.listEl.style.position = 'absolute';
+        this.listEl.style.left = `${areaX}px`;
+        this.listEl.style.top = `${areaTop}px`;
+        this.listEl.style.width = `${areaWidth}px`;
+        this.listEl.style.height = `${areaBottom - areaTop}px`;
+        this.listEl.style.overflowY = 'auto';
+        this.listEl.style.fontSize = `${FONT_SIZE.SMALL}px`;
+        this.listEl.style.color = 'black';
+        sceneEl.appendChild(this.listEl);
 
-        let computedMaxWidth = Math.floor(width * 0.85);
-        computedMaxWidth = Math.min(computedMaxWidth, MAX_RANKING_WIDTH);
-        computedMaxWidth = Math.max(computedMaxWidth, Math.min(MIN_RANKING_WIDTH, width - scrollbarWidth - scrollbarMarginRight - 20));
-
-        // ランキング領域とスクロールバーを含む全体幅を中央寄せ
-        const totalBlockWidth = computedMaxWidth + scrollbarWidth + scrollbarMarginRight;
-        const displayStartX = Math.floor((width - totalBlockWidth) / 2);
-
-        this.rankingDisplayArea = {
-            x: displayStartX,
-            y: rankingContentStartY,
-            width: computedMaxWidth,
-            height: availableHeight
-        };
-
-        // スクロールバーの位置（ランキング表示領域の右に配置）
-        this.scrollbar.x = this.rankingDisplayArea.x + this.rankingDisplayArea.width + scrollbarMarginRight;
-        this.scrollbar.y = this.rankingDisplayArea.y;
-        this.scrollbar.width = scrollbarWidth;
-        this.scrollbar.height = this.rankingDisplayArea.height;
-
-        const lineHeight = 60;
-        const maxDisplayCount = 50;
-        const totalScoresHeight = maxDisplayCount * lineHeight;
-        this.scrollbar.updateContentHeight(totalScoresHeight);
+        this.renderLoading();
+        this.loadScores();
     }
 
-    update() {
-        const mouse = this.game.mouse;
-
-        if (mouse.clicked) {
-            if (this.scrollbar.handleMouseDown(mouse.x, mouse.y)) {
-                return;
-            }
-        }
-
-        if (!mouse.isDown && this.scrollbar.isDragging) {
-            this.scrollbar.handleMouseUp();
-        }
-
-        if (this.scrollbar.isDragging) {
-            this.scrollbar.handleMouseMove(mouse.x, mouse.y);
-        }
-
-        if (this.backButton && this.backButton.update(mouse)) {
-            this.game.changeScene(SCENE.MAIN);
-        }
+    renderLoading() {
+        this.listEl.innerHTML = '';
+        const msg = document.createElement('div');
+        msg.textContent = '読み込み中...';
+        msg.style.textAlign = 'center';
+        msg.style.padding = '40px 0';
+        this.listEl.appendChild(msg);
     }
 
-    draw() {
-        const ctx = this.game.ctx;
-        const { width, height } = this.game.canvas;
+    async loadScores() {
+        const scores = await this.game.scoreManager.getScores();
+        this.scores = scores.map(s => ({
+            ...s,
+            username: s.username && s.username.trim() !== '' ? s.username : 'guest',
+        }));
+        this.render();
+    }
 
-        drawBackground(ctx, this.backgroundImage, width, height);
-
-        ctx.fillStyle = 'black';
-        ctx.textAlign = 'center';
-        ctx.font = `${FONT_SIZE.MEDIUM}px ${FONT_FAMILY}`;
-        ctx.fillText('ランキング', width / 2, 120);
-
-        // 小フォントをセット（これで measureText する）
-        ctx.font = `${FONT_SIZE.SMALL}px ${FONT_FAMILY}`;
-        const lineHeight = 60;
-
-        ctx.save();
-        ctx.beginPath();
-        ctx.rect(this.rankingDisplayArea.x, this.rankingDisplayArea.y, this.rankingDisplayArea.width, this.rankingDisplayArea.height);
-        ctx.clip();
+    render() {
+        this.listEl.innerHTML = '';
 
         if (!this.scores || this.scores.length === 0) {
-            ctx.textAlign = 'center';
-            ctx.fillText('まだ記録がありません', width / 2, this.rankingDisplayArea.y + this.rankingDisplayArea.height / 2);
-        } else {
-            const maxDisplayWidth = this.rankingDisplayArea.width;
-            const displayStartX = this.rankingDisplayArea.x;
-
-            // 列位置（広めに確保）
-            const rankX = displayStartX + maxDisplayWidth * 0.02;
-            const usernameX = displayStartX + maxDisplayWidth * 0.16;
-            const scoreX = displayStartX + maxDisplayWidth * 0.48; // 右寄せでスコア
-            const instrumentX = displayStartX + maxDisplayWidth * 0.55; // 楽器はここから左寄せ
-            const dateX = displayStartX + maxDisplayWidth * 0.98; // 日付は右端
-
-            // 楽器名の最大幅（date と重ならないように余裕を持たせる）
-            const gapBetweenInstrumentAndDate = 14; // px
-            let instrumentMaxWidth = dateX - instrumentX - gapBetweenInstrumentAndDate;
-            if (instrumentMaxWidth < 60) instrumentMaxWidth = 60; // 最低幅確保
-
-            // ユーザー名の最大幅（スコアと被らないように）
-            const gapBetweenUsernameAndScore = 12;
-            let usernameMaxWidth = scoreX - usernameX - gapBetweenUsernameAndScore;
-            if (usernameMaxWidth < 80) usernameMaxWidth = 80;
-
-            let currentY = this.rankingDisplayArea.y + lineHeight / 2 - this.scrollbar.getScrollOffset();
-
-            const maxDisplayCount = 50;
-            for (let i = 0; i < maxDisplayCount; i++) {
-                const entry = this.scores[i];
-                const rank = `${i + 1}位`;
-
-                let scoreText = '---';
-                let instrumentText = '---';
-                let dateText = '---';
-                let usernameText = 'guest';
-
-                if (entry) {
-                    scoreText = `${entry.score.toLocaleString()} pt`;
-                    instrumentText = entry.instrument ? `(${entry.instrument})` : '';
-                    dateText = entry.date || '';
-                    usernameText = entry.username || 'guest';
-                }
-
-                const textTop = currentY - lineHeight / 2;
-                const textBottom = currentY + lineHeight / 2;
-
-                if (textBottom < this.rankingDisplayArea.y || textTop > this.rankingDisplayArea.y + this.rankingDisplayArea.height) {
-                    currentY += lineHeight;
-                    continue;
-                }
-
-                // 順位
-                ctx.textAlign = 'left';
-                ctx.fillText(rank, rankX, currentY);
-
-                // ユーザー名（長ければ省略）
-                ctx.textAlign = 'left';
-                const usernameToDraw = this.truncateTextToWidth(ctx, usernameText, usernameMaxWidth);
-                ctx.fillText(usernameToDraw, usernameX, currentY);
-
-                // スコア（右寄せ）
-                ctx.textAlign = 'right';
-                ctx.fillText(scoreText, scoreX, currentY);
-
-                // 楽器（長ければ省略）
-                ctx.textAlign = 'left';
-                const instrumentToDraw = this.truncateTextToWidth(ctx, instrumentText, instrumentMaxWidth);
-                ctx.fillText(instrumentToDraw, instrumentX, currentY);
-
-                // 日付（右寄せ）
-                ctx.textAlign = 'right';
-                ctx.fillText(dateText, dateX, currentY);
-
-                currentY += lineHeight;
-            }
+            const msg = document.createElement('div');
+            msg.textContent = 'まだ記録がありません';
+            msg.style.textAlign = 'center';
+            msg.style.padding = '40px 0';
+            this.listEl.appendChild(msg);
+            return;
         }
 
-        ctx.restore();
-        this.scrollbar.draw(ctx);
+        const count = Math.min(this.scores.length, MAX_DISPLAY_COUNT);
+        for (let i = 0; i < count; i++) {
+            const entry = this.scores[i];
+            const row = document.createElement('div');
+            row.style.display = 'flex';
+            row.style.alignItems = 'center';
+            row.style.height = '60px';
+            row.style.flexShrink = '0';
+            row.style.gap = '20px';
 
-        ctx.textAlign = 'center';
-        if (this.backButton) {
-            this.backButton.draw(ctx);
+            const rankEl = document.createElement('div');
+            rankEl.textContent = `${i + 1}位`;
+            rankEl.style.flex = '0 0 100px';
+
+            const usernameEl = document.createElement('div');
+            usernameEl.textContent = entry.username || 'guest';
+            usernameEl.style.flex = '0 0 320px';
+            usernameEl.style.whiteSpace = 'nowrap';
+            usernameEl.style.overflow = 'hidden';
+            usernameEl.style.textOverflow = 'ellipsis';
+
+            const scoreEl = document.createElement('div');
+            scoreEl.textContent = `${entry.score.toLocaleString()} pt`;
+            scoreEl.style.flex = '0 0 240px';
+            scoreEl.style.textAlign = 'right';
+
+            const instrumentEl = document.createElement('div');
+            instrumentEl.textContent = entry.instrument ? `(${entry.instrument})` : '';
+            instrumentEl.style.flex = '1 1 auto';
+            instrumentEl.style.whiteSpace = 'nowrap';
+            instrumentEl.style.overflow = 'hidden';
+            instrumentEl.style.textOverflow = 'ellipsis';
+
+            const dateEl = document.createElement('div');
+            dateEl.textContent = entry.date || '';
+            dateEl.style.flex = '0 0 260px';
+            dateEl.style.textAlign = 'right';
+            dateEl.style.whiteSpace = 'nowrap';
+
+            row.append(rankEl, usernameEl, scoreEl, instrumentEl, dateEl);
+            this.listEl.appendChild(row);
         }
     }
 
     destroy() {
-        this.game.canvas.removeEventListener('wheel', this.handleWheelBound);
-    }
-
-    handleWheel(event) {
-        event.preventDefault();
-        this.scrollbar.scrollBy(event.deltaY * 0.5);
+        this.game.sceneElements[SCENE.RANKING].innerHTML = '';
     }
 }

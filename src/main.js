@@ -20,21 +20,24 @@ const SCENE_BGM_MAP = {
     [SCENE.GAME_OVER]: 'gameover_bgm',
 };
 
+const BASE_WIDTH = 1920;
+const BASE_HEIGHT = 1080;
+
 class Game {
     constructor() {
-        this.canvas = document.getElementById('gameCanvas');
-        this.ctx = this.canvas.getContext('2d');
+        this.root = document.getElementById('gameRoot');
+        this.baseWidth = BASE_WIDTH;
+        this.baseHeight = BASE_HEIGHT;
 
-        this.baseWidth = 1920;
-        this.baseHeight = 1080;
-        this.scale = 1;
-        this.canvas.width = this.baseWidth;
-        this.canvas.height = this.baseHeight;
+        this.sceneElements = {};
+        document.querySelectorAll('.scene').forEach(el => {
+            const name = el.id.replace('scene-', '');
+            this.sceneElements[name] = el;
+        });
 
         this.scenes = {};
         this.currentScene = null;
         this.currentSceneName = null;
-        this.mouse = { x: 0, y: 0, clicked: false, isDown: false };
         this.isGameActive = false;
 
         this.scoreManager = new ScoreManager(this);
@@ -44,16 +47,12 @@ class Game {
 
         this.loadSettings();
 
-        this.canvasOffsetX = 0;
-        this.canvasOffsetY = 0;
-
-        window.addEventListener('resize', () => this.resizeCanvas());
-        this.resizeCanvas();
+        window.addEventListener('resize', () => this.resizeRoot());
+        this.resizeRoot();
 
         this.init();
-        this.setupMouseHandlers();
+        this.setupActivationHandler();
     }
-
 
     loadSettings() {
         try {
@@ -72,7 +71,6 @@ class Game {
         }
     }
 
-
     saveSettings() {
         try {
             const settings = {
@@ -88,84 +86,37 @@ class Game {
         }
     }
 
-    resizeCanvas() {
-        const aspectRatio = this.baseWidth / this.baseHeight;
-        let newWidth, newHeight;
-
-        if (window.innerWidth / window.innerHeight > aspectRatio) {
-            newHeight = window.innerHeight;
-            newWidth = newHeight * aspectRatio;
-            this.canvasOffsetX = (window.innerWidth - newWidth) / 2;
-            this.canvasOffsetY = 0;
-        } else {
-            newWidth = window.innerWidth;
-            newHeight = newWidth / aspectRatio;
-            this.canvasOffsetX = 0;
-            this.canvasOffsetY = (window.innerHeight - newHeight) / 2;
-        }
-
-        this.canvas.style.width = `${newWidth}px`;
-        this.canvas.style.height = `${newHeight}px`;
-
-        this.scale = newWidth / this.baseWidth;
+    // #gameRootを画面いっぱいに収まるようscaleする。中のDOM要素は全て
+    // 1920x1080基準のpx値をそのまま使えるため、座標変換コードが一切不要になる。
+    resizeRoot() {
+        const scale = Math.min(window.innerWidth / this.baseWidth, window.innerHeight / this.baseHeight);
+        this.scale = scale;
+        this.root.style.transform = `scale(${scale})`;
+        this.root.style.left = `${(window.innerWidth - this.baseWidth * scale) / 2}px`;
+        this.root.style.top = `${(window.innerHeight - this.baseHeight * scale) / 2}px`;
 
         if (this.currentScene && this.currentScene.onResize) {
             this.currentScene.onResize();
         }
     }
 
-    getScaledMousePos(event) {
-        const rect = this.canvas.getBoundingClientRect();
-
-        const clientXInCanvas = event.clientX - rect.left - this.canvasOffsetX;
-        const clientYInCanvas = event.clientY - rect.top - this.canvasOffsetY;
-
-        return {
-            x: clientXInCanvas / this.scale,
-            y: clientYInCanvas / this.scale
+    setupActivationHandler() {
+        const activateOnce = () => {
+            this.isGameActive = true;
+            soundPlayer.playBGM('home_bgm');
+            window.removeEventListener('pointerdown', activateOnce);
         };
-    }
-
-    // Canvas内部座標(x, y, width, height)を、Canvas上に重ねるDOM要素用の
-    // 画面上の位置・サイズ（CSSピクセル）に変換する
-    // canvas.getBoundingClientRect()は、canvas.style.width/heightで設定した
-    // レターボックス考慮後の実サイズ・実位置をすでに返すため、canvasOffsetは加算しない
-    getScreenRect(x, y, width, height) {
-        const rect = this.canvas.getBoundingClientRect();
-        return {
-            left: rect.left + x * this.scale,
-            top: rect.top + y * this.scale,
-            width: width * this.scale,
-            height: height * this.scale,
-        };
-    }
-
-    setupMouseHandlers() {
-        this.canvas.addEventListener('mousemove', (e) => {
-            const pos = this.getScaledMousePos(e);
-            this.mouse.x = pos.x;
-            this.mouse.y = pos.y;
-        });
-        this.canvas.addEventListener('mousedown', (e) => {
-            const pos = this.getScaledMousePos(e);
-            this.mouse.x = pos.x;
-            this.mouse.y = pos.y;
-            this.mouse.clicked = true;
-            this.mouse.isDown = true;
-        });
-        this.canvas.addEventListener('mouseup', (e) => {
-            this.mouse.isDown = false;
-        });
+        window.addEventListener('pointerdown', activateOnce);
     }
 
     init() {
-        this.inputHandler = new InputHandler(this.mouse);
+        this.inputHandler = new InputHandler();
         this.scenes[SCENE.MAIN] = new MainScene(this);
         this.scenes[SCENE.GAME_DESCRIPTION] = new GameDescriptionScene(this);
         this.scenes[SCENE.INSTRUMENT_SELECT] = new InstrumentSelectScene(this);
         this.scenes[SCENE.GAME_OVER] = new GameOverScene(this);
         this.scenes[SCENE.SETTINGS] = new SettingsScene(this);
-        
+
         this.changeScene(SCENE.MAIN);
         this.gameLoop();
     }
@@ -173,6 +124,9 @@ class Game {
     changeScene(sceneName, data = {}) {
         if (this.currentScene && this.currentScene.destroy) {
             this.currentScene.destroy();
+        }
+        if (this.currentSceneName) {
+            this.sceneElements[this.currentSceneName].classList.remove('active');
         }
 
         const targetBGM = SCENE_BGM_MAP[sceneName];
@@ -190,6 +144,8 @@ class Game {
             this.currentScene = this.scenes[sceneName];
         }
 
+        this.sceneElements[sceneName].classList.add('active');
+
         if (this.currentScene.init) {
             this.currentScene.init(data);
         }
@@ -199,10 +155,6 @@ class Game {
         if (this.currentScene && this.currentScene.update) {
             this.currentScene.update();
         }
-        if (this.currentScene && this.currentScene.draw) {
-            this.currentScene.draw();
-        }
-        this.mouse.clicked = false;
         requestAnimationFrame(() => this.gameLoop());
     }
 }

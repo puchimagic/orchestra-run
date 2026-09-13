@@ -8,8 +8,15 @@
     <link rel="stylesheet" href="src/style.css">
 </head>
 <body>
-    <canvas id="gameCanvas"></canvas>
-    <input id="usernameInput" type="text" maxlength="8" autocomplete="off" style="display:none;">
+    <div id="gameRoot">
+        <div id="scene-main" class="scene"></div>
+        <div id="scene-game_description" class="scene"></div>
+        <div id="scene-instrument_select" class="scene"></div>
+        <div id="scene-game" class="scene"></div>
+        <div id="scene-game_over" class="scene"></div>
+        <div id="scene-ranking" class="scene"></div>
+        <div id="scene-settings" class="scene"></div>
+    </div>
     <script type="module" src="src/main.js"></script>
 </body>
 </html>

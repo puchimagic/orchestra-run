@@ -3,27 +3,27 @@ import { soundPlayer } from "./soundPlayer.js";
 
 const PLAYER_WIDTH_IN_BLOCKS = 2.0;
 const PLAYER_HEIGHT_IN_BLOCKS = 2.5;
-const PLAYER_COLOR = 'blue';
 const JUMP_POWER = 34;
 const GRAVITY = 1.7;
 
+const WAIT_IMG = 'assets/img/character_wait.png';
+const JUMP_IMG = 'assets/img/character_jump.png';
+const WALK_IMG = 'assets/img/character_woke.png';
+const WALK_IMG2 = 'assets/img/character_woke2.png';
+
 export class Player {
-    constructor(game, inputHandler, waitImage, jumpImage, walkImage, walkImage2) {
+    constructor(game, inputHandler) {
         this.game = game;
         this.input = inputHandler;
         this.width = PLAYER_WIDTH_IN_BLOCKS * BLOCK_SIZE;
         this.height = PLAYER_HEIGHT_IN_BLOCKS * BLOCK_SIZE;
         this.x = 50;
-        this.y = this.game.canvas.height - this.height - 50;
+        this.y = this.game.baseHeight - this.height - 50;
         this.vx = 0;
         this.vy = 0;
         this.onGround = false;
         this.moveSpeed = PLAYER_INITIAL_SPEED;
 
-        this.waitImage = waitImage;
-        this.jumpImage = jumpImage;
-        this.walkImage = walkImage;
-        this.walkImage2 = walkImage2;
         this.walkFrame = 0;
         this.walkAnimationSpeed = 10;
 
@@ -36,22 +36,39 @@ export class Player {
         this.keys = {};
         this.handleKeyDown = this.handleKeyDown.bind(this);
         this.handleKeyUp = this.handleKeyUp.bind(this);
+
+        this.el = document.createElement('div');
+        this.el.style.position = 'absolute';
+        this.el.style.left = '0';
+        this.el.style.top = '0';
+        this.el.style.width = `${this.width}px`;
+        this.el.style.height = `${this.height}px`;
+        this.el.style.backgroundSize = 'contain';
+        this.el.style.backgroundRepeat = 'no-repeat';
+        this.el.style.backgroundPosition = 'center';
+        this.currentImageSrc = null;
+    }
+
+    mount(parentEl) {
+        parentEl.appendChild(this.el);
+    }
+
+    destroy() {
+        document.removeEventListener('keydown', this.handleKeyDown);
+        document.removeEventListener('keyup', this.handleKeyUp);
+        if (this.el.parentNode) this.el.parentNode.removeChild(this.el);
     }
 
     init() {
         this.x = 50;
-        this.y = this.game.canvas.height - (PLATFORM_HEIGHT_IN_BLOCKS * BLOCK_SIZE) - this.height;
+        this.y = this.game.baseHeight - (PLATFORM_HEIGHT_IN_BLOCKS * BLOCK_SIZE) - this.height;
         this.vx = 0;
         this.vy = 0;
         this.onGround = false;
         this.isCrushed = false;
         document.addEventListener('keydown', this.handleKeyDown);
         document.addEventListener('keyup', this.handleKeyUp);
-    }
-
-    destroy() {
-        document.removeEventListener('keydown', this.handleKeyDown);
-        document.removeEventListener('keyup', this.handleKeyUp);
+        this.updateView();
     }
 
     handleKeyDown(e) { this.keys[e.code] = true; }
@@ -154,6 +171,7 @@ export class Player {
 
         if (leftTreeCollision && rightTreeCollision) {
             this.isCrushed = true;
+            this.updateView();
             return;
         }
 
@@ -179,36 +197,36 @@ export class Player {
         });
 
         this.isJumping = !this.onGround;
+
+        this.updateView();
     }
 
-    draw(ctx) {
+    updateView() {
         let currentImage;
         if (this.isJumping) {
-            currentImage = this.jumpImage;
+            currentImage = JUMP_IMG;
         }
         else if (this.isMoving) {
             this.walkFrame++;
             if (Math.floor(this.walkFrame / this.walkAnimationSpeed) % 2 === 0) {
-                currentImage = this.walkImage;
+                currentImage = WALK_IMG;
             }
             else {
-                currentImage = this.walkImage2;
+                currentImage = WALK_IMG2;
             }
         }
         else {
-            currentImage = this.waitImage;
+            currentImage = WAIT_IMG;
             this.walkFrame = 0;
         }
 
-        ctx.save();
-        if (this.facingDirection === -1) {
-            ctx.translate(this.x + this.width, this.y);
-            ctx.scale(-1, 1);
-            ctx.drawImage(currentImage, 0, 0, this.width, this.height);
+        if (currentImage !== this.currentImageSrc) {
+            this.el.style.backgroundImage = `url('${currentImage}')`;
+            this.currentImageSrc = currentImage;
         }
-        else {
-            ctx.drawImage(currentImage, this.x, this.y, this.width, this.height);
-        }
-        ctx.restore();
+
+        const flip = this.facingDirection === -1 ? ' scaleX(-1)' : '';
+        this.el.style.transform = `translate(${this.x}px, ${this.y}px)${flip}`;
+        this.el.style.transformOrigin = 'center';
     }
 }

@@ -1,6 +1,5 @@
 export class InputHandler {
-    constructor(mouse) {
-        this.mouse = mouse;
+    constructor() {
         this.keyboardInstrumentConfig = null;
         this.gamepadInstrumentConfig = null;
         this.activeKeyMap = {};
@@ -10,14 +9,6 @@ export class InputHandler {
         this.gamepads = [];
         this.lastGamepadConnectedStatus = false;
         this.fixedGamepadConnectedStatus = null;
-
-        this.activated = false;
-
-        const activateOnce = () => {
-            this.activated = true;
-            window.removeEventListener('mousedown', activateOnce);
-        };
-        window.addEventListener('mousedown', activateOnce);
 
         window.addEventListener('keydown', this.handleKeyDown.bind(this));
         window.addEventListener('keyup', this.handleKeyUp.bind(this));
@@ -31,22 +22,6 @@ export class InputHandler {
         });
 
         this.pollGamepads();
-    }
-
-    isActivated() {
-        return this.activated;
-    }
-
-    isMouseDown() {
-        return this.mouse.isDown;
-    }
-
-    getMouseX() {
-        return this.mouse.x;
-    }
-
-    getMouseY() {
-        return this.mouse.y;
     }
 
     setInstrumentKeyMaps(keyboardConfig, gamepadConfig, fixedConnectedStatus = null) {

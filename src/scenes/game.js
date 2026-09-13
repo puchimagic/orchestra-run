@@ -1,16 +1,14 @@
-import { 
-    SCENE, FONT_SIZE, FONT_FAMILY, BLOCK_SIZE, PLATFORM_HEIGHT_IN_BLOCKS, 
-    KEYBOARD_INSTRUMENT_CONFIG, GAMEPAD_INSTRUMENT_CONFIG, 
-    INITIAL_SCROLL_SPEED, SPEED_INCREASE_INTERVAL, PLAYER_MAX_JUMP_IN_BLOCKS, 
-    TREE_TEXT_COLOR, TREE_TEXT_STROKE_COLOR, TREE_TEXT_STROKE_WIDTH, 
-    TREE_TEXT_BACKGROUND_COLOR, TREE_TEXT_BACKGROUND_PADDING 
+import {
+    SCENE, FONT_SIZE, FONT_FAMILY, BLOCK_SIZE, PLATFORM_HEIGHT_IN_BLOCKS,
+    KEYBOARD_INSTRUMENT_CONFIG, GAMEPAD_INSTRUMENT_CONFIG,
+    INITIAL_SCROLL_SPEED, SPEED_INCREASE_INTERVAL, PLAYER_MAX_JUMP_IN_BLOCKS
 } from '../config.js';
 import { Player } from '../player.js';
-import { Stage, Tree } from '../stage.js'; 
+import { Stage, Tree } from '../stage.js';
 import { ScaffoldBlock } from '../scaffold.js';
 import { InputHandler } from '../input_handler.js';
 import { SoundPlayer, soundPlayer } from '../soundPlayer.js';
-import { loadImage, drawBackground } from '../ui/scene_utils.js';
+import { setSceneBackground } from '../ui/scene_utils.js';
 
 export class GameScene {
     constructor(game, selectedInstrument) {
@@ -33,18 +31,20 @@ export class GameScene {
         };
         this.instrumentDirName = null;
 
-        this.backgroundImage = loadImage('assets/img/bg_game.png');
-        this.instrumentImage = null;
+        this.instrumentImageSrc = null;
+
+        // 木の必要キー表示用のDOM要素を Tree -> <span> でひもづけて管理する
+        this.treeKeyEls = new Map();
     }
 
     init(data) {
         this.instrumentName = this.selectedInstrument || 'トライアングル';
-        
+
         const useGamepadForScaffold = this.game.inputMethod === 'gamepad';
         this.player2Input.setInstrumentKeyMaps(
-            KEYBOARD_INSTRUMENT_CONFIG, 
-            GAMEPAD_INSTRUMENT_CONFIG, 
-            useGamepadForScaffold 
+            KEYBOARD_INSTRUMENT_CONFIG,
+            GAMEPAD_INSTRUMENT_CONFIG,
+            useGamepadForScaffold
         );
 
         // activeInstrumentConfigも同様に固定
@@ -57,22 +57,71 @@ export class GameScene {
         this.score = 0;
         this.scoreMultiplier = this.instrument.multiplier;
 
+        // --- DOM構築 ---
+        const sceneEl = this.game.sceneElements[SCENE.GAME];
+        sceneEl.innerHTML = '';
+        setSceneBackground(sceneEl, 'assets/img/bg_game.png');
+
+        // ワールドコンテナ（スクロールする領域）
         this.stage = new Stage(this.game);
+        this.stage.mount(sceneEl);
+
         this.scaffolds = [];
         this.breakableTrees = new Map();
+        this.treeKeyEls.clear();
 
         this.stage.init();
-        this.player = new Player(
-            this.game, 
-            this.game.inputHandler, 
-            this.stage.playerWaitImage, 
-            this.stage.playerJumpImage, 
-            this.stage.playerWalkImage,
-            this.stage.playerWalkImage2
-        );
+
+        this.player = new Player(this.game, this.game.inputHandler);
+        this.player.mount(this.stage.worldEl);
         this.player.init();
 
         this.player2Input.init();
+
+        // --- 画面固定UI（スクロールしない） ---
+        this.scoreEl = document.createElement('div');
+        this.scoreEl.style.position = 'absolute';
+        this.scoreEl.style.left = '20px';
+        this.scoreEl.style.top = '20px';
+        this.scoreEl.style.color = 'black';
+        this.scoreEl.style.fontFamily = FONT_FAMILY;
+        this.scoreEl.style.fontSize = `${FONT_SIZE.MEDIUM}px`;
+        sceneEl.appendChild(this.scoreEl);
+
+        const instrumentImageMap = {
+            "トライアングル": "assets/img/instrument_triangle.png",
+            "タンバリン": "assets/img/instrument_tambourine.png",
+            "太鼓": "assets/img/instrument_taiko.png",
+            "ドラム": "assets/img/instrument_drum.png",
+            "ピアノ": "assets/img/instrument_piano.png",
+            "ギター": "assets/img/gita.png"
+        };
+        this.instrumentImageSrc = instrumentImageMap[this.instrumentName] || "";
+
+        this.instrumentIconEl = document.createElement('img');
+        this.instrumentIconEl.src = this.instrumentImageSrc;
+        this.instrumentIconEl.style.position = 'absolute';
+        this.instrumentIconEl.style.left = `${this.game.baseWidth - 100 - 40}px`;
+        this.instrumentIconEl.style.top = '20px';
+        this.instrumentIconEl.style.width = '140px';
+        this.instrumentIconEl.style.height = '150px';
+        sceneEl.appendChild(this.instrumentIconEl);
+
+        // カウントダウン用オーバーレイ
+        this.countdownOverlayEl = document.createElement('div');
+        this.countdownOverlayEl.style.position = 'absolute';
+        this.countdownOverlayEl.style.left = '0';
+        this.countdownOverlayEl.style.top = '0';
+        this.countdownOverlayEl.style.width = '100%';
+        this.countdownOverlayEl.style.height = '100%';
+        this.countdownOverlayEl.style.background = 'rgba(0, 0, 0, 0.5)';
+        this.countdownOverlayEl.style.display = 'flex';
+        this.countdownOverlayEl.style.alignItems = 'center';
+        this.countdownOverlayEl.style.justifyContent = 'center';
+        this.countdownOverlayEl.style.color = 'white';
+        this.countdownOverlayEl.style.fontFamily = FONT_FAMILY;
+        this.countdownOverlayEl.style.fontSize = '128px';
+        sceneEl.appendChild(this.countdownOverlayEl);
 
         // カウントダウンプロパティ
         this.isCountdown = true;
@@ -82,19 +131,8 @@ export class GameScene {
         // 連続入力を防ぐためのロックフラグ
         this.inputLocked = false;
 
-        // 楽器名ごとに対応する画像URLをマッピング
-        const instrumentImageMap = {
-            "トライアングル": "assets/img/instrument_triangle.png",
-            "タンバリン": "assets/img/instrument_tambourine.png",
-            "太鼓": "assets/img/instrument_taiko.png",
-            "ドラム": "assets/img/instrument_drum.png",
-            "ピアノ": "assets/img/instrument_piano.png",
-            "ギター": "assets/img/gita.png"
-        };
-
-        this.instrumentImage = loadImage(instrumentImageMap[this.instrumentName] || "");
-
         this.loadInstrumentSounds();
+        this.updateView();
     }
 
     // 楽器の音源をロードするメソッド
@@ -141,12 +179,14 @@ export class GameScene {
         const gapWidthInBlocks = totalGapWidthInBlocks / (numScaffolds + 1);
         let currentX = holeX;
         const scaffoldHeightInBlocks = 1;
-        const scaffoldY = this.game.canvas.height - (PLATFORM_HEIGHT_IN_BLOCKS * BLOCK_SIZE) - (scaffoldHeightInBlocks * BLOCK_SIZE) * 3;
+        const scaffoldY = this.game.baseHeight - (PLATFORM_HEIGHT_IN_BLOCKS * BLOCK_SIZE) - (scaffoldHeightInBlocks * BLOCK_SIZE) * 3;
 
         for (let i = 0; i < numScaffolds; i++) {
             currentX += gapWidthInBlocks * BLOCK_SIZE;
             let requiredKeys = this.generateRequiredKeys();
-            this.scaffolds.push(new ScaffoldBlock(currentX, scaffoldY, scaffoldWidthInBlocks, scaffoldHeightInBlocks, requiredKeys));
+            const scaffold = new ScaffoldBlock(currentX, scaffoldY, scaffoldWidthInBlocks, scaffoldHeightInBlocks, requiredKeys);
+            scaffold.mount(this.stage.worldEl);
+            this.scaffolds.push(scaffold);
             currentX += scaffoldWidthInBlocks * BLOCK_SIZE;
         }
     }
@@ -154,6 +194,27 @@ export class GameScene {
     requestTreeBreakEvent(tree) {
         const requiredKeys = this.generateRequiredKeys();
         this.breakableTrees.set(tree, { requiredKeys });
+
+        const keyText = requiredKeys.join(' + ');
+        const el = document.createElement('div');
+        el.className = 'tree-key-text';
+        el.style.fontSize = `${BLOCK_SIZE}px`;
+        el.textContent = keyText;
+        this.stage.worldEl.appendChild(el);
+        this.treeKeyEls.set(tree, el);
+        this.updateTreeKeyPosition(tree, el);
+    }
+
+    updateTreeKeyPosition(tree, el) {
+        el.style.transform = `translate(${tree.x + tree.width / 2}px, ${tree.y + tree.height / 2}px)`;
+    }
+
+    removeTreeKeyEl(tree) {
+        const el = this.treeKeyEls.get(tree);
+        if (el) {
+            el.remove();
+            this.treeKeyEls.delete(tree);
+        }
     }
 
     generateRequiredKeys() {
@@ -162,7 +223,7 @@ export class GameScene {
         if (this.instrument.name === 'ギター') {
             // 2から5の範囲でランダムな数を生成
             numKeysToPress = 1 + Math.floor(Math.random() * 4); // 2, 3, 4, 5
-        } 
+        }
         else {
             numKeysToPress = 1;
         }
@@ -186,6 +247,7 @@ export class GameScene {
                     this.lastTime = this.startTime;
                 }
             }
+            this.updateView();
             return;
         }
 
@@ -210,10 +272,20 @@ export class GameScene {
         const allPlatforms = [...this.stage.platforms, ...solidScaffolds];
         this.player.update(allPlatforms, this.stage.trees, newScrollSpeed);
 
+        const expiredScaffolds = this.scaffolds.filter(s => s.state === 'EXPIRED' || s.x + s.width <= this.stage.cameraX);
+        expiredScaffolds.forEach(s => s.destroy());
         this.scaffolds = this.scaffolds.filter(s => s.state !== 'EXPIRED' && s.x + s.width > this.stage.cameraX);
+
+        // 木の必要キー表示の位置を更新（画面外に流れた木のテキストも消す）
+        this.breakableTrees.forEach((data, tree) => {
+            const el = this.treeKeyEls.get(tree);
+            if (el) this.updateTreeKeyPosition(tree, el);
+        });
 
         this.checkGameOver();
         this.player2Input.clearPressedActions();
+
+        this.updateView();
     }
 
     // 要求されたキー入力が過不足なく行われているかをチェックするヘルパーメソッド
@@ -246,13 +318,13 @@ export class GameScene {
         }
 
         // 4. 操作対象のターゲットを決定
-        const activeScaffolds = this.scaffolds.filter(s => 
-            s.state === 'ACTIVE' && 
-            s.x < this.stage.cameraX + this.game.canvas.width && 
+        const activeScaffolds = this.scaffolds.filter(s =>
+            s.state === 'ACTIVE' &&
+            s.x < this.stage.cameraX + this.game.baseWidth &&
             s.x + s.width > this.stage.cameraX
         );
-        const activeTrees = Array.from(this.breakableTrees.keys()).filter(t => 
-            t.x < this.stage.cameraX + this.game.canvas.width && 
+        const activeTrees = Array.from(this.breakableTrees.keys()).filter(t =>
+            t.x < this.stage.cameraX + this.game.baseWidth &&
             t.x + t.width > this.stage.cameraX
         );
         const allInteractiveObjects = [...activeScaffolds, ...activeTrees];
@@ -271,7 +343,7 @@ export class GameScene {
         if (isMatched) {
             if (target instanceof ScaffoldBlock) {
                 target.solidify();
-                
+
                 // ゲームパッド選択時は楽器音を鳴らさない
                 if (this.game.inputMethod !== 'gamepad') {
                     if (this.instrumentName === 'ギター') {
@@ -296,6 +368,7 @@ export class GameScene {
             else if (target instanceof Tree) {
                 this.stage.spawnFallingTreeAnimation(target);
                 target.break();
+                this.removeTreeKeyEl(target);
                 this.breakableTrees.delete(target);
             }
 
@@ -309,7 +382,7 @@ export class GameScene {
             this.gameOver();
             return;
         }
-        if (this.player.y > this.game.canvas.height) this.gameOver();
+        if (this.player.y > this.game.baseHeight) this.gameOver();
         if (this.player.x < this.stage.cameraX) this.gameOver();
         this.stage.enemies.forEach(enemy => {
             if (this.player.x < enemy.x + enemy.width && this.player.x + this.player.width > enemy.x &&
@@ -326,86 +399,31 @@ export class GameScene {
             soundPlayer.gameSounds.tree_fall.pause();
             soundPlayer.gameSounds.tree_fall.currentTime = 0;
         }
-        
+
         this.player.destroy();
         this.player2Input.destroy();
         this.game.changeScene(SCENE.GAME_OVER, { score: this.score, instrument: this.instrumentName });
     }
 
-    draw() {
-        const ctx = this.game.ctx;
-        const { width, height } = this.game.canvas;
-
-        {
-            drawBackground(ctx, this.backgroundImage, width, height, '#d0d0d0');
-        }
-
-        ctx.save();
-        ctx.translate(-this.stage.cameraX, 0);
-
-        this.stage.draw(ctx);
-        this.player.draw(ctx);
-        this.scaffolds.forEach(s => s.draw(ctx));
-
-        this.breakableTrees.forEach((data, tree) => {
-            const keyText = data.requiredKeys.join(' + ');
-            ctx.font = `${BLOCK_SIZE}px ${FONT_FAMILY}`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-
-            // テキストの幅と高さを測定
-            const textMetrics = ctx.measureText(keyText);
-            const textWidth = textMetrics.width;
-            const textHeight = BLOCK_SIZE; // フォントサイズと同じくらいと仮定
-
-            const padding = TREE_TEXT_BACKGROUND_PADDING;
-            const bgX = tree.x + tree.width / 2 - textWidth / 2 - padding;
-            const bgY = tree.y + tree.height / 2 - textHeight / 2 - padding;
-            const bgWidth = textWidth + padding * 2;
-            const bgHeight = textHeight + padding * 2;
-
-            // 黒い背景を描画
-            ctx.fillStyle = TREE_TEXT_BACKGROUND_COLOR;
-            ctx.fillRect(bgX, bgY, bgWidth, bgHeight);
-
-            // テキストに黒い縁取りを追加
-            ctx.strokeStyle = TREE_TEXT_STROKE_COLOR;
-            ctx.lineWidth = TREE_TEXT_STROKE_WIDTH;
-            ctx.strokeText(keyText, tree.x + tree.width / 2, tree.y + tree.height / 2);
-            
-            ctx.fillStyle = TREE_TEXT_COLOR;
-            ctx.fillText(keyText, tree.x + tree.width / 2, tree.y + tree.height / 2);
-        });
-
-        ctx.restore();
-
-        ctx.fillStyle = 'black';
-        ctx.textAlign = 'left';
-        ctx.font = `${FONT_SIZE.MEDIUM}px ${FONT_FAMILY}`;
-        ctx.fillText(`スコア: ${this.score}`, 20, 50);
-
-        // 楽器アイコンを右上に描画
-        if (this.instrumentImage.complete && this.instrumentImage.naturalHeight !== 0) {
-            const x = width - 100 - 40;
-            const y = 20;
-            ctx.drawImage(this.instrumentImage, x, y, 140, 150);
-        }
+    updateView() {
+        this.scoreEl.textContent = `スコア: ${this.score}`;
 
         if (this.isCountdown) {
-            ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-            ctx.fillRect(0, 0, width, height);
-    
-            ctx.font = `128px ${FONT_FAMILY}`;
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillStyle = "white";
-    
+            this.countdownOverlayEl.style.display = 'flex';
             if (this.countdownNumber > 0) {
-                ctx.fillText(this.countdownNumber, width / 2, height / 2);
+                this.countdownOverlayEl.textContent = this.countdownNumber;
+            } else if (this.countdownNumber === 0) {
+                this.countdownOverlayEl.textContent = 'Start!';
+            } else {
+                this.countdownOverlayEl.textContent = '';
             }
-            else if (this.countdownNumber === 0) {
-                ctx.fillText("Start!", width / 2, height / 2);
-            }
+        } else {
+            this.countdownOverlayEl.style.display = 'none';
         }
+    }
+
+    destroy() {
+        const sceneEl = this.game.sceneElements[SCENE.GAME];
+        sceneEl.innerHTML = '';
     }
 }

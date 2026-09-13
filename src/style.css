@@ -1,29 +1,171 @@
+* {
+    box-sizing: border-box;
+}
+
 body {
     margin: 0;
-    overflow: hidden; /* スクロールバーを消す */
-    background-color: #000; /* はみ出た部分の背景色 */
-}
-
-canvas#gameCanvas {
-    display: block;
-    background-color: #e0e0e0;
-    /* 画面に合わせてアスペクト比を保ったまま中央に配置 */
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 100vw;
-    height: 100vh;
-    object-fit: contain;
-}
-
-/* Canvas上に重ねるDOM要素（日本語入力などブラウザ標準機能が必要なUI用） */
-#usernameInput {
-    position: absolute;
-    box-sizing: border-box;
-    border: none;
-    outline: none;
-    padding: 0 10px;
+    overflow: hidden;
+    background-color: #000;
     font-family: Arial, sans-serif;
-    background: transparent;
+}
+
+/* 1920x1080固定の仮想ゲーム画面。画面サイズに合わせてtransform: scaleのみで拡縮する。
+   内部の全要素はこの座標系のpx値をそのまま使えるため、Canvas用の座標変換が一切不要になる。 */
+#gameRoot {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1920px;
+    height: 1080px;
+    transform-origin: top left;
+    background-color: #e0e0e0;
+    overflow: hidden;
+}
+
+.scene {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1920px;
+    height: 1080px;
+    background-size: cover;
+    background-position: center;
+    display: none;
+}
+
+.scene.active {
+    display: block;
+}
+
+/* --- 共通UI部品 --- */
+
+.game-button {
+    position: absolute;
+    border: none;
+    cursor: pointer;
+    background-color: #888;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    font-size: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: background-color 0.1s;
+}
+
+.game-button:hover {
+    background-color: #aaa;
+}
+
+.game-button.selected {
+    background-color: #333;
+}
+
+.game-button.selected:hover {
+    background-color: #555;
+}
+
+.game-button:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.scene-title {
+    position: absolute;
+    top: 40px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 64px;
+    color: black;
+    margin: 0;
+}
+
+.text-input {
+    position: absolute;
+    border: 2px solid black;
+    outline: none;
+    font-size: 48px;
+    padding: 0 10px;
+    background: white;
+}
+
+.volume-slider {
+    position: absolute;
+    width: 500px;
+    height: 40px;
+}
+
+.volume-slider label {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    font-size: 36px;
+    color: black;
+}
+
+.volume-slider .volume-value {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    font-size: 36px;
+    color: black;
+}
+
+.volume-slider input[type="range"] {
+    width: 100%;
+    height: 40px;
+    margin: 0;
+}
+
+/* --- 足場ブロック --- */
+
+.scaffold {
+    position: absolute;
+    left: 0;
+    top: 0;
+    box-sizing: border-box;
+}
+
+.scaffold.active {
+    border: 5px solid #f0ad4e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.scaffold.active .scaffold-key-text {
+    color: #f0ad4e;
+    -webkit-text-stroke: 4px black;
+    paint-order: stroke fill;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.scaffold.solid {
+    background-image: url('../assets/img/scaffold.png');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+}
+
+.scaffold.expired {
+    display: none;
+}
+
+/* --- 木を破壊するための必要キー表示 --- */
+
+.tree-key-text {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    -webkit-text-stroke: 4px black;
+    paint-order: stroke fill;
+    font-family: Arial, sans-serif;
+    white-space: nowrap;
+    padding: 10px;
 }

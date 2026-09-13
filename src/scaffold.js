@@ -1,8 +1,6 @@
-import { FONT_FAMILY, BLOCK_SIZE, SCAFFOLD_ACTIVE_STROKE_COLOR, SCAFFOLD_ACTIVE_LINE_WIDTH, SCAFFOLD_ACTIVE_TEXT_COLOR, SCAFFOLD_ACTIVE_TEXT_STROKE_COLOR, SCAFFOLD_ACTIVE_TEXT_STROKE_WIDTH, SCAFFOLD_SOLID_FILL_COLOR_FALLBACK } from './config.js';
+import { BLOCK_SIZE } from './config.js';
 
 const SOLID_DURATION = 5000;
-const scaffoldImage = new Image();
-scaffoldImage.src = 'assets/img/scaffold.png';
 
 export class ScaffoldBlock {
     constructor(x, y, widthInBlocks, heightInBlocks, requiredKeys) {
@@ -14,12 +12,35 @@ export class ScaffoldBlock {
 
         this.state = 'ACTIVE';
         this.solidUntil = 0;
+
+        this.el = document.createElement('div');
+        this.el.className = 'scaffold';
+        this.el.style.width = `${this.width}px`;
+        this.el.style.height = `${this.height}px`;
+        this.el.style.transform = `translate(${this.x}px, ${this.y}px)`;
+
+        this.keyTextEl = document.createElement('span');
+        this.keyTextEl.className = 'scaffold-key-text';
+        this.keyTextEl.style.fontSize = `${this.height * 0.7}px`;
+        this.keyTextEl.textContent = this.requiredKeys.join(' + ');
+        this.el.appendChild(this.keyTextEl);
+
+        this.updateView();
+    }
+
+    mount(parentEl) {
+        parentEl.appendChild(this.el);
+    }
+
+    destroy() {
+        if (this.el.parentNode) this.el.parentNode.removeChild(this.el);
     }
 
     solidify() {
         if (this.state === 'ACTIVE') {
             this.state = 'SOLID';
             this.solidUntil = Date.now() + SOLID_DURATION;
+            this.updateView();
             return true;
         }
         return false;
@@ -28,40 +49,18 @@ export class ScaffoldBlock {
     update() {
         if (this.state === 'SOLID' && Date.now() > this.solidUntil) {
             this.state = 'EXPIRED';
+            this.updateView();
         }
     }
 
-    draw(ctx) {
-        if (this.state === 'EXPIRED') return;
-
+    updateView() {
+        this.el.classList.remove('active', 'solid', 'expired');
         if (this.state === 'ACTIVE') {
-            ctx.strokeStyle = SCAFFOLD_ACTIVE_STROKE_COLOR; // configから取得
-            ctx.lineWidth = SCAFFOLD_ACTIVE_LINE_WIDTH; // configから取得
-            ctx.strokeRect(this.x, this.y, this.width, this.height);
-
-            // テキストの描画
-            ctx.font = `${this.height * 0.7}px ${FONT_FAMILY}`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            const keyText = this.requiredKeys.join(' + ');
-
-            // 黒い縁取りを追加
-            ctx.strokeStyle = SCAFFOLD_ACTIVE_TEXT_STROKE_COLOR; // configから取得
-            ctx.lineWidth = SCAFFOLD_ACTIVE_TEXT_STROKE_WIDTH; // configから取得
-            ctx.strokeText(keyText, this.x + this.width / 2, this.y + this.height / 2);
-
-            // オレンジ色のテキストを描画
-            ctx.fillStyle = SCAFFOLD_ACTIVE_TEXT_COLOR; // configから取得
-            ctx.fillText(keyText, this.x + this.width / 2, this.y + this.height / 2);
-
+            this.el.classList.add('active');
         } else if (this.state === 'SOLID') {
-            if (scaffoldImage.complete && scaffoldImage.naturalHeight !== 0) {
-                ctx.drawImage(scaffoldImage, this.x, this.y, this.width, this.height);
-            } else {
-                // 画像が読み込まれるまでのフォールバック
-                ctx.fillStyle = SCAFFOLD_SOLID_FILL_COLOR_FALLBACK; // configから取得
-                ctx.fillRect(this.x, this.y, this.width, this.height);
-            }
+            this.el.classList.add('solid');
+        } else {
+            this.el.classList.add('expired');
         }
     }
 }

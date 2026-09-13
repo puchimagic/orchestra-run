@@ -8,6 +8,12 @@ const MAX_PLATFORM_WIDTH_IN_BLOCKS = 15;
 const MIN_GAP_IN_BLOCKS = 4;
 const MAX_GAP_IN_BLOCKS = 40;
 
+const GROUND_IMG = 'assets/img/ground.png';
+const ENEMY_IMG = 'assets/img/enemy.png';
+const TREE_IMG = 'assets/img/tree.png';
+const STUMP_IMG = 'assets/img/stump.png';
+const TREE_FALL_IMAGES = [2, 3, 4].map(i => `assets/img/tree${i}.png`);
+
 class TemporaryAnimation {
     constructor(x, y, width, height, images, speed, offsets = [], displayDuration = 0.3) {
         this.x = x;
@@ -22,6 +28,22 @@ class TemporaryAnimation {
         this.displayDuration = displayDuration;
         this.done = false;
         this.offsets = offsets;
+
+        this.el = document.createElement('div');
+        this.el.style.position = 'absolute';
+        this.el.style.left = '0';
+        this.el.style.top = '0';
+        this.el.style.backgroundSize = '100% 100%';
+        this.el.style.backgroundRepeat = 'no-repeat';
+        this.currentSrc = null;
+    }
+
+    mount(parentEl) {
+        parentEl.appendChild(this.el);
+    }
+
+    destroy() {
+        if (this.el.parentNode) this.el.parentNode.removeChild(this.el);
     }
 
     update(deltaTime) {
@@ -30,59 +52,75 @@ class TemporaryAnimation {
         if (this.animationFrame >= this.images.length - 1) {
             this.holdTimer += deltaTime;
             if (this.holdTimer >= this.displayDuration) this.done = true;
+        } else {
+            this.animationTimer += deltaTime;
+            if (this.animationTimer > this.animationSpeed) {
+                this.animationTimer = 0;
+                this.animationFrame = Math.min(this.animationFrame + 1, this.images.length - 1);
+            }
+        }
+
+        this.updateView();
+    }
+
+    updateView() {
+        if (this.done) {
+            this.el.style.display = 'none';
             return;
         }
 
-        this.animationTimer += deltaTime;
-        if (this.animationTimer > this.animationSpeed) {
-            this.animationTimer = 0;
-            this.animationFrame = Math.min(this.animationFrame + 1, this.images.length - 1);
+        const frameImage = this.images[this.animationFrame];
+
+        let drawX = this.x;
+        let drawY = this.y;
+        let drawWidth = this.width;
+        let drawHeight = this.height;
+
+        const stumpHeightPixels = BLOCK_SIZE * STUMP_HEIGHT_IN_BLOCKS;
+        const stumpPivotX = this.x + this.width / 2;
+        const stumpPivotY = this.y + this.height - stumpHeightPixels;
+
+        let currentOffsetX = 0;
+        let currentOffsetY = 0;
+
+        // フレームごとのオフセットを適用 (BLOCK_SIZEの倍数で受け取り、ここでピクセルに変換)
+        if (this.offsets[this.animationFrame]) {
+            currentOffsetX = this.offsets[this.animationFrame][0] * BLOCK_SIZE; // BLOCK_SIZE乗算を追加
+            currentOffsetY = this.offsets[this.animationFrame][1] * BLOCK_SIZE; // BLOCK_SIZE乗算を追加
         }
+
+        if (this.animationFrame === 0) { // ki2 (初期の傾き)
+            drawX = stumpPivotX - drawWidth / 2;
+            drawY = stumpPivotY - drawHeight;
+        } else if (this.animationFrame === 1) { // ki3 (さらに傾く)
+            drawX = stumpPivotX - drawWidth / 2;
+            drawY = stumpPivotY - drawHeight;
+        } else if (this.animationFrame === 2) { // ki4 (倒れた丸太)
+            const fallenLogVisualWidth = drawHeight * 0.9;
+            const fallenLogVisualHeight = drawWidth * 0.8;
+            const groundLevelY = this.y + this.height;
+
+            drawX = stumpPivotX + currentOffsetX - fallenLogVisualWidth / 2;
+            drawY = groundLevelY - fallenLogVisualHeight + currentOffsetY;
+            drawWidth = fallenLogVisualWidth;
+            drawHeight = fallenLogVisualHeight;
+
+            this.applyFrame(frameImage, drawX, drawY, drawWidth, drawHeight);
+            return;
+        }
+
+        this.applyFrame(frameImage, drawX + currentOffsetX, drawY + currentOffsetY, drawWidth, drawHeight);
     }
 
-    draw(ctx) {
-        if (this.done) return;
-
-        const frameImage = this.images[this.animationFrame];
-        if (frameImage && frameImage.complete) {
-            let drawX = this.x;
-            let drawY = this.y;
-            const drawWidth = this.width;
-            const drawHeight = this.height;
-
-            const stumpHeightPixels = BLOCK_SIZE * STUMP_HEIGHT_IN_BLOCKS;
-            const stumpPivotX = this.x + this.width / 2;
-            const stumpPivotY = this.y + this.height - stumpHeightPixels;
-
-            let currentOffsetX = 0;
-            let currentOffsetY = 0;
-
-            // フレームごとのオフセットを適用 (BLOCK_SIZEの倍数で受け取り、ここでピクセルに変換)
-            if (this.offsets[this.animationFrame]) {
-                currentOffsetX = this.offsets[this.animationFrame][0] * BLOCK_SIZE; // BLOCK_SIZE乗算を追加
-                currentOffsetY = this.offsets[this.animationFrame][1] * BLOCK_SIZE; // BLOCK_SIZE乗算を追加
-            }
-
-            if (this.animationFrame === 0) { // ki2 (初期の傾き)
-                drawX = stumpPivotX - drawWidth / 2;
-                drawY = stumpPivotY - drawHeight;
-            } else if (this.animationFrame === 1) { // ki3 (さらに傾く)
-                drawX = stumpPivotX - drawWidth / 2;
-                drawY = stumpPivotY - drawHeight;
-            } else if (this.animationFrame === 2) { // ki4 (倒れた丸太)
-                const fallenLogVisualWidth = drawHeight * 0.9;
-                const fallenLogVisualHeight = drawWidth * 0.8;
-                const groundLevelY = this.y + this.height;
-
-                drawX = stumpPivotX + currentOffsetX - fallenLogVisualWidth / 2;
-                drawY = groundLevelY - fallenLogVisualHeight + currentOffsetY;
-
-                ctx.drawImage(frameImage, drawX, drawY, fallenLogVisualWidth, fallenLogVisualHeight);
-                return;
-            }
-
-            ctx.drawImage(frameImage, drawX + currentOffsetX, drawY + currentOffsetY, drawWidth, drawHeight);
+    applyFrame(frameImage, x, y, width, height) {
+        this.el.style.display = 'block';
+        if (frameImage !== this.currentSrc) {
+            this.el.style.backgroundImage = `url('${frameImage}')`;
+            this.currentSrc = frameImage;
         }
+        this.el.style.width = `${width}px`;
+        this.el.style.height = `${height}px`;
+        this.el.style.transform = `translate(${x}px, ${y}px)`;
     }
 }
 
@@ -95,6 +133,23 @@ export class Tree {
         this.image = image;
         this.isBreakable = isBreakable;
         this.stumpImage = stumpImage;
+
+        this.el = document.createElement('div');
+        this.el.style.position = 'absolute';
+        this.el.style.left = '0';
+        this.el.style.top = '0';
+        this.el.style.backgroundSize = '100% 100%';
+        this.el.style.backgroundRepeat = 'no-repeat';
+        this.currentSrc = null;
+        this.updateView();
+    }
+
+    mount(parentEl) {
+        parentEl.appendChild(this.el);
+    }
+
+    destroy() {
+        if (this.el.parentNode) this.el.parentNode.removeChild(this.el);
     }
 
     break() {
@@ -109,15 +164,17 @@ export class Tree {
         this.width = newWidth;
         this.image = this.stumpImage;
         this.isBreakable = false;
+        this.updateView();
     }
 
-    draw(ctx) {
-        if (this.image && this.image.complete && this.image.naturalHeight !== 0) {
-            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-        } else {
-            ctx.fillStyle = '#555';
-            ctx.fillRect(this.x, this.y, this.width, this.height);
+    updateView() {
+        if (this.image !== this.currentSrc) {
+            this.el.style.backgroundImage = `url('${this.image}')`;
+            this.currentSrc = this.image;
         }
+        this.el.style.width = `${this.width}px`;
+        this.el.style.height = `${this.height}px`;
+        this.el.style.transform = `translate(${this.x}px, ${this.y}px)`;
     }
 }
 
@@ -131,15 +188,37 @@ class Enemy {
         this.minX = x - moveRange;
         this.maxX = x + moveRange;
         this.enemyImage = enemyImage;
+
+        this.el = document.createElement('div');
+        this.el.style.position = 'absolute';
+        this.el.style.left = '0';
+        this.el.style.top = '0';
+        this.el.style.width = `${this.width}px`;
+        this.el.style.height = `${this.height}px`;
+        this.el.style.backgroundImage = `url('${this.enemyImage}')`;
+        this.el.style.backgroundSize = '100% 100%';
+        this.el.style.backgroundRepeat = 'no-repeat';
+        this.updateView();
     }
+
+    mount(parentEl) {
+        parentEl.appendChild(this.el);
+    }
+
+    destroy() {
+        if (this.el.parentNode) this.el.parentNode.removeChild(this.el);
+    }
+
     update() {
         this.x += this.vx;
         if (this.x < this.minX || this.x > this.maxX) {
             this.vx *= -1;
         }
+        this.updateView();
     }
-    draw(ctx) {
-        ctx.drawImage(this.enemyImage, this.x, this.y, this.width, this.height);
+
+    updateView() {
+        this.el.style.transform = `translate(${this.x}px, ${this.y}px)`;
     }
 }
 
@@ -151,39 +230,55 @@ class Platform {
         this.height = PLATFORM_HEIGHT_IN_BLOCKS * BLOCK_SIZE;
         this.widthInBlocks = widthInBlocks;
         this.groundImage = groundImage;
+
+        this.el = document.createElement('div');
+        this.el.style.position = 'absolute';
+        this.el.style.left = '0';
+        this.el.style.top = '0';
+        this.el.style.width = `${this.width}px`;
+        this.el.style.height = `${this.height}px`;
+        this.el.style.backgroundImage = `url('${this.groundImage}')`;
+        this.el.style.backgroundRepeat = 'repeat';
+        this.el.style.backgroundSize = `${BLOCK_SIZE}px ${BLOCK_SIZE}px`;
+        this.el.style.transform = `translate(${this.x}px, ${this.y}px)`;
     }
 
-    draw(ctx) {
-        for (let i = 0; i < this.widthInBlocks; i++) {
-            for (let j = 0; j < PLATFORM_HEIGHT_IN_BLOCKS; j++) {
-                const blockX = this.x + i * BLOCK_SIZE;
-                const blockY = this.y + j * BLOCK_SIZE;
-                ctx.drawImage(this.groundImage, blockX, blockY, BLOCK_SIZE, BLOCK_SIZE);
-            }
-        }
+    mount(parentEl) {
+        parentEl.appendChild(this.el);
+    }
+
+    destroy() {
+        if (this.el.parentNode) this.el.parentNode.removeChild(this.el);
     }
 }
 
 export class Stage {
     constructor(game) {
         this.game = game;
+
+        this.worldEl = document.createElement('div');
+        this.worldEl.style.position = 'absolute';
+        this.worldEl.style.left = '0';
+        this.worldEl.style.top = '0';
+        this.worldEl.style.width = '0';
+        this.worldEl.style.height = '0';
+
         this.scrollSpeed = INITIAL_SCROLL_SPEED;
         this.elapsedTimeInSeconds = 0;
         this.animations = [];
-        this.groundImage = new Image(); this.groundImage.src = 'assets/img/ground.png';
-        this.enemyImage = new Image(); this.enemyImage.src = 'assets/img/enemy.png';
-        this.playerWaitImage = new Image(); this.playerWaitImage.src = 'assets/img/character_wait.png';
-        this.playerJumpImage = new Image(); this.playerJumpImage.src = 'assets/img/character_jump.png';
-        this.playerWalkImage = new Image(); this.playerWalkImage.src = 'assets/img/character_woke.png';
-        this.playerWalkImage2 = new Image(); this.playerWalkImage2.src = 'assets/img/character_woke2.png';
-        this.treeImage = new Image(); this.treeImage.src = 'assets/img/tree.png';
-        this.stumpImage = new Image(); this.stumpImage.src = 'assets/img/stump.png';
-        this.treeFallImages = [];
-        for (let i = 2; i <= 4; i++) {
-            const img = new Image();
-            img.src = `assets/img/tree${i}.png`;
-            this.treeFallImages.push(img);
-        }
+        this.groundImage = GROUND_IMG;
+        this.enemyImage = ENEMY_IMG;
+        this.treeImage = TREE_IMG;
+        this.stumpImage = STUMP_IMG;
+        this.treeFallImages = TREE_FALL_IMAGES;
+    }
+
+    mount(parentEl) {
+        parentEl.appendChild(this.worldEl);
+    }
+
+    destroy() {
+        if (this.worldEl.parentNode) this.worldEl.parentNode.removeChild(this.worldEl);
     }
 
     init() {
@@ -195,11 +290,12 @@ export class Stage {
         this.enemies = [];
         this.animations = [];
         this.lastPlatformX = -50;
-        const initialPlatformWidth = Math.ceil(this.game.canvas.width / BLOCK_SIZE) + 2;
-        this.createPlatform(this.lastPlatformX, this.game.canvas.height - (PLATFORM_HEIGHT_IN_BLOCKS * BLOCK_SIZE), initialPlatformWidth);
-        while (this.lastPlatformX < this.cameraX + this.game.canvas.width * 2) {
+        const initialPlatformWidth = Math.ceil(this.game.baseWidth / BLOCK_SIZE) + 2;
+        this.createPlatform(this.lastPlatformX, this.game.baseHeight - (PLATFORM_HEIGHT_IN_BLOCKS * BLOCK_SIZE), initialPlatformWidth);
+        while (this.lastPlatformX < this.cameraX + this.game.baseWidth * 2) {
             this.generateNext();
         }
+        this.updateScroll();
     }
 
     setScrollSpeed(speed) { this.scrollSpeed = speed; }
@@ -213,11 +309,14 @@ export class Stage {
         ];
         const animationDisplayDuration = 0.3; // ここで秒数を設定できるようにする
         const anim = new TemporaryAnimation(originalTree.x, originalTree.y, originalTree.width, originalTree.height, this.treeFallImages, 0.15, offsets, animationDisplayDuration);
+        anim.mount(this.worldEl);
+        anim.updateView();
         this.animations.push(anim);
     }
 
     createPlatform(x, y, widthInBlocks) {
         const platform = new Platform(x, y, widthInBlocks, this.groundImage);
+        platform.mount(this.worldEl);
         this.platforms.push(platform);
         this.lastPlatformX = x + platform.width;
 
@@ -235,6 +334,7 @@ export class Stage {
                     const treeWidth = treeHeight * aspectRatio;
                     const treeX = (x + platform.width / 2) - (treeWidth / 2);
                     const tree = new Tree(treeX, y - treeHeight, treeWidth, treeHeight, this.treeImage, true, this.stumpImage);
+                    tree.mount(this.worldEl);
                     this.trees.push(tree);
                     this.game.currentScene.requestTreeBreakEvent(tree);
                 } else {
@@ -242,10 +342,12 @@ export class Stage {
                     const treeWidth = BLOCK_SIZE * STUMP_WIDTH_IN_BLOCKS;
                     const treeX = (x + platform.width / 2) - (treeWidth / 2);
                     const tree = new Tree(treeX, y - treeHeight, treeWidth, treeHeight, this.stumpImage, false, this.stumpImage);
+                    tree.mount(this.worldEl);
                     this.trees.push(tree);
                 }
             } else if (obstacleType < treeThreshold + enemyChance) {
                 const enemy = new Enemy(x + platform.width / 2, y - BLOCK_SIZE * 1.5, platform.width / 4, this.enemyImage);
+                enemy.mount(this.worldEl);
                 this.enemies.push(enemy);
             }
         }
@@ -258,7 +360,7 @@ export class Stage {
         const widthInBlocks = MIN_PLATFORM_WIDTH_IN_BLOCKS + Math.floor(Math.random() * (MAX_PLATFORM_WIDTH_IN_BLOCKS - MIN_PLATFORM_WIDTH_IN_BLOCKS + 1));
         const gapInPixels = gapInBlocks * BLOCK_SIZE;
         const newX = this.lastPlatformX + gapInPixels;
-        const newY = this.game.canvas.height - (PLATFORM_HEIGHT_IN_BLOCKS * BLOCK_SIZE);
+        const newY = this.game.baseHeight - (PLATFORM_HEIGHT_IN_BLOCKS * BLOCK_SIZE);
         if (gapInBlocks > PLAYER_MAX_JUMP_IN_BLOCKS) {
             this.game.currentScene.requestScaffold(this.lastPlatformX, gapInPixels);
         }
@@ -267,26 +369,32 @@ export class Stage {
 
     update(deltaTime) {
         this.cameraX += this.scrollSpeed;
-        if (this.lastPlatformX < this.cameraX + this.game.canvas.width + 200) {
+        if (this.lastPlatformX < this.cameraX + this.game.baseWidth + 200) {
             this.generateNext();
         }
+
+        const goneOutPlatforms = this.platforms.filter(p => p.x + p.width <= this.cameraX);
+        goneOutPlatforms.forEach(p => p.destroy());
         this.platforms = this.platforms.filter(p => p.x + p.width > this.cameraX);
+
+        const goneOutTrees = this.trees.filter(t => t.x + t.width <= this.cameraX);
+        goneOutTrees.forEach(t => t.destroy());
         this.trees = this.trees.filter(t => t.x + t.width > this.cameraX);
+
+        const goneOutEnemies = this.enemies.filter(e => e.x + e.width <= this.cameraX);
+        goneOutEnemies.forEach(e => e.destroy());
         this.enemies = this.enemies.filter(e => e.x + e.width > this.cameraX);
         this.enemies.forEach(e => e.update());
 
         this.animations.forEach(a => a.update(deltaTime));
+        const doneAnimations = this.animations.filter(a => a.done);
+        doneAnimations.forEach(a => a.destroy());
         this.animations = this.animations.filter(a => !a.done);
+
+        this.updateScroll();
     }
 
-    draw(ctx) {
-        this.platforms.forEach(p => p.draw(ctx));
-        this.enemies.forEach(e => e.draw(ctx)); // 敵は手前で良い
-        
-        // 倒れた木のアニメーションを木（切り株）より奥に描画する
-        this.animations.forEach(a => a.draw(ctx));
-
-        // その後に木（切り株を含む）を描画する
-        this.trees.forEach(t => t.draw(ctx));
+    updateScroll() {
+        this.worldEl.style.transform = `translate(${-this.cameraX}px, 0)`;
     }
 }

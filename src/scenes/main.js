@@ -1,45 +1,32 @@
-import { SCENE, FONT_SIZE, FONT_FAMILY } from '../config.js';
+import { SCENE } from '../config.js';
 import { Button } from '../ui/button.js';
-import { soundPlayer } from '../soundPlayer.js';
-import { loadImage, drawBackground } from '../ui/scene_utils.js';
+import { setSceneBackground } from '../ui/scene_utils.js';
 
 export class MainScene {
     constructor(game) {
         this.game = game;
-
-        this.backgroundImage = loadImage('assets/img/bg_title.png');
-        this.logoImage = loadImage('assets/img/logo.png');
-        this.logoImage.onload = () => this.onResize();
-
-        this.logoX = 0;
-        this.logoY = 0;
-        this.logoWidth = 0;
-        this.logoHeight = 0;
     }
-
 
     init() {
-        this.onResize();
-    }
+        const sceneEl = this.game.sceneElements[SCENE.MAIN];
+        sceneEl.innerHTML = '';
+        setSceneBackground(sceneEl, 'assets/img/bg_title.png');
 
-    onResize() {
-        const { width, height } = this.game.canvas;
-        const cx = width / 2;
-
-        const logoDisplayWidth = width * 0.7;
-        const logoDisplayHeight = this.logoImage.height * (logoDisplayWidth / this.logoImage.width);
-        const logoY = height * 0.05;
-
-        this.logoX = cx - logoDisplayWidth / 2;
-        this.logoY = logoY;
-        this.logoWidth = logoDisplayWidth;
-        this.logoHeight = logoDisplayHeight;
+        const logo = document.createElement('img');
+        logo.src = 'assets/img/logo.png';
+        logo.style.position = 'absolute';
+        logo.style.left = '10%';
+        logo.style.top = '5%';
+        logo.style.width = '80%';
+        sceneEl.appendChild(logo);
+        this.logo = logo;
 
         const btnWidth = 550;
         const btnHeight = 150;
         const gapX = 100;
         const gapY = 50;
-        const buttonsStartY = height * 0.55;
+        const cx = this.game.baseWidth / 2;
+        const buttonsStartY = this.game.baseHeight * 0.55;
         const leftColX = cx - btnWidth - gapX / 2;
         const rightColX = cx + gapX / 2;
 
@@ -47,44 +34,52 @@ export class MainScene {
         this.descButton = new Button(leftColX, buttonsStartY + btnHeight + gapY, btnWidth, btnHeight, 'あそびかた');
         this.rankingButton = new Button(rightColX, buttonsStartY, btnWidth, btnHeight, 'ランキング');
         this.settingsButton = new Button(rightColX, buttonsStartY + btnHeight + gapY, btnWidth, btnHeight, '設定');
+
+        this.startButton.onClick = () => this.game.changeScene(SCENE.INSTRUMENT_SELECT);
+        this.descButton.onClick = () => this.game.changeScene(SCENE.GAME_DESCRIPTION);
+        this.rankingButton.onClick = () => this.game.changeScene(SCENE.RANKING);
+        this.settingsButton.onClick = () => this.game.changeScene(SCENE.SETTINGS);
+
+        this.startButton.mount(sceneEl);
+        this.descButton.mount(sceneEl);
+        this.rankingButton.mount(sceneEl);
+        this.settingsButton.mount(sceneEl);
+
+        // BGM再生に必要な最初のユーザー操作待ちオーバーレイ。
+        // isGameActiveの切り替え自体はGame.setupActivationHandler(main.js)が
+        // window全体のpointerdownで一元管理しており、ここでは表示/非表示のみ担当する。
+        this.overlay = document.createElement('div');
+        this.overlay.style.position = 'absolute';
+        this.overlay.style.left = '0';
+        this.overlay.style.top = '0';
+        this.overlay.style.width = '100%';
+        this.overlay.style.height = '100%';
+        this.overlay.style.background = 'rgba(0, 0, 0, 0.7)';
+        this.overlay.style.color = 'white';
+        this.overlay.style.display = 'flex';
+        this.overlay.style.alignItems = 'center';
+        this.overlay.style.justifyContent = 'center';
+        this.overlay.style.fontSize = '96px';
+        this.overlay.style.cursor = 'pointer';
+        this.overlay.textContent = '画面をクリックしてください';
+        sceneEl.appendChild(this.overlay);
+
+        this.updateOverlayVisibility();
+    }
+
+    updateOverlayVisibility() {
+        if (this.game.isGameActive && this.overlay) {
+            this.overlay.remove();
+            this.overlay = null;
+        }
     }
 
     update() {
-        if (!this.game.isGameActive) {
-            if (this.game.inputHandler.isActivated()) {
-                this.game.isGameActive = true;
-                soundPlayer.playBGM('home_bgm');
-            }
-            return;
-        }
-
-        if (this.startButton.update(this.game.mouse)) this.game.changeScene(SCENE.INSTRUMENT_SELECT);
-        if (this.rankingButton.update(this.game.mouse)) this.game.changeScene(SCENE.RANKING);
-        if (this.descButton.update(this.game.mouse)) this.game.changeScene(SCENE.GAME_DESCRIPTION);
-        if (this.settingsButton.update(this.game.mouse)) this.game.changeScene(SCENE.SETTINGS);
+        this.updateOverlayVisibility();
     }
 
-    draw() {
-        const ctx = this.game.ctx;
-        const { width, height } = this.game.canvas;
-
-        drawBackground(ctx, this.backgroundImage, width, height);
-
-        if (!this.game.isGameActive) {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            ctx.fillRect(0, 0, width, height);
-            ctx.fillStyle = 'white';
-            ctx.font = `${FONT_SIZE.LARGE}px ${FONT_FAMILY}`;
-            ctx.textAlign = 'center';
-            ctx.fillText('画面をクリックしてください', width / 2, height / 2);
-        } else {
-            if (this.logoImage.complete && this.logoImage.naturalHeight !== 0) {
-                ctx.drawImage(this.logoImage, this.logoX, this.logoY, this.logoWidth, this.logoHeight);
-            }
-            this.startButton.draw(ctx);
-            this.rankingButton.draw(ctx);
-            this.descButton.draw(ctx);
-            this.settingsButton.draw(ctx);
-        }
+    destroy() {
+        const sceneEl = this.game.sceneElements[SCENE.MAIN];
+        sceneEl.innerHTML = '';
     }
 }

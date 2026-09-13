@@ -1,64 +1,42 @@
-import { FONT_SIZE, FONT_FAMILY, SELECTED_BUTTON_COLOR, SELECTED_BUTTON_HOVER_COLOR, DEFAULT_BUTTON_COLOR, DEFAULT_BUTTON_HOVER_COLOR } from '../config.js';
 import { soundPlayer } from '../soundPlayer.js';
 
+// Canvas座標(x, y, width, height)をそのままpxとして使えるDOMボタンを生成する
 export class Button {
-    constructor(x, y, width, height, text, color = DEFAULT_BUTTON_COLOR, hoverColor = DEFAULT_BUTTON_HOVER_COLOR, clickSoundKey = "score", clickSoundType = "gameSound") {
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
-        this.text = text;
-        this.color = color;
-        this.hoverColor = hoverColor;
-        this.isHovered = false;
-        this.isHighlighted = false; // 追加
-        this.clickSoundKey = clickSoundKey;
-        this.clickSoundType = clickSoundType; // 追加
+    constructor(x, y, width, height, text, { clickSoundKey = 'score', clickSoundType = 'gameSound' } = {}) {
+        this.el = document.createElement('button');
+        this.el.className = 'game-button';
+        this.el.type = 'button';
+        this.el.textContent = text;
+        this.setRect(x, y, width, height);
+
+        this.el.addEventListener('click', () => {
+            if (this.el.disabled) return;
+            if (clickSoundType === 'gameSound') soundPlayer.playGameSound(clickSoundKey);
+            else if (clickSoundType === 'instrumentSound') soundPlayer.playSound(clickSoundKey);
+            if (this.onClick) this.onClick();
+        });
     }
 
-    update(mouse) {
-        if (mouse.x >= this.x && mouse.x <= this.x + this.width &&
-            mouse.y >= this.y && mouse.y <= this.y + this.height) {
-            this.isHovered = true;
-            if (mouse.clicked) {
-                // clickSoundType に応じて適切なサウンド再生メソッドを呼び出す
-                if (this.clickSoundType === "gameSound") {
-                    soundPlayer.playGameSound(this.clickSoundKey);
-                } else if (this.clickSoundType === "instrumentSound") {
-                    soundPlayer.playSound(this.clickSoundKey);
-                }
-                return true; // ボタンがクリックされた
-            }
-        } else {
-            this.isHovered = false;
-        }
-        return false; // ボタンはクリックされなかった
+    setRect(x, y, width, height) {
+        this.el.style.left = `${x}px`;
+        this.el.style.top = `${y}px`;
+        this.el.style.width = `${width}px`;
+        this.el.style.height = `${height}px`;
     }
 
-    draw(ctx, scale = 1) {
-        ctx.save(); // 現在の描画状態を保存
+    setSelected(isSelected) {
+        this.el.classList.toggle('selected', isSelected);
+    }
 
-        // ボタンを描画
-        let currentColor = this.color;
-        let currentHoverColor = this.hoverColor;
+    setEnabled(isEnabled) {
+        this.el.disabled = !isEnabled;
+    }
 
-        if (this.isHighlighted) {
-            currentColor = SELECTED_BUTTON_COLOR;
-            currentHoverColor = SELECTED_BUTTON_HOVER_COLOR;
-        }
+    mount(parent) {
+        parent.appendChild(this.el);
+    }
 
-        ctx.fillStyle = this.isHovered ? currentHoverColor : currentColor;
-        ctx.fillRect(this.x, this.y, this.width, this.height);
-
-        // テキストを描画
-        ctx.fillStyle = '#fff';
-        // フォントサイズにスケールを適用
-        const scaledFontSize = FONT_SIZE.MEDIUM;
-        ctx.font = `${scaledFontSize}px ${FONT_FAMILY}`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(this.text, this.x + this.width / 2, this.y + this.height / 2);
-
-        ctx.restore(); // 保存した描画状態を復元
+    destroy() {
+        this.el.remove();
     }
 }
