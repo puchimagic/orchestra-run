@@ -2,7 +2,7 @@ import { SCENE, FONT_SIZE } from '../config.js';
 import { Button } from '../ui/button.js';
 import { VolumeSlider } from '../ui/volume_slider.js';
 import { soundPlayer } from '../soundPlayer.js';
-import { setSceneBackground } from '../ui/scene_utils.js';
+import { setSceneBackground, createCenteredText } from '../ui/scene_utils.js';
 
 export class SettingsScene {
     constructor(game) {
@@ -24,16 +24,7 @@ export class SettingsScene {
         const sectionTitleLineHeight = 40;
         const sliderTextSpacing = 40;
 
-        const title = document.createElement('div');
-        title.textContent = '設定';
-        title.style.position = 'absolute';
-        title.style.left = '0';
-        title.style.top = '70px';
-        title.style.width = '100%';
-        title.style.textAlign = 'center';
-        title.style.fontSize = `${FONT_SIZE.LARGE}px`;
-        title.style.color = 'black';
-        sceneEl.appendChild(title);
+        createCenteredText(sceneEl, '設定', { top: 70, fontSize: FONT_SIZE.LARGE });
 
         // --- 左セクション (音量) ---
         const leftColumnCenterX = columnWidth / 2;
@@ -41,7 +32,7 @@ export class SettingsScene {
         const leftSectionStartX = leftColumnCenterX - sliderWidth / 2;
 
         let currentYLeft = 200 + mainTitleLineHeight + elementPadding / 2;
-        this.appendSectionTitle(sceneEl, '音量調整', leftColumnCenterX, currentYLeft);
+        createCenteredText(sceneEl, '音量調整', { top: currentYLeft, fontSize: FONT_SIZE.MEDIUM, width: 500, centerX: leftColumnCenterX });
         currentYLeft += sectionTitleLineHeight + elementPadding + sliderTextSpacing;
 
         this.bgmSlider = new VolumeSlider(leftSectionStartX, currentYLeft, sliderWidth, 'BGM音量', soundPlayer.bgmVolume, (v) => {
@@ -74,7 +65,7 @@ export class SettingsScene {
         const centerSectionStartX = centerColumnCenterX - buttonWidth / 2;
 
         let currentYCenter = 200 + mainTitleLineHeight + elementPadding / 2;
-        this.appendSectionTitle(sceneEl, '入力方法', centerColumnCenterX, currentYCenter);
+        createCenteredText(sceneEl, '入力方法', { top: currentYCenter, fontSize: FONT_SIZE.MEDIUM, width: 500, centerX: centerColumnCenterX });
         currentYCenter += sectionTitleLineHeight + elementPadding;
 
         this.keyboardButton = new Button(centerSectionStartX, currentYCenter, buttonWidth, buttonHeight, 'キーボード');
@@ -102,7 +93,7 @@ export class SettingsScene {
         const rightSectionStartX = rightColumnCenterX - usernameInputWidth / 2;
 
         let currentYRight = 200 + mainTitleLineHeight + elementPadding / 2;
-        this.appendSectionTitle(sceneEl, 'ユーザー名', rightColumnCenterX, currentYRight);
+        createCenteredText(sceneEl, 'ユーザー名', { top: currentYRight, fontSize: FONT_SIZE.MEDIUM, width: 500, centerX: rightColumnCenterX });
         currentYRight += sectionTitleLineHeight + elementPadding;
 
         this.usernameInput = document.createElement('input');
@@ -129,20 +120,6 @@ export class SettingsScene {
         );
         this.backButton.onClick = () => this.game.changeScene(SCENE.MAIN);
         this.backButton.mount(sceneEl);
-    }
-
-    appendSectionTitle(sceneEl, text, centerX, y) {
-        const width = 500;
-        const el = document.createElement('div');
-        el.textContent = text;
-        el.style.position = 'absolute';
-        el.style.left = `${centerX - width / 2}px`;
-        el.style.top = `${y}px`;
-        el.style.width = `${width}px`;
-        el.style.textAlign = 'center';
-        el.style.fontSize = `${FONT_SIZE.MEDIUM}px`;
-        el.style.color = 'black';
-        sceneEl.appendChild(el);
     }
 
     updateInputMethodHighlight() {

@@ -74,7 +74,7 @@ export class Player {
     handleKeyDown(e) { this.keys[e.code] = true; }
     handleKeyUp(e) { this.keys[e.code] = false; }
 
-    update(platforms, trees, currentScrollSpeed) {
+    update(platforms, trees, currentScrollSpeed, cameraX) {
         if (typeof currentScrollSpeed !== 'undefined') {
             const speedOffset = currentScrollSpeed - INITIAL_SCROLL_SPEED;
             this.moveSpeed = PLAYER_INITIAL_SPEED + (speedOffset * PLAYER_SPEED_INCREASE_RATE);
@@ -106,10 +106,10 @@ export class Player {
         let canMoveLeft = true;
 
         // ステージ左端との衝突チェック
-        if (this.x + this.vx < this.game.currentScene.stage.cameraX) {
+        if (this.x + this.vx < cameraX) {
             canMoveLeft = false;
             this.vx = 0; // 左端にいる場合は左への移動をキャンセル
-            this.x = this.game.currentScene.stage.cameraX; // 左端に固定
+            this.x = cameraX; // 左端に固定
         }
 
         // 木との衝突を予測して移動を制限
@@ -152,7 +152,7 @@ export class Player {
         let rightTreeCollision = false;
 
         // ステージ左端との衝突
-        if (this.x <= this.game.currentScene.stage.cameraX) {
+        if (this.x <= cameraX) {
             leftTreeCollision = true;
         }
 

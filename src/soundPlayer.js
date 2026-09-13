@@ -1,6 +1,48 @@
 import { INSTRUMENT_ORDER, INSTRUMENT_FOLDER_MAP } from './config.js';
 
-export class SoundPlayer {
+// 使い捨ての音源プール。loadSoundで動的に追加し、playSoundで再生するだけの軽量クラス。
+// GameSceneの演奏音や、楽器選択画面のプレビュー音など、任意の音源集合を管理するのに使う。
+export class SoundPool {
+  constructor(volume = 1.0) {
+    this.sounds = {};
+    this.volume = volume;
+  }
+
+  loadSound(name, path, volumeMultiplier = 1.0) {
+    const audio = new Audio(path);
+    audio.customMultiplier = volumeMultiplier;
+    audio.volume = Math.min(1.0, this.volume * volumeMultiplier);
+    this.sounds[name] = audio;
+  }
+
+  playSound(name) {
+    if (this.sounds[name]) {
+      this.sounds[name].currentTime = 0;
+      this.sounds[name].play();
+    }
+  }
+
+  setVolume(volume) {
+    this.volume = volume;
+    for (const sound of Object.values(this.sounds)) {
+      if (sound) {
+        sound.volume = Math.min(1.0, this.volume * (sound.customMultiplier || 1.0));
+      }
+    }
+  }
+
+  stopAll() {
+    for (const sound of Object.values(this.sounds)) {
+      if (sound) {
+        sound.pause();
+        sound.currentTime = 0;
+      }
+    }
+  }
+}
+
+// 固定効果音・BGMを管理するグローバルシングルトン。
+export class GameAudioManager {
   constructor() {
     this.bgmVolume      = this._loadVolume('bgmVolume', 0.5);
     this.instrumentVolume = this._loadVolume('instrumentVolume', 1.0);
@@ -27,13 +69,14 @@ export class SoundPlayer {
     this.gameSounds.home_bgm.loop = true;
     this.gameSounds.game_bgm.loop = true;
 
-    this.sounds = {};
     this.currentBGM = null;
 
+    // 楽器選択画面のプレビュー再生用に、各楽器のtrack01のみを保持するプール
+    this.previewPool = new SoundPool(this.instrumentVolume);
     INSTRUMENT_ORDER.forEach(instrumentName => {
       const folderName = INSTRUMENT_FOLDER_MAP[instrumentName];
       if (folderName) {
-        this.loadSound(`${instrumentName}_track01`, `./assets/sound/${folderName}/track01.wav`);
+        this.previewPool.loadSound(`${instrumentName}_track01`, `./assets/sound/${folderName}/track01.wav`);
       }
     });
   }
@@ -57,11 +100,7 @@ export class SoundPlayer {
 
   setInstrumentVolume(volume) {
     this.instrumentVolume = this._clampVolume(volume);
-    for (const sound of Object.values(this.sounds)) {
-      if (sound) {
-        sound.volume = Math.min(1.0, this.instrumentVolume * (sound.customMultiplier || 1.0));
-      }
-    }
+    this.previewPool.setVolume(this.instrumentVolume);
     localStorage.setItem('instrumentVolume', this.instrumentVolume);
   }
 
@@ -102,28 +141,14 @@ export class SoundPlayer {
     }
   }
 
+  // 楽器選択画面などで使うプレビュー音の再生（例: 'ギター_track01'）
   playSound(name) {
-    if (this.sounds[name]) {
-      this.sounds[name].currentTime = 0;
-      this.sounds[name].play();
-    }
-  }
-
-  loadSound(name, path, volumeMultiplier = 1.0) {
-    const audio = new Audio(path);
-    audio.customMultiplier = volumeMultiplier;
-    audio.volume = Math.min(1.0, this.instrumentVolume * volumeMultiplier);
-    this.sounds[name] = audio;
+    this.previewPool.playSound(name);
   }
 
   stopAllSounds() {
     this.stopBGM();
-    for (const sound of Object.values(this.sounds)) {
-      if (sound) {
-        sound.pause();
-        sound.currentTime = 0;
-      }
-    }
+    this.previewPool.stopAll();
     for (const [key, sound] of Object.entries(this.gameSounds)) {
       if (!key.endsWith('_bgm') && sound) {
         sound.pause();
@@ -133,4 +158,4 @@ export class SoundPlayer {
   }
 }
 
-export const soundPlayer = new SoundPlayer();
+export const soundPlayer = new GameAudioManager();

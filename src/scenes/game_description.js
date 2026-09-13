@@ -1,6 +1,6 @@
 import { SCENE, FONT_SIZE } from '../config.js';
 import { Button } from '../ui/button.js';
-import { setSceneBackground } from '../ui/scene_utils.js';
+import { setSceneBackground, createCenteredText } from '../ui/scene_utils.js';
 
 export class GameDescriptionScene {
     constructor(game) {
@@ -64,16 +64,7 @@ export class GameDescriptionScene {
         sceneEl.innerHTML = '';
         setSceneBackground(sceneEl, 'assets/img/bg_title.png');
 
-        const title = document.createElement('div');
-        title.textContent = 'あそびかた';
-        title.style.position = 'absolute';
-        title.style.left = '0';
-        title.style.top = '70px';
-        title.style.width = '100%';
-        title.style.textAlign = 'center';
-        title.style.fontSize = `${FONT_SIZE.MEDIUM}px`;
-        title.style.color = 'black';
-        sceneEl.appendChild(title);
+        createCenteredText(sceneEl, 'あそびかた', { top: 70, fontSize: FONT_SIZE.MEDIUM });
 
         this.contentEl = document.createElement('div');
         this.contentEl.style.position = 'absolute';

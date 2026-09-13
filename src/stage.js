@@ -253,8 +253,10 @@ class Platform {
 }
 
 export class Stage {
-    constructor(game) {
+    constructor(game, { onTreeSpawned, onGapCreated } = {}) {
         this.game = game;
+        this.onTreeSpawned = onTreeSpawned || (() => {});
+        this.onGapCreated = onGapCreated || (() => {});
 
         this.worldEl = document.createElement('div');
         this.worldEl.style.position = 'absolute';
@@ -336,7 +338,7 @@ export class Stage {
                     const tree = new Tree(treeX, y - treeHeight, treeWidth, treeHeight, this.treeImage, true, this.stumpImage);
                     tree.mount(this.worldEl);
                     this.trees.push(tree);
-                    this.game.currentScene.requestTreeBreakEvent(tree);
+                    this.onTreeSpawned(tree);
                 } else {
                     const treeHeight = BLOCK_SIZE * STUMP_HEIGHT_IN_BLOCKS;
                     const treeWidth = BLOCK_SIZE * STUMP_WIDTH_IN_BLOCKS;
@@ -362,7 +364,7 @@ export class Stage {
         const newX = this.lastPlatformX + gapInPixels;
         const newY = this.game.baseHeight - (PLATFORM_HEIGHT_IN_BLOCKS * BLOCK_SIZE);
         if (gapInBlocks > PLAYER_MAX_JUMP_IN_BLOCKS) {
-            this.game.currentScene.requestScaffold(this.lastPlatformX, gapInPixels);
+            this.onGapCreated(this.lastPlatformX, gapInPixels);
         }
         this.createPlatform(newX, newY, widthInBlocks);
     }

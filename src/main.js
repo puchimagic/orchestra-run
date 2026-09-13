@@ -110,7 +110,7 @@ class Game {
     }
 
     init() {
-        this.inputHandler = new InputHandler();
+        this.playerInput = new InputHandler();
         this.scenes[SCENE.MAIN] = new MainScene(this);
         this.scenes[SCENE.GAME_DESCRIPTION] = new GameDescriptionScene(this);
         this.scenes[SCENE.INSTRUMENT_SELECT] = new InstrumentSelectScene(this);

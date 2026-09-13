@@ -1,4 +1,3 @@
-const STORAGE_KEY = 'superGeminiRunnerHighScores';
 const MAX_SCORES = 50; // ランキングに保存する最大数
 
 export class ScoreManager {
@@ -34,16 +33,12 @@ export class ScoreManager {
     async addScore(score, instrument) {
         const scores = await this.getScores();
 
-        console.log('Current username in ScoreManager.addScore:', this.game.username);
-
         const newScore = {
             score: score,
             instrument: instrument,
             date: this.getFormattedDate(),
             username: this.game.username || "guest" // ← ゲスト補完
         };
-
-        console.log('Created newScore object:', newScore);
 
         scores.push(newScore);
 
@@ -54,12 +49,9 @@ export class ScoreManager {
     }
 
     async sendJson(jsonData) {
-        console.log('Attempting to send JSON data:', jsonData);
-
         try {
             const res = await fetch('https://xy4mb3of79.execute-api.ap-southeast-2.amazonaws.com/getSignedUrl?key=test.json');
             const { url } = await res.json();
-            console.log('Received signed URL:', url);
 
             const putRes = await fetch(url, {
                 method: 'PUT',
@@ -69,9 +61,7 @@ export class ScoreManager {
                 body: jsonData
             });
 
-            if (putRes.ok) {
-                console.log('JSON data successfully sent to S3!');
-            } else {
+            if (!putRes.ok) {
                 console.error('Failed to send JSON data to S3:', putRes.status, putRes.statusText);
                 const errorBody = await putRes.text();
                 console.error('S3 PUT response body:', errorBody);

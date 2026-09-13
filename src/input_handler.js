@@ -67,19 +67,6 @@ export class InputHandler {
         this.pressedKeys.delete(e.code);
     }
 
-    isActionPressed(action) {
-        return this.actionsDown.has(action);
-    }
-
-    isActionDown(action) {
-        const physicalKey = this.actionMap[action];
-        return this.pressedKeys.has(physicalKey);
-    }
-
-    isKeyPressed(keyCode) {
-        return this.pressedKeys.has(keyCode);
-    }
-
     getInstrumentPhysicalKeys() {
         return new Set(Object.keys(this.activeKeyMap));
     }

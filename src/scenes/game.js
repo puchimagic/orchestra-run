@@ -1,36 +1,27 @@
 import {
     SCENE, FONT_SIZE, FONT_FAMILY, BLOCK_SIZE, PLATFORM_HEIGHT_IN_BLOCKS,
     KEYBOARD_INSTRUMENT_CONFIG, GAMEPAD_INSTRUMENT_CONFIG,
+    INSTRUMENT_FOLDER_MAP, INSTRUMENT_ICON_MAP,
     INITIAL_SCROLL_SPEED, SPEED_INCREASE_INTERVAL, PLAYER_MAX_JUMP_IN_BLOCKS
 } from '../config.js';
 import { Player } from '../player.js';
 import { Stage, Tree } from '../stage.js';
 import { ScaffoldBlock } from '../scaffold.js';
 import { InputHandler } from '../input_handler.js';
-import { SoundPlayer, soundPlayer } from '../soundPlayer.js';
+import { SoundPool, soundPlayer } from '../soundPlayer.js';
 import { setSceneBackground } from '../ui/scene_utils.js';
 
 export class GameScene {
     constructor(game, selectedInstrument) {
         this.game = game;
         this.selectedInstrument = selectedInstrument;
-        this.player2Input = new InputHandler();
+        this.instrumentInput = new InputHandler();
         this.activeInstrumentConfig = null;
 
-        // SoundPlayerのインスタンスを生成
-        this.instrumentSoundPlayer = new SoundPlayer();
+        // 選択した楽器の演奏音専用の音源プール（BGM/固定効果音を管理するsoundPlayerとは別物）
+        this.instrumentSounds = new SoundPool();
 
-        // 日本語の楽器名と英語のディレクトリ名のマッピングをプロパティとして保持
-        this.instrumentDirMap = {
-            "トライアングル": "triangle",
-            "タンバリン": "tambourie",
-            "太鼓": "taiko",
-            "ドラム": "drum",
-            "ピアノ": "piano",
-            "ギター": "guitar"
-        };
         this.instrumentDirName = null;
-
         this.instrumentImageSrc = null;
 
         // 木の必要キー表示用のDOM要素を Tree -> <span> でひもづけて管理する
@@ -38,10 +29,10 @@ export class GameScene {
     }
 
     init(data) {
-        this.instrumentName = this.selectedInstrument || 'トライアングル';
+        this.instrumentName = data?.instrument || this.selectedInstrument || 'トライアングル';
 
         const useGamepadForScaffold = this.game.inputMethod === 'gamepad';
-        this.player2Input.setInstrumentKeyMaps(
+        this.instrumentInput.setInstrumentKeyMaps(
             KEYBOARD_INSTRUMENT_CONFIG,
             GAMEPAD_INSTRUMENT_CONFIG,
             useGamepadForScaffold
@@ -63,7 +54,10 @@ export class GameScene {
         setSceneBackground(sceneEl, 'assets/img/bg_game.png');
 
         // ワールドコンテナ（スクロールする領域）
-        this.stage = new Stage(this.game);
+        this.stage = new Stage(this.game, {
+            onTreeSpawned: (tree) => this.requestTreeBreakEvent(tree),
+            onGapCreated: (holeX, holeWidth) => this.requestScaffold(holeX, holeWidth),
+        });
         this.stage.mount(sceneEl);
 
         this.scaffolds = [];
@@ -72,11 +66,11 @@ export class GameScene {
 
         this.stage.init();
 
-        this.player = new Player(this.game, this.game.inputHandler);
+        this.player = new Player(this.game, this.game.playerInput);
         this.player.mount(this.stage.worldEl);
         this.player.init();
 
-        this.player2Input.init();
+        this.instrumentInput.init();
 
         // --- 画面固定UI（スクロールしない） ---
         this.scoreEl = document.createElement('div');
@@ -88,15 +82,7 @@ export class GameScene {
         this.scoreEl.style.fontSize = `${FONT_SIZE.MEDIUM}px`;
         sceneEl.appendChild(this.scoreEl);
 
-        const instrumentImageMap = {
-            "トライアングル": "assets/img/instrument_triangle.png",
-            "タンバリン": "assets/img/instrument_tambourine.png",
-            "太鼓": "assets/img/instrument_taiko.png",
-            "ドラム": "assets/img/instrument_drum.png",
-            "ピアノ": "assets/img/instrument_piano.png",
-            "ギター": "assets/img/gita.png"
-        };
-        this.instrumentImageSrc = instrumentImageMap[this.instrumentName] || "";
+        this.instrumentImageSrc = INSTRUMENT_ICON_MAP[this.instrumentName] || '';
 
         this.instrumentIconEl = document.createElement('img');
         this.instrumentIconEl.src = this.instrumentImageSrc;
@@ -137,13 +123,13 @@ export class GameScene {
 
     // 楽器の音源をロードするメソッド
     loadInstrumentSounds() {
-        const instrumentConfig = KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName];
+        const instrumentConfig = this.instrument;
         if (!instrumentConfig) {
             console.warn(`楽器設定が見つかりません: ${this.instrumentName}`);
             return;
         }
 
-        this.instrumentDirName = this.instrumentDirMap[this.instrumentName]; // プロパティに設定
+        this.instrumentDirName = INSTRUMENT_FOLDER_MAP[this.instrumentName];
         if (!this.instrumentDirName) {
             console.warn(`楽器のディレクトリ名が見つかりません: ${this.instrumentName}`);
             return;
@@ -156,14 +142,14 @@ export class GameScene {
             for (let i = 0; i < instrumentConfig.maxChord; i++) {
                 const soundName = `${this.instrumentDirName}_track${i + 1}`;
                 const soundPath = `assets/sound/${this.instrumentDirName}/track0${i + 1}.wav`;
-                this.instrumentSoundPlayer.loadSound(soundName, soundPath, volumeMultiplier);
+                this.instrumentSounds.loadSound(soundName, soundPath, volumeMultiplier);
             }
         } else {
             // その他の楽器の場合 (既存のロジック)
             instrumentConfig.keys.forEach((key, index) => {
                 const soundName = `${this.instrumentDirName}_track${index + 1}`;
                 const soundPath = `assets/sound/${this.instrumentDirName}/track0${index + 1}.wav`;
-                this.instrumentSoundPlayer.loadSound(soundName, soundPath, volumeMultiplier);
+                this.instrumentSounds.loadSound(soundName, soundPath, volumeMultiplier);
             });
         }
     }
@@ -266,11 +252,11 @@ export class GameScene {
         this.stage.update(deltaTime);
         this.scaffolds.forEach(s => s.update());
 
-        this.handlePlayer2Input();
+        this.handleInstrumentInput();
 
         const solidScaffolds = this.scaffolds.filter(s => s.state === 'SOLID');
         const allPlatforms = [...this.stage.platforms, ...solidScaffolds];
-        this.player.update(allPlatforms, this.stage.trees, newScrollSpeed);
+        this.player.update(allPlatforms, this.stage.trees, newScrollSpeed, this.stage.cameraX);
 
         const expiredScaffolds = this.scaffolds.filter(s => s.state === 'EXPIRED' || s.x + s.width <= this.stage.cameraX);
         expiredScaffolds.forEach(s => s.destroy());
@@ -283,7 +269,7 @@ export class GameScene {
         });
 
         this.checkGameOver();
-        this.player2Input.clearPressedActions();
+        this.instrumentInput.clearPressedActions();
 
         this.updateView();
     }
@@ -291,20 +277,20 @@ export class GameScene {
     // 要求されたキー入力が過不足なく行われているかをチェックするヘルパーメソッド
     isChordPerfectlyMatched(requiredKeys) {
         const requiredPhysicalKeys = new Set(
-            requiredKeys.map(key => this.player2Input.actionMap[`ACTION_${key}`]).filter(Boolean)
+            requiredKeys.map(key => this.instrumentInput.actionMap[`ACTION_${key}`]).filter(Boolean)
         );
-        const instrumentPhysicalKeys = this.player2Input.getInstrumentPhysicalKeys();
+        const instrumentPhysicalKeys = this.instrumentInput.getInstrumentPhysicalKeys();
         const pressedInstrumentKeys = new Set(
-            [...this.player2Input.pressedKeys].filter(k => instrumentPhysicalKeys.has(k))
+            [...this.instrumentInput.pressedKeys].filter(k => instrumentPhysicalKeys.has(k))
         );
         return pressedInstrumentKeys.size === requiredPhysicalKeys.size &&
                [...requiredPhysicalKeys].every(k => pressedInstrumentKeys.has(k));
     }
 
-    handlePlayer2Input() {
+    handleInstrumentInput() {
         // 1. 楽器キーが何か押されているかをチェック
-        const instrumentPhysicalKeys = this.player2Input.getInstrumentPhysicalKeys();
-        const instrumentKeysPressed = Array.from(this.player2Input.pressedKeys).some(key => instrumentPhysicalKeys.has(key));
+        const instrumentPhysicalKeys = this.instrumentInput.getInstrumentPhysicalKeys();
+        const instrumentKeysPressed = Array.from(this.instrumentInput.pressedKeys).some(key => instrumentPhysicalKeys.has(key));
 
         // 2. 楽器キーが一つも押されていなければ、ロックを解除して処理を終了
         if (!instrumentKeysPressed) {
@@ -347,19 +333,18 @@ export class GameScene {
                 // ゲームパッド選択時は楽器音を鳴らさない
                 if (this.game.inputMethod !== 'gamepad') {
                     if (this.instrumentName === 'ギター') {
-                        const trackNumber = Math.floor(Math.random() * KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName].maxChord);
-                        if (trackNumber >= 0 && trackNumber < KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName].maxChord) {
+                        const trackNumber = Math.floor(Math.random() * this.instrument.maxChord);
+                        if (trackNumber >= 0 && trackNumber < this.instrument.maxChord) {
                             const soundName = `${this.instrumentDirName}_track${trackNumber + 1}`;
-                            this.instrumentSoundPlayer.playSound(soundName);
+                            this.instrumentSounds.playSound(soundName);
                         }
                     } else {
                         // 押されたキーのインデックスに対応するトラックを再生（ピアノ含む全楽器共通）
                         requiredKeys.forEach(key => {
-                            const instrumentConfig = KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName];
-                            const keyIndex = instrumentConfig.keys.indexOf(key);
+                            const keyIndex = this.instrument.keys.indexOf(key);
                             if (keyIndex !== -1) {
                                 const soundName = `${this.instrumentDirName}_track${keyIndex + 1}`;
-                                this.instrumentSoundPlayer.playSound(soundName);
+                                this.instrumentSounds.playSound(soundName);
                             }
                         });
                     }
@@ -401,7 +386,7 @@ export class GameScene {
         }
 
         this.player.destroy();
-        this.player2Input.destroy();
+        this.instrumentInput.destroy();
         this.game.changeScene(SCENE.GAME_OVER, { score: this.score, instrument: this.instrumentName });
     }
 

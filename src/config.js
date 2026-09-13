@@ -117,3 +117,13 @@ export const INSTRUMENT_FOLDER_MAP = {
     'ピアノ': 'piano',
     'ギター': 'guitar',
 };
+
+// 日本語の楽器名とゲーム画面アイコン画像パスのマッピング
+export const INSTRUMENT_ICON_MAP = {
+    'トライアングル': 'assets/img/instrument_triangle.png',
+    'タンバリン': 'assets/img/instrument_tambourine.png',
+    '太鼓': 'assets/img/instrument_taiko.png',
+    'ドラム': 'assets/img/instrument_drum.png',
+    'ピアノ': 'assets/img/instrument_piano.png',
+    'ギター': 'assets/img/gita.png',
+};
