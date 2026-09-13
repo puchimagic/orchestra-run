@@ -116,13 +116,27 @@ class Game {
 
     getScaledMousePos(event) {
         const rect = this.canvas.getBoundingClientRect();
-       
+
         const clientXInCanvas = event.clientX - rect.left - this.canvasOffsetX;
         const clientYInCanvas = event.clientY - rect.top - this.canvasOffsetY;
 
         return {
             x: clientXInCanvas / this.scale,
             y: clientYInCanvas / this.scale
+        };
+    }
+
+    // Canvas内部座標(x, y, width, height)を、Canvas上に重ねるDOM要素用の
+    // 画面上の位置・サイズ（CSSピクセル）に変換する
+    // canvas.getBoundingClientRect()は、canvas.style.width/heightで設定した
+    // レターボックス考慮後の実サイズ・実位置をすでに返すため、canvasOffsetは加算しない
+    getScreenRect(x, y, width, height) {
+        const rect = this.canvas.getBoundingClientRect();
+        return {
+            left: rect.left + x * this.scale,
+            top: rect.top + y * this.scale,
+            width: width * this.scale,
+            height: height * this.scale,
         };
     }
 

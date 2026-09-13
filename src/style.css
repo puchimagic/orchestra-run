@@ -16,3 +16,14 @@ canvas#gameCanvas {
     height: 100vh;
     object-fit: contain;
 }
+
+/* Canvas上に重ねるDOM要素（日本語入力などブラウザ標準機能が必要なUI用） */
+#usernameInput {
+    position: absolute;
+    box-sizing: border-box;
+    border: none;
+    outline: none;
+    padding: 0 10px;
+    font-family: Arial, sans-serif;
+    background: transparent;
+}

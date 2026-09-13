@@ -15,18 +15,21 @@ export class SettingsScene {
         this.inputTitleX = 0;
         this.usernameTitleX = 0;
 
-        // ユーザー名関連
-        this.username = 'guest';
-        this.isEditingUsername = false;
+        // ユーザー名関連（実際の入力欄はDOMのinputに任せ、IME変換等をブラウザに委譲する）
         this.inputRect = { x: 0, y: 0, width: 0, height: 0 };
-        this.handleKeyDown = this.handleKeyDown.bind(this);
+        this.usernameInput = document.getElementById('usernameInput');
+        this.handleUsernameInput = this.handleUsernameInput.bind(this);
+        this.handleUsernameBlur = this.handleUsernameBlur.bind(this);
     }
 
     init() {
         this.backgroundImage = loadImage('assets/img/bg_title.png');
 
         // gameオブジェクトから現在のユーザー名を取得して初期化
-        this.username = this.game.username;
+        this.usernameInput.value = this.game.username;
+        this.usernameInput.style.display = 'block';
+        this.usernameInput.addEventListener('input', this.handleUsernameInput);
+        this.usernameInput.addEventListener('blur', this.handleUsernameBlur);
 
         // 音量スライダー (3種類に修正)
         this.bgmSlider = new VolumeSlider(0, 0, 500, 40, 'BGM音量', soundPlayer.bgmVolume, (v) => {
@@ -50,9 +53,6 @@ export class SettingsScene {
 
         // 戻るボタン
         this.backButton = new Button(0, 0, 500, 100, '戻る');
-
-        // キーボードイベントリスナー
-        document.addEventListener('keydown', this.handleKeyDown);
 
         this.onResize();
     }
@@ -133,6 +133,7 @@ export class SettingsScene {
             width: usernameInputWidth,
             height: usernameInputHeight
         };
+        this.updateUsernameInputPosition();
 
         // --- 戻るボタン (下部中央) ---
         const backButtonWidth = 400;
@@ -143,21 +144,41 @@ export class SettingsScene {
         this.backButton.y = height - this.backButton.height - 60;
     }
 
+    // ユーザー名inputをCanvas上のinputRectの位置・サイズに追従させる
+    updateUsernameInputPosition() {
+        const screenRect = this.game.getScreenRect(
+            this.inputRect.x, this.inputRect.y, this.inputRect.width, this.inputRect.height
+        );
+        const input = this.usernameInput;
+        input.style.left = `${screenRect.left}px`;
+        input.style.top = `${screenRect.top}px`;
+        input.style.width = `${screenRect.width}px`;
+        input.style.height = `${screenRect.height}px`;
+        input.style.fontSize = `${FONT_SIZE.MEDIUM * this.game.scale}px`;
+    }
+
+    handleUsernameInput() {
+        // 文字種の制限はブラウザのinput要素（IME変換含む）に委ね、ここでは保存のみ行う
+        this.game.username = this.usernameInput.value;
+        this.game.saveSettings();
+    }
+
+    handleUsernameBlur() {
+        if (this.usernameInput.value.trim() === '') {
+            this.usernameInput.value = 'guest';
+            this.game.username = 'guest';
+            this.game.saveSettings();
+        }
+    }
+
     update() {
         const mouse = this.game.mouse;
+        this.updateUsernameInputPosition();
 
         if (mouse.clicked) {
             if (this.bgmSlider.handleMouseDown(mouse.x, mouse.y)) this.activeSlider = this.bgmSlider;
             else if (this.instrumentSlider.handleMouseDown(mouse.x, mouse.y)) this.activeSlider = this.instrumentSlider;
             else if (this.gameSoundSlider.handleMouseDown(mouse.x, mouse.y)) this.activeSlider = this.gameSoundSlider;
-            // ユーザー名入力欄のクリック判定
-            else if (mouse.x >= this.inputRect.x && mouse.x <= this.inputRect.x + this.inputRect.width &&
-                     mouse.y >= this.inputRect.y && mouse.y <= this.inputRect.y + this.inputRect.height) {
-                this.isEditingUsername = true;
-            } else {
-                // スライダーでも入力欄でもない場所がクリックされたら、入力モードを解除
-                this.isEditingUsername = false;
-            }
         }
 
         if (!mouse.isDown && this.activeSlider) {
@@ -214,57 +235,24 @@ export class SettingsScene {
         this.gamepadButton.draw(ctx);
 
         // --- 右セクション (ユーザー名入力欄) ---
+        // 実際の入力ボックスはDOMのinput要素（updateUsernameInputPositionで追従）が描画するため、
+        // ここではCanvas上に枠だけ描いて位置の目印にする
         ctx.font = `${FONT_SIZE.MEDIUM}px ${FONT_FAMILY}`;
         ctx.textAlign = 'center';
         ctx.fillText('ユーザー名', this.usernameTitleX, this.usernameTitleY);
 
-        // ユーザー名入力ボックス
         ctx.strokeStyle = 'black';
         ctx.lineWidth = 2;
         ctx.strokeRect(this.inputRect.x, this.inputRect.y, this.inputRect.width, this.inputRect.height);
-
-        ctx.fillStyle = 'black';
-        ctx.font = `${FONT_SIZE.MEDIUM}px ${FONT_FAMILY}`;
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'middle';
-        let displayText = this.username;
-        if (this.isEditingUsername && Math.floor(Date.now() / 500) % 2 === 0) {
-            displayText += '|'; // カーソル
-        }
-        ctx.fillText(displayText, this.inputRect.x + 10, this.inputRect.y + this.inputRect.height / 2 + 8); // Y座標を微調整
 
         // --- 戻るボタン (中央揃え) ---
         this.backButton.draw(ctx);
     }
 
     destroy() {
-        document.removeEventListener('keydown', this.handleKeyDown);
-    }
-
-    handleKeyDown(e) {
-        if (!this.isEditingUsername) return;
-
-        let changed = false; // 変更があったかどうかのフラグ
-
-        if (e.key === 'Backspace') {
-            if (this.username.length > 0) {
-                this.username = this.username.slice(0, -1);
-                changed = true;
-            }
-        } else if (e.key.length === 1 && e.key.match(/^[a-zA-Z0-9_]$/)) { // 英数字とアンダースコアのみ許可
-            if (this.username.length < 8) { // 最大文字数制限を8に変更
-                this.username += e.key;
-                changed = true;
-            }
-        } else if (e.key === 'Enter') {
-            // Enterキーでの登録処理は不要になるため、入力モードを解除するのみ
-            this.isEditingUsername = false;
-        }
-
-        if (changed) {
-            // gameオブジェクトのユーザー名を更新し、保存
-            this.game.username = this.username;
-            this.game.saveSettings();
-        }
+        this.usernameInput.removeEventListener('input', this.handleUsernameInput);
+        this.usernameInput.removeEventListener('blur', this.handleUsernameBlur);
+        this.usernameInput.blur();
+        this.usernameInput.style.display = 'none';
     }
 }
