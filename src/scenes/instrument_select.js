@@ -46,7 +46,7 @@ export class InstrumentSelectScene {
 
             const config = KEYBOARD_INSTRUMENT_CONFIG[name];
             let infoText = `キー: ${config.keys.length}種`;
-            if (config.maxChord > 1) infoText += ` / 最大${config.maxChord}音`;
+            if (config.maxSimultaneousKeys > 1) infoText += ` / 最大${config.maxSimultaneousKeys}音同時`;
 
             const infoEl = document.createElement('div');
             infoEl.textContent = infoText;

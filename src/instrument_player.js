@@ -62,14 +62,8 @@ export class InstrumentPlayer {
 
     generateRequiredKeys() {
         const availableKeys = this.instrument.keys;
-        let numKeysToPress;
-        if (this.instrument.name === 'ギター') {
-            // 2から5の範囲でランダムな数を生成
-            numKeysToPress = 1 + Math.floor(Math.random() * 4); // 2, 3, 4, 5
-        }
-        else {
-            numKeysToPress = 1;
-        }
+        const maxSimultaneousKeys = this.instrument.maxSimultaneousKeys || 1;
+        const numKeysToPress = 1 + Math.floor(Math.random() * maxSimultaneousKeys);
         const shuffledKeys = [...availableKeys].sort(() => 0.5 - Math.random());
         return shuffledKeys.slice(0, numKeysToPress);
     }

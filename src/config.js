@@ -59,14 +59,15 @@ const INSTRUMENT_BASE_CONFIG = {
     'トライアングル': {
         name: 'トライアングル',      // 画面に表示される楽器名
         maxChord: 1,             // ギター演奏時に読み込む音声トラック数
+        maxSimultaneousKeys: 1,  // 演奏時に同時押しが要求されるキーの最大数
         multiplier: 1.0,         // 獲得スコアの倍率
         volumeMultiplier: 1.0    // 音量の補正倍率 (1.0が基準)
     },
-    'タンバリン':   { name: 'タンバリン',   maxChord: 1, multiplier: 1.1, volumeMultiplier: 3.0 },
-    '太鼓':         { name: '太鼓',         maxChord: 1, multiplier: 1.2, volumeMultiplier: 2.0 },
-    'ドラム':       { name: 'ドラム',       maxChord: 1, multiplier: 1.4, volumeMultiplier: 3.0 },
-    'ギター':       { name: 'ギター',       maxChord: 4, multiplier: 1.6, volumeMultiplier: 1.0 },
-    'ピアノ':       { name: 'ピアノ',       maxChord: 1, multiplier: 1.9, volumeMultiplier: 1.0 },
+    'タンバリン':   { name: 'タンバリン',   maxChord: 1, maxSimultaneousKeys: 1, multiplier: 1.1, volumeMultiplier: 3.0 },
+    '太鼓':         { name: '太鼓',         maxChord: 1, maxSimultaneousKeys: 1, multiplier: 1.2, volumeMultiplier: 2.0 },
+    'ドラム':       { name: 'ドラム',       maxChord: 1, maxSimultaneousKeys: 1, multiplier: 1.4, volumeMultiplier: 3.0 },
+    'ギター':       { name: 'ギター',       maxChord: 4, maxSimultaneousKeys: 2, multiplier: 1.6, volumeMultiplier: 1.0 },
+    'ピアノ':       { name: 'ピアノ',       maxChord: 1, maxSimultaneousKeys: 1, multiplier: 1.9, volumeMultiplier: 1.0 },
 };
 
 // キーボード演奏時のキー割り当て
