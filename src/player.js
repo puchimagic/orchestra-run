@@ -43,10 +43,29 @@ export class Player {
         this.el.style.top = '0';
         this.el.style.width = `${this.width}px`;
         this.el.style.height = `${this.height}px`;
-        this.el.style.backgroundSize = 'contain';
-        this.el.style.backgroundRepeat = 'no-repeat';
-        this.el.style.backgroundPosition = 'center';
-        this.currentImageSrc = null;
+
+        // background-imageの都度差し替えは、切り替え時にブラウザが
+        // 一瞬デコードし直すことがあり歩行アニメーション中にキャラが
+        // ちらつく原因になっていた。4枚の<img>を全部常時DOMに置いたまま
+        // display切り替えだけで見た目を変える方式にして、デコードの
+        // やり直しが起きないようにする。
+        this.imageEls = {};
+        [
+            ['wait', WAIT_IMG], ['jump', JUMP_IMG], ['walk', WALK_IMG], ['walk2', WALK_IMG2],
+        ].forEach(([key, src]) => {
+            const img = document.createElement('img');
+            img.src = src;
+            img.style.position = 'absolute';
+            img.style.left = '0';
+            img.style.top = '0';
+            img.style.width = '100%';
+            img.style.height = '100%';
+            img.style.objectFit = 'contain';
+            img.style.display = 'none';
+            this.el.appendChild(img);
+            this.imageEls[key] = img;
+        });
+        this.currentImageKey = null;
     }
 
     mount(parentEl) {
@@ -202,27 +221,23 @@ export class Player {
     }
 
     updateView() {
-        let currentImage;
+        let currentKey;
         if (this.isJumping) {
-            currentImage = JUMP_IMG;
+            currentKey = 'jump';
         }
         else if (this.isMoving) {
             this.walkFrame++;
-            if (Math.floor(this.walkFrame / this.walkAnimationSpeed) % 2 === 0) {
-                currentImage = WALK_IMG;
-            }
-            else {
-                currentImage = WALK_IMG2;
-            }
+            currentKey = Math.floor(this.walkFrame / this.walkAnimationSpeed) % 2 === 0 ? 'walk' : 'walk2';
         }
         else {
-            currentImage = WAIT_IMG;
+            currentKey = 'wait';
             this.walkFrame = 0;
         }
 
-        if (currentImage !== this.currentImageSrc) {
-            this.el.style.backgroundImage = `url('${currentImage}')`;
-            this.currentImageSrc = currentImage;
+        if (currentKey !== this.currentImageKey) {
+            if (this.currentImageKey) this.imageEls[this.currentImageKey].style.display = 'none';
+            this.imageEls[currentKey].style.display = 'block';
+            this.currentImageKey = currentKey;
         }
 
         const flip = this.facingDirection === -1 ? ' scaleX(-1)' : '';
