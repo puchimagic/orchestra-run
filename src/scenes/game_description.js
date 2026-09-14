@@ -87,22 +87,25 @@ export class GameDescriptionScene {
         this.pageIndicator.style.color = '#555';
         sceneEl.appendChild(this.pageIndicator);
 
-        const btnWidth = 400;
+        const btnWidth = 300;
         const btnHeight = 100;
-        const backBtnY = this.game.baseHeight - btnHeight - 60;
-        const backBtnX = (this.game.baseWidth - btnWidth) / 2;
-        this.backButton = new Button(backBtnX, backBtnY, btnWidth, btnHeight, '戻る');
+        const bottomBtnY = this.game.baseHeight - btnHeight - 60;
+        const sideMargin = 320;
+        const backBtnX = sideMargin;
+        this.backButton = new Button(backBtnX, bottomBtnY, btnWidth, btnHeight, '戻る');
         this.backButton.onClick = () => this.game.changeScene(SCENE.MAIN);
 
         const navBtnWidth = 100;
-        const navBtnHeight = 80;
-        const navBtnY = backBtnY - navBtnHeight - 60;
+        const navBtnHeight = 100;
         const navBtnMargin = 30;
+        const navBtnY = bottomBtnY;
         this.navBtnY = navBtnY;
         this.navBtnHeight = navBtnHeight;
 
-        this.prevButton = new Button(this.game.baseWidth / 2 - navBtnWidth - navBtnMargin - 50, navBtnY, navBtnWidth, navBtnHeight, '＜', { compact: true });
-        this.nextButton = new Button(this.game.baseWidth / 2 + navBtnMargin + 50, navBtnY, navBtnWidth, navBtnHeight, '＞', { compact: true });
+        const nextBtnX = this.game.baseWidth - sideMargin - navBtnWidth;
+        const prevBtnX = nextBtnX - navBtnMargin - navBtnWidth;
+        this.prevButton = new Button(prevBtnX, navBtnY, navBtnWidth, navBtnHeight, '＜', { compact: true });
+        this.nextButton = new Button(nextBtnX, navBtnY, navBtnWidth, navBtnHeight, '＞', { compact: true });
         this.prevButton.onClick = () => { if (this.currentPage > 0) { this.currentPage--; this.render(); } };
         this.nextButton.onClick = () => { if (this.currentPage < this.totalPages - 1) { this.currentPage++; this.render(); } };
 

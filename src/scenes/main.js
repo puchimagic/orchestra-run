@@ -12,8 +12,8 @@ export class MainScene {
         sceneEl.innerHTML = '';
         setSceneBackground(sceneEl, 'assets/img/bg_title.png');
 
-        const logoWidth = this.game.baseWidth * 0.6;
-        const logoTop = this.game.baseHeight * 0.02;
+        const logoWidth = this.game.baseWidth * 0.8;
+        const logoTop = 0;
 
         const logo = document.createElement('img');
         logo.src = 'assets/img/logo.png';
@@ -35,7 +35,7 @@ export class MainScene {
         const logoAspectRatio = 374 / 666; // assets/img/logo.png の height/width
         const logoHeight = logoWidth * logoAspectRatio;
         const logoBottom = logoTop + logoHeight;
-        const buttonsStartY = logoBottom + 10;
+        const buttonsStartY = logoBottom - 130;
 
         const leftColX = cx - btnWidth - gapX / 2;
         const rightColX = cx + gapX / 2;
