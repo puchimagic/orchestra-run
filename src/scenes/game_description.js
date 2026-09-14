@@ -98,19 +98,31 @@ export class GameDescriptionScene {
         const panelTop = 190;
         const panelBottom = this.game.baseHeight - 100 - 60 - 20;
 
+        // 角丸パネル(枠)と、実際にスクロールする内側の要素を分離する。
+        // 同じ要素に border-radius と overflow-y: auto を両方指定すると、
+        // スクロールバーが角丸を無視して描画されてしまうため。
+        this.panelEl = document.createElement('div');
+        this.panelEl.className = 'content-panel';
+        this.panelEl.style.position = 'absolute';
+        this.panelEl.style.left = '320px';
+        this.panelEl.style.top = `${panelTop}px`;
+        this.panelEl.style.width = '1280px';
+        this.panelEl.style.maxHeight = `${panelBottom - panelTop}px`;
+        this.panelEl.style.padding = '0';
+        this.panelEl.style.overflow = 'hidden';
+        sceneEl.appendChild(this.panelEl);
+
         this.contentEl = document.createElement('div');
-        this.contentEl.className = 'content-panel';
-        this.contentEl.style.position = 'absolute';
-        this.contentEl.style.left = '320px';
-        this.contentEl.style.top = `${panelTop}px`;
-        this.contentEl.style.width = '1280px';
+        this.contentEl.style.width = '100%';
         this.contentEl.style.maxHeight = `${panelBottom - panelTop}px`;
         this.contentEl.style.overflowY = 'auto';
+        this.contentEl.style.boxSizing = 'border-box';
+        this.contentEl.style.padding = '28px 36px';
         this.contentEl.style.fontSize = '36px';
         this.contentEl.style.lineHeight = '48px';
         this.contentEl.style.color = 'var(--color-ink)';
         this.contentEl.style.whiteSpace = 'pre-wrap';
-        sceneEl.appendChild(this.contentEl);
+        this.panelEl.appendChild(this.contentEl);
 
         this.pageIndicator = document.createElement('div');
         this.pageIndicator.style.position = 'absolute';

@@ -30,17 +30,29 @@ export class RankingScene {
         const areaWidth = 1480; // content-panelの左右パディング分を確保
         const areaX = (this.game.baseWidth - areaWidth) / 2;
 
+        // 角丸パネル(枠)と、実際にスクロールする内側の要素を分離する。
+        // 同じ要素に border-radius と overflow-y: auto を両方指定すると、
+        // スクロールバーが角丸を無視して描画されてしまうため。
+        this.panelEl = document.createElement('div');
+        this.panelEl.className = 'content-panel';
+        this.panelEl.style.position = 'absolute';
+        this.panelEl.style.left = `${areaX}px`;
+        this.panelEl.style.top = `${areaTop}px`;
+        this.panelEl.style.width = `${areaWidth}px`;
+        this.panelEl.style.height = `${areaBottom - areaTop}px`;
+        this.panelEl.style.padding = '0';
+        this.panelEl.style.overflow = 'hidden';
+        sceneEl.appendChild(this.panelEl);
+
         this.listEl = document.createElement('div');
-        this.listEl.className = 'content-panel';
-        this.listEl.style.position = 'absolute';
-        this.listEl.style.left = `${areaX}px`;
-        this.listEl.style.top = `${areaTop}px`;
-        this.listEl.style.width = `${areaWidth}px`;
-        this.listEl.style.height = `${areaBottom - areaTop}px`;
+        this.listEl.style.width = '100%';
+        this.listEl.style.height = '100%';
         this.listEl.style.overflowY = 'auto';
+        this.listEl.style.boxSizing = 'border-box';
+        this.listEl.style.padding = '28px 36px';
         this.listEl.style.fontSize = `${FONT_SIZE.SMALL}px`;
         this.listEl.style.color = 'var(--color-ink)';
-        sceneEl.appendChild(this.listEl);
+        this.panelEl.appendChild(this.listEl);
 
         this.renderLoading();
         this.loadScores();
