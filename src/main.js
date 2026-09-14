@@ -10,6 +10,15 @@ import { ScoreManager } from './score_manager.js';
 import { InputHandler } from './input_handler.js';
 import { soundPlayer } from './soundPlayer.js';
 
+// 旧PWA対応時代に登録されたService Workerが端末に残っていると、
+// 更新後のファイルが反映されず古いキャッシュのまま表示され続けるため、
+// 見つかり次第自動的に解除する（現在このサイトはService Workerを使用しない）
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(registrations => {
+        registrations.forEach(registration => registration.unregister());
+    });
+}
+
 const SCENE_BGM_MAP = {
     [SCENE.MAIN]: 'home_bgm',
     [SCENE.INSTRUMENT_SELECT]: 'home_bgm',
