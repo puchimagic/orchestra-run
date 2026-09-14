@@ -2,9 +2,9 @@ import { soundPlayer } from '../soundPlayer.js';
 
 // Canvas座標(x, y, width, height)をそのままpxとして使えるDOMボタンを生成する
 export class Button {
-    constructor(x, y, width, height, text, { clickSoundKey = 'score', clickSoundType = 'gameSound' } = {}) {
+    constructor(x, y, width, height, text, { clickSoundKey = 'score', clickSoundType = 'gameSound', compact = false } = {}) {
         this.el = document.createElement('button');
-        this.el.className = 'game-button';
+        this.el.className = compact ? 'game-button game-button--compact' : 'game-button';
         this.el.type = 'button';
         this.el.textContent = text;
         this.setRect(x, y, width, height);

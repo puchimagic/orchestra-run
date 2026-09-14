@@ -67,13 +67,14 @@ export class GameDescriptionScene {
         createCenteredText(sceneEl, 'あそびかた', { top: 70, fontSize: FONT_SIZE.MEDIUM });
 
         this.contentEl = document.createElement('div');
+        this.contentEl.className = 'content-panel';
         this.contentEl.style.position = 'absolute';
-        this.contentEl.style.left = '360px';
-        this.contentEl.style.top = '200px';
-        this.contentEl.style.width = '1200px';
+        this.contentEl.style.left = '320px';
+        this.contentEl.style.top = '190px';
+        this.contentEl.style.width = '1280px';
         this.contentEl.style.fontSize = '30px';
         this.contentEl.style.lineHeight = '40px';
-        this.contentEl.style.color = 'black';
+        this.contentEl.style.color = 'var(--color-ink)';
         this.contentEl.style.whiteSpace = 'pre-wrap';
         sceneEl.appendChild(this.contentEl);
 
@@ -100,8 +101,8 @@ export class GameDescriptionScene {
         this.navBtnY = navBtnY;
         this.navBtnHeight = navBtnHeight;
 
-        this.prevButton = new Button(this.game.baseWidth / 2 - navBtnWidth - navBtnMargin - 50, navBtnY, navBtnWidth, navBtnHeight, '＜');
-        this.nextButton = new Button(this.game.baseWidth / 2 + navBtnMargin + 50, navBtnY, navBtnWidth, navBtnHeight, '＞');
+        this.prevButton = new Button(this.game.baseWidth / 2 - navBtnWidth - navBtnMargin - 50, navBtnY, navBtnWidth, navBtnHeight, '＜', { compact: true });
+        this.nextButton = new Button(this.game.baseWidth / 2 + navBtnMargin + 50, navBtnY, navBtnWidth, navBtnHeight, '＞', { compact: true });
         this.prevButton.onClick = () => { if (this.currentPage > 0) { this.currentPage--; this.render(); } };
         this.nextButton.onClick = () => { if (this.currentPage < this.totalPages - 1) { this.currentPage++; this.render(); } };
 

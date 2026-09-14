@@ -8,7 +8,7 @@ export const SCENE = {
     SETTINGS: 'settings',
 };
 
-export const FONT_FAMILY = 'Arial';
+export const FONT_FAMILY = "'M PLUS Rounded 1c', sans-serif";
 export const FONT_SIZE = {
     SMALL: 36,
     MEDIUM: 72,

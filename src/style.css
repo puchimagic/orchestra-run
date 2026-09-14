@@ -2,11 +2,25 @@
     box-sizing: border-box;
 }
 
+:root {
+    /* タイトル画面の水彩音符（水色・ピンク・黄色）から取ったパレット */
+    --color-cream: #fffaf0;
+    --color-sky: #6fd0e8;
+    --color-sky-deep: #3fa8c9;
+    --color-pink: #ff9ec4;
+    --color-pink-deep: #e8759f;
+    --color-yellow: #ffcf5c;
+    --color-yellow-deep: #e8a93a;
+    --color-ink: #4a3f35;
+    --color-ink-soft: #7a6d5e;
+    --shadow-soft: 0 6px 0 rgba(74, 63, 53, 0.18), 0 10px 18px rgba(74, 63, 53, 0.12);
+}
+
 body {
     margin: 0;
     overflow: hidden;
     background-color: #000;
-    font-family: Arial, sans-serif;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
 }
 
 /* 1920x1080固定の仮想ゲーム画面。画面サイズに合わせてtransform: scaleのみで拡縮する。
@@ -18,7 +32,7 @@ body {
     width: 1920px;
     height: 1080px;
     transform-origin: top left;
-    background-color: #e0e0e0;
+    background-color: var(--color-cream);
     overflow: hidden;
     user-select: none;
     -webkit-user-select: none;
@@ -45,38 +59,89 @@ body {
     display: block;
 }
 
-/* --- 共通UI部品 --- */
+/* --- 共通UI部品：ボタン ---
+   四角一辺倒を避け、音符のように丸く弾むボタン。左上に♪を添えて
+   「音楽ゲーム」であることをボタン単体からも感じられるようにする。 */
 
 .game-button {
     position: absolute;
     border: none;
     cursor: pointer;
-    background-color: #888;
-    color: #fff;
-    font-family: Arial, sans-serif;
-    font-size: 48px;
+    background: linear-gradient(180deg, #ffffff 0%, #fdf3e3 100%);
+    color: var(--color-ink);
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-weight: 700;
+    font-size: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 0 20px 0 56px;
+    border-radius: 999px;
+    border: 4px solid var(--color-ink);
+    box-shadow: var(--shadow-soft);
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+    transform: translateY(0);
+}
+
+.game-button::before {
+    content: '\266A';
+    position: absolute;
+    left: 22px;
+    top: 50%;
+    transform: translateY(-60%) rotate(-12deg);
+    font-size: 0.55em;
+    color: var(--color-sky-deep);
+    opacity: 0.75;
+    pointer-events: none;
+}
+
+/* ページ送り矢印など、小さく正方形に近いボタンでは音符アイコンを省略し
+   文字を圧迫しないコンパクトな見た目にする */
+.game-button--compact {
     padding: 0;
-    transition: background-color 0.1s;
+}
+
+.game-button--compact::before {
+    content: none;
 }
 
 .game-button:hover {
-    background-color: #aaa;
+    background: linear-gradient(180deg, #ffffff 0%, #fff0d6 100%);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 0 rgba(74, 63, 53, 0.18), 0 16px 22px rgba(74, 63, 53, 0.15);
+}
+
+.game-button:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 rgba(74, 63, 53, 0.18), 0 4px 8px rgba(74, 63, 53, 0.12);
 }
 
 .game-button.selected {
-    background-color: #333;
+    background: linear-gradient(180deg, var(--color-yellow) 0%, var(--color-yellow-deep) 100%);
+    color: #4a3113;
 }
 
 .game-button.selected:hover {
-    background-color: #555;
+    background: linear-gradient(180deg, #ffd873 0%, #eeb44a 100%);
 }
 
 .game-button:disabled {
     opacity: 0.4;
     cursor: default;
+    transform: none;
+    box-shadow: none;
+}
+
+/* --- コンテンツパネル ---
+   背景の水彩音符がテキストと重なって読みにくくなるのを防ぐため、
+   ランキング表や説明文など文字量の多いエリアの下に敷く、
+   五線譜ノートを思わせる半透明の紙のようなパネル。 */
+.content-panel {
+    background: rgba(255, 250, 240, 0.82);
+    border: 4px solid var(--color-ink);
+    border-radius: 32px;
+    box-shadow: var(--shadow-soft);
+    padding: 28px 36px;
 }
 
 .scene-title {
@@ -86,19 +151,54 @@ body {
     width: 100%;
     text-align: center;
     font-size: 64px;
-    color: black;
+    font-weight: 800;
+    color: var(--color-ink);
     margin: 0;
+}
+
+/* --- 見出し用の音符アンダーライン ---
+   直線の下線ではなく、波打つ五線譜風の飾り線を見出しの下に敷く。 */
+.staff-heading {
+    position: relative;
+    display: inline-block;
+}
+
+.staff-heading::after {
+    content: '';
+    position: absolute;
+    left: -6%;
+    right: -6%;
+    bottom: -14px;
+    height: 14px;
+    background-image: repeating-linear-gradient(
+        90deg,
+        var(--color-sky) 0px, var(--color-sky) 40px,
+        var(--color-pink) 40px, var(--color-pink) 80px,
+        var(--color-yellow) 80px, var(--color-yellow) 120px
+    );
+    border-radius: 8px;
+    opacity: 0.6;
 }
 
 .text-input {
     position: absolute;
-    border: 2px solid black;
+    border: 4px solid var(--color-ink);
     outline: none;
-    font-size: 48px;
-    padding: 0 10px;
-    background: white;
+    font-size: 44px;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    padding: 0 18px;
+    background: #ffffff;
+    border-radius: 999px;
+    color: var(--color-ink);
+    box-shadow: inset 0 3px 6px rgba(74, 63, 53, 0.08);
 }
 
+.text-input:focus {
+    border-color: var(--color-sky-deep);
+}
+
+/* --- 音量スライダー ---
+   トラックを太い丸パイプに、つまみを音符の玉に見立てる。 */
 .volume-slider {
     position: absolute;
     width: 500px;
@@ -107,18 +207,20 @@ body {
 
 .volume-slider .volume-label {
     position: absolute;
-    top: -40px;
-    left: 0;
-    font-size: 36px;
-    color: black;
+    top: -42px;
+    left: 4px;
+    font-size: 34px;
+    font-weight: 700;
+    color: var(--color-ink);
 }
 
 .volume-slider .volume-value {
     position: absolute;
-    top: -40px;
-    right: 0;
-    font-size: 36px;
-    color: black;
+    top: -42px;
+    right: 4px;
+    font-size: 34px;
+    font-weight: 700;
+    color: var(--color-sky-deep);
 }
 
 .volume-slider input[type="range"] {
@@ -133,45 +235,51 @@ body {
 
 /* つまみより左側（現在値まで）を塗り分ける。--fill-percentはJS側(updateTrackFill)が更新する */
 .volume-slider input[type="range"]::-webkit-slider-runnable-track {
-    height: 16px;
-    border-radius: 8px;
-    background: linear-gradient(to right, #007bff var(--fill-percent), #ccc var(--fill-percent));
+    height: 20px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, var(--color-sky) 0%, var(--color-sky-deep) var(--fill-percent), #eee0c8 var(--fill-percent), #eee0c8 100%);
+    border: 3px solid var(--color-ink);
 }
 
 .volume-slider input[type="range"]::-moz-range-track {
-    height: 16px;
-    border-radius: 8px;
-    background: #ccc;
+    height: 20px;
+    border-radius: 999px;
+    background: #eee0c8;
+    border: 3px solid var(--color-ink);
 }
 
 .volume-slider input[type="range"]::-moz-range-progress {
-    height: 16px;
-    border-radius: 8px 0 0 8px;
-    background: #007bff;
+    height: 20px;
+    border-radius: 999px 0 0 999px;
+    background: var(--color-sky-deep);
 }
 
 .volume-slider input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    background: #007bff;
-    border: 3px solid #333;
-    margin-top: -10px;
+    background: radial-gradient(circle at 35% 30%, #fffef8, var(--color-yellow) 55%, var(--color-yellow-deep) 100%);
+    border: 4px solid var(--color-ink);
+    margin-top: -13px;
     cursor: pointer;
+    box-shadow: 0 3px 0 rgba(74, 63, 53, 0.25);
 }
 
 .volume-slider input[type="range"]::-moz-range-thumb {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    background: #007bff;
-    border: 3px solid #333;
+    background: radial-gradient(circle at 35% 30%, #fffef8, var(--color-yellow) 55%, var(--color-yellow-deep) 100%);
+    border: 4px solid var(--color-ink);
     cursor: pointer;
+    box-shadow: 0 3px 0 rgba(74, 63, 53, 0.25);
 }
 
-/* --- 足場ブロック --- */
+/* --- 足場ブロック ---
+   角丸の枠に、演奏成功時は木目の質感画像を貼るのはそのまま維持しつつ、
+   ACTIVE状態の枠を音符カラーの点線から実線グラデーションに変える。 */
 
 .scaffold {
     position: absolute;
@@ -181,18 +289,21 @@ body {
 }
 
 .scaffold.active {
-    border: 5px solid #f0ad4e;
+    border: 6px solid var(--color-yellow-deep);
+    border-radius: 18px;
+    background: rgba(255, 207, 92, 0.18);
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.6) inset;
 }
 
 .scaffold.active .scaffold-key-text {
-    color: #f0ad4e;
-    -webkit-text-stroke: 4px black;
+    color: #fff6e0;
+    -webkit-text-stroke: 5px var(--color-ink);
     paint-order: stroke fill;
-    font-family: Arial, sans-serif;
-    font-weight: bold;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-weight: 800;
     white-space: nowrap;
 }
 
@@ -200,13 +311,15 @@ body {
     background-image: url('../assets/img/scaffold.png');
     background-size: 100% 100%;
     background-repeat: no-repeat;
+    border-radius: 12px;
 }
 
 .scaffold.expired {
     display: none;
 }
 
-/* --- 木を破壊するための必要キー表示 --- */
+/* --- 木を破壊するための必要キー表示 ---
+   黒背景の四角から、丸みのある吹き出し風タグに変更。 */
 
 .tree-key-text {
     position: absolute;
@@ -215,11 +328,14 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: rgba(0, 0, 0, 0.7);
-    color: white;
-    -webkit-text-stroke: 4px black;
+    background-color: rgba(74, 63, 53, 0.82);
+    color: #fff6e0;
+    -webkit-text-stroke: 4px var(--color-ink);
     paint-order: stroke fill;
-    font-family: Arial, sans-serif;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-weight: 800;
     white-space: nowrap;
-    padding: 10px;
+    padding: 12px 18px;
+    border-radius: 999px;
+    border: 3px solid #fff6e0;
 }

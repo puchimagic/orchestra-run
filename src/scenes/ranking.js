@@ -27,10 +27,11 @@ export class RankingScene {
 
         const areaTop = 170;
         const areaBottom = backBtnY - 50;
-        const areaWidth = 1400;
+        const areaWidth = 1480; // content-panelの左右パディング分を確保
         const areaX = (this.game.baseWidth - areaWidth) / 2;
 
         this.listEl = document.createElement('div');
+        this.listEl.className = 'content-panel';
         this.listEl.style.position = 'absolute';
         this.listEl.style.left = `${areaX}px`;
         this.listEl.style.top = `${areaTop}px`;
@@ -38,7 +39,7 @@ export class RankingScene {
         this.listEl.style.height = `${areaBottom - areaTop}px`;
         this.listEl.style.overflowY = 'auto';
         this.listEl.style.fontSize = `${FONT_SIZE.SMALL}px`;
-        this.listEl.style.color = 'black';
+        this.listEl.style.color = 'var(--color-ink)';
         sceneEl.appendChild(this.listEl);
 
         this.renderLoading();
