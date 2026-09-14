@@ -64,16 +64,21 @@ export class GameDescriptionScene {
         sceneEl.innerHTML = '';
         setSceneBackground(sceneEl, 'assets/img/bg_title.png');
 
-        createCenteredText(sceneEl, 'あそびかた', { top: 70, fontSize: FONT_SIZE.MEDIUM });
+        createCenteredText(sceneEl, 'あそびかた', { top: 40, fontSize: FONT_SIZE.MEDIUM });
+
+        const panelTop = 150;
+        const panelBottom = this.game.baseHeight - 100 - 60 - 40;
 
         this.contentEl = document.createElement('div');
         this.contentEl.className = 'content-panel';
         this.contentEl.style.position = 'absolute';
         this.contentEl.style.left = '320px';
-        this.contentEl.style.top = '190px';
+        this.contentEl.style.top = `${panelTop}px`;
         this.contentEl.style.width = '1280px';
-        this.contentEl.style.fontSize = '30px';
-        this.contentEl.style.lineHeight = '40px';
+        this.contentEl.style.maxHeight = `${panelBottom - panelTop}px`;
+        this.contentEl.style.overflowY = 'auto';
+        this.contentEl.style.fontSize = '28px';
+        this.contentEl.style.lineHeight = '38px';
         this.contentEl.style.color = 'var(--color-ink)';
         this.contentEl.style.whiteSpace = 'pre-wrap';
         sceneEl.appendChild(this.contentEl);
