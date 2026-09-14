@@ -20,6 +20,14 @@ body {
     transform-origin: top left;
     background-color: #e0e0e0;
     overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* ユーザー名入力欄など、実際にテキストを編集する要素だけは選択可能に戻す */
+#gameRoot input {
+    user-select: text;
+    -webkit-user-select: text;
 }
 
 .scene {
@@ -160,7 +168,6 @@ body {
     position: absolute;
     left: 0;
     top: 0;
-    transform: translate(-50%, -50%);
     background-color: rgba(0, 0, 0, 0.7);
     color: white;
     -webkit-text-stroke: 4px black;

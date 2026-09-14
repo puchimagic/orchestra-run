@@ -115,7 +115,8 @@ export class GameScene {
     }
 
     updateTreeKeyPosition(tree, el) {
-        el.style.transform = `translate(${tree.x + tree.width / 2}px, ${tree.y + tree.height / 2}px)`;
+        // CSS側の -50%,-50% と合成し、要素の中心が木の中心に来るようにする
+        el.style.transform = `translate(${tree.x + tree.width / 2}px, ${tree.y + tree.height / 2}px) translate(-50%, -50%)`;
     }
 
     removeTreeKeyEl(tree) {

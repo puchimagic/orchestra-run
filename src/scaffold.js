@@ -62,5 +62,7 @@ export class ScaffoldBlock {
         } else {
             this.el.classList.add('expired');
         }
+        // 必要キーのテキストはACTIVE状態(まだ固まっていない足場)でのみ表示する
+        this.keyTextEl.style.display = this.state === 'ACTIVE' ? '' : 'none';
     }
 }
