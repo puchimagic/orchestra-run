@@ -112,7 +112,7 @@ body {
 }
 
 .game-button:hover {
-    background: linear-gradient(180deg, #ffffff 0%, #fff0d6 100%);
+    background: linear-gradient(180deg, #fff9ec 0%, #ffe4ad 100%);
     transform: translateY(-4px);
     box-shadow: 0 10px 0 rgba(74, 63, 53, 0.18), 0 16px 22px rgba(74, 63, 53, 0.15);
 }
@@ -128,7 +128,7 @@ body {
 }
 
 .game-button.selected:hover {
-    background: linear-gradient(180deg, #ffd873 0%, #eeb44a 100%);
+    background: linear-gradient(180deg, #ffc94d 0%, #d99a2e 100%);
 }
 
 .game-button:disabled {
