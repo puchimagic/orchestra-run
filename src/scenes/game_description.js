@@ -95,7 +95,7 @@ export class GameDescriptionScene {
         createCenteredText(sceneEl, 'あそびかた', { top: 40, fontSize: FONT_SIZE.MEDIUM });
 
         const panelTop = 150;
-        const panelBottom = this.game.baseHeight - 100 - 60 - 40;
+        const panelBottom = this.game.baseHeight - 100 - 60 - 20;
 
         this.contentEl = document.createElement('div');
         this.contentEl.className = 'content-panel';
@@ -105,8 +105,8 @@ export class GameDescriptionScene {
         this.contentEl.style.width = '1280px';
         this.contentEl.style.maxHeight = `${panelBottom - panelTop}px`;
         this.contentEl.style.overflowY = 'auto';
-        this.contentEl.style.fontSize = '28px';
-        this.contentEl.style.lineHeight = '38px';
+        this.contentEl.style.fontSize = '36px';
+        this.contentEl.style.lineHeight = '48px';
         this.contentEl.style.color = 'var(--color-ink)';
         this.contentEl.style.whiteSpace = 'pre-wrap';
         sceneEl.appendChild(this.contentEl);
