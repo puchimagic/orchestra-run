@@ -1,14 +1,10 @@
 export class InputHandler {
     constructor() {
-        this.keyboardInstrumentConfig = null;
-        this.gamepadInstrumentConfig = null;
         this.activeKeyMap = {};
         this.pressedKeys = new Set();
         this.actionsDown = new Set();
         this.actionMap = {};
         this.gamepads = [];
-        this.lastGamepadConnectedStatus = false;
-        this.fixedGamepadConnectedStatus = null;
 
         window.addEventListener('keydown', this.handleKeyDown.bind(this));
         window.addEventListener('keyup', this.handleKeyUp.bind(this));
@@ -24,27 +20,17 @@ export class InputHandler {
         this.pollGamepads();
     }
 
-    setInstrumentKeyMaps(keyboardConfig, gamepadConfig, fixedConnectedStatus = null) {
-        this.keyboardInstrumentConfig = keyboardConfig;
-        this.gamepadInstrumentConfig = gamepadConfig;
-        this.fixedGamepadConnectedStatus = fixedConnectedStatus;
-        this._updateActiveKeyMap();
-    }
-
-    _updateActiveKeyMap() {
-        const isConnected = this.fixedGamepadConnectedStatus !== null ? this.fixedGamepadConnectedStatus : this.isGamepadConnected();
-        const currentInstrumentConfig = isConnected ? this.gamepadInstrumentConfig : this.keyboardInstrumentConfig;
-
+    // 演奏操作(足場生成・木の破壊)はキャラ操作の入力方法に関わらず常にキーボードの
+    // キーで判定するため、ここではキーボード用のキーマップのみを組み立てる
+    setInstrumentKeyMaps(instrumentConfig) {
         this.activeKeyMap = {};
         this.actionMap = {};
 
-        if (currentInstrumentConfig) {
-            for (const instrumentName in currentInstrumentConfig) {
-                const instrument = currentInstrumentConfig[instrumentName];
+        if (instrumentConfig) {
+            for (const instrumentName in instrumentConfig) {
+                const instrument = instrumentConfig[instrumentName];
                 instrument.keys.forEach(key => {
-                    let physicalKey;
-                    if (typeof key === 'string') physicalKey = `Key${key}`;
-                    else physicalKey = `GamepadButton${key}`;
+                    const physicalKey = `Key${key}`;
                     const action = `ACTION_${key}`;
                     this.activeKeyMap[physicalKey] = action;
                     this.actionMap[action] = physicalKey;
@@ -82,12 +68,6 @@ export class InputHandler {
                 const currentApiState = gamepadsFromAPI[this.gamepads[i].index];
                 if (currentApiState) this.gamepads[i] = currentApiState;
             }
-        }
-
-        const currentGamepadConnectedStatus = this.isGamepadConnected();
-        if (currentGamepadConnectedStatus !== this.lastGamepadConnectedStatus) {
-            this._updateActiveKeyMap();
-            this.lastGamepadConnectedStatus = currentGamepadConnectedStatus;
         }
 
         this.processGamepadButtons();

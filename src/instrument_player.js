@@ -1,4 +1,4 @@
-import { KEYBOARD_INSTRUMENT_CONFIG, GAMEPAD_INSTRUMENT_CONFIG, INSTRUMENT_FOLDER_MAP } from './config.js';
+import { KEYBOARD_INSTRUMENT_CONFIG, INSTRUMENT_FOLDER_MAP } from './config.js';
 import { InputHandler } from './input_handler.js';
 import { SoundPool } from './soundPlayer.js';
 
@@ -15,13 +15,14 @@ export class InstrumentPlayer {
         this.instrument = null;
     }
 
-    // instrumentName: 楽器の日本語名, instrument: activeInstrumentConfig[instrumentName]
-    // useGamepad: ゲームパッド入力を使うかどうか（GameScene側のinputMethodから決定）
-    init(instrumentName, instrument, useGamepad) {
+    // instrumentName: 楽器の日本語名, instrument: KEYBOARD_INSTRUMENT_CONFIG[instrumentName]
+    // 演奏操作(足場生成・木の破壊)は、キャラ操作の入力方法(キーボード/ゲームパッド)に
+    // 関わらず常にキーボードのキーで行う仕様のため、ここでは常にキーボード設定を使う
+    init(instrumentName, instrument) {
         this.instrumentName = instrumentName;
         this.instrument = instrument;
 
-        this.input.setInstrumentKeyMaps(KEYBOARD_INSTRUMENT_CONFIG, GAMEPAD_INSTRUMENT_CONFIG, useGamepad);
+        this.input.setInstrumentKeyMaps(KEYBOARD_INSTRUMENT_CONFIG, KEYBOARD_INSTRUMENT_CONFIG, false);
         this.input.init();
 
         this.instrumentDirName = INSTRUMENT_FOLDER_MAP[instrumentName];
@@ -91,10 +92,8 @@ export class InstrumentPlayer {
                [...requiredPhysicalKeys].every(k => pressedInstrumentKeys.has(k));
     }
 
-    // 一致成功時の効果音再生（ゲームパッド選択時は楽器音を鳴らさない）
-    playSuccessSound(requiredKeys, gamepadSelected) {
-        if (gamepadSelected) return;
-
+    // 一致成功時の効果音再生
+    playSuccessSound(requiredKeys) {
         if (this.instrumentName === 'ギター') {
             const trackNumber = Math.floor(Math.random() * this.instrument.maxChord);
             if (trackNumber >= 0 && trackNumber < this.instrument.maxChord) {

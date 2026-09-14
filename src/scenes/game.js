@@ -1,6 +1,6 @@
 import {
     SCENE, BLOCK_SIZE, PLATFORM_HEIGHT_IN_BLOCKS,
-    KEYBOARD_INSTRUMENT_CONFIG, GAMEPAD_INSTRUMENT_CONFIG,
+    KEYBOARD_INSTRUMENT_CONFIG,
     INSTRUMENT_ICON_MAP,
     INITIAL_SCROLL_SPEED, SPEED_INCREASE_INTERVAL, PLAYER_MAX_JUMP_IN_BLOCKS
 } from '../config.js';
@@ -25,10 +25,10 @@ export class GameScene {
     init(data) {
         this.instrumentName = data?.instrument || this.selectedInstrument || 'トライアングル';
 
-        const useGamepadForScaffold = this.game.inputMethod === 'gamepad';
-
-        const activeInstrumentConfig = useGamepadForScaffold ? GAMEPAD_INSTRUMENT_CONFIG : KEYBOARD_INSTRUMENT_CONFIG;
-        this.instrument = activeInstrumentConfig[this.instrumentName];
+        // 「ゲームパッドモード」はキャラ操作(移動・ジャンプ)をゲームパッドで行うためのもので、
+        // 演奏操作(足場生成・木の破壊)は入力方法に関わらず常にキーボードのキーで行う仕様のため、
+        // ここでGAMEPAD_INSTRUMENT_CONFIGに切り替えてはいけない
+        this.instrument = KEYBOARD_INSTRUMENT_CONFIG[this.instrumentName];
 
         this.startTime = Date.now();
         this.lastTime = this.startTime;
@@ -54,7 +54,7 @@ export class GameScene {
 
         // stage.init()内で足場生成・木の破壊イベントが同期的に発火し得るため、
         // requestScaffold/requestTreeBreakEventが参照するinstrumentPlayerを先に初期化しておく
-        this.instrumentPlayer.init(this.instrumentName, this.instrument, useGamepadForScaffold);
+        this.instrumentPlayer.init(this.instrumentName, this.instrument);
 
         this.stage.init();
 
@@ -222,7 +222,7 @@ export class GameScene {
         if (isMatched) {
             if (target instanceof ScaffoldBlock) {
                 target.solidify();
-                this.instrumentPlayer.playSuccessSound(requiredKeys, this.game.inputMethod === 'gamepad');
+                this.instrumentPlayer.playSuccessSound(requiredKeys);
             }
             else if (target instanceof Tree) {
                 this.stage.spawnFallingTreeAnimation(target);
