@@ -67,7 +67,7 @@ const INSTRUMENT_BASE_CONFIG = {
     '太鼓':         { name: '太鼓',         maxChord: 1, maxSimultaneousKeys: 1, multiplier: 1.2, volumeMultiplier: 2.0 },
     'ドラム':       { name: 'ドラム',       maxChord: 1, maxSimultaneousKeys: 1, multiplier: 1.4, volumeMultiplier: 3.0 },
     'ギター':       { name: 'ギター',       maxChord: 4, maxSimultaneousKeys: 2, multiplier: 1.6, volumeMultiplier: 1.0 },
-    'ピアノ':       { name: 'ピアノ',       maxChord: 1, maxSimultaneousKeys: 1, multiplier: 1.9, volumeMultiplier: 1.0 },
+    'ピアノ':       { name: 'ピアノ',       maxChord: 1, maxSimultaneousKeys: 3, multiplier: 1.9, volumeMultiplier: 1.0 },
 };
 
 // キーボード演奏時のキー割り当て

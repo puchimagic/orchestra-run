@@ -56,14 +56,15 @@ export class GameDescriptionScene {
                 '■ 楽器によるちがい',
                 '選んだ楽器によって、演奏の難しさやスコア倍率が変わります。',
                 '',
-                '  ・トライアングル、タンバリン、太鼓、ドラム、ピアノ',
+                '  ・トライアングル、タンバリン、太鼓、ドラム',
                 '    → その都度表示される1つのキーを押して、1つの音を奏でます。',
-                '    → 楽器ごとに使うキーの種類数がちがい、1〜7種類あります。',
-                '  ・ギター',
-                '    → 1〜2個のキーを同時に押して、コードを奏でます。',
+                '    → 楽器ごとに使うキーの種類数がちがい、1〜5種類あります。',
+                '  ・ギター、ピアノ',
+                '    → 複数のキーを同時に押して、和音を奏でます。',
+                '    → ギターは最大2個、ピアノは最大3個の同時押しが必要です。',
                 '',
-                '使うキーの種類が多い楽器ほど、演奏は難しくなりますが、',
-                'その分スコア倍率も高くなります。',
+                '使うキーの種類が多い楽器や、同時押しの数が多い楽器ほど',
+                '演奏は難しくなりますが、その分スコア倍率も高くなります。',
                 '（倍率が最も高いのはピアノ、次いでギターです。）',
             ],
             [
@@ -92,9 +93,9 @@ export class GameDescriptionScene {
         sceneEl.innerHTML = '';
         setSceneBackground(sceneEl, 'assets/img/bg_title.png');
 
-        createCenteredText(sceneEl, 'あそびかた', { top: 40, fontSize: FONT_SIZE.MEDIUM });
+        createCenteredText(sceneEl, 'あそびかた', { top: 70, fontSize: FONT_SIZE.MEDIUM });
 
-        const panelTop = 150;
+        const panelTop = 190;
         const panelBottom = this.game.baseHeight - 100 - 60 - 20;
 
         this.contentEl = document.createElement('div');
@@ -120,7 +121,7 @@ export class GameDescriptionScene {
         this.pageIndicator.style.color = '#555';
         sceneEl.appendChild(this.pageIndicator);
 
-        const btnWidth = 300;
+        const btnWidth = 400;
         const btnHeight = 100;
         const bottomBtnY = this.game.baseHeight - btnHeight - 60;
         const sideMargin = 320;

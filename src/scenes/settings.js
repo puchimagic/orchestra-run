@@ -24,7 +24,7 @@ export class SettingsScene {
         const sectionTitleLineHeight = 40;
         const sliderTextSpacing = 40;
 
-        createCenteredText(sceneEl, '設定', { top: 70, fontSize: FONT_SIZE.LARGE });
+        createCenteredText(sceneEl, '設定', { top: 70, fontSize: FONT_SIZE.MEDIUM });
 
         // --- 左セクション (音量) ---
         const leftColumnCenterX = columnWidth / 2;

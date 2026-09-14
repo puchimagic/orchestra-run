@@ -15,22 +15,27 @@ export class InstrumentSelectScene {
 
         createCenteredText(sceneEl, '楽器をえらんでね', { top: 70, fontSize: FONT_SIZE.MEDIUM });
 
-        const btnWidth = 500;
-        const btnHeight = 100;
+        const btnWidth = 560;
+        const btnHeight = 130;
         const cx = this.game.baseWidth / 2;
-        const cy = this.game.baseHeight / 2;
-        const row_margin = 30;
+        const row_margin = 20;
         const col_gap = 60;
-        const infoTextWidth = 250;
+        const infoTextWidth = 280;
 
         const instrumentBlockWidth = (btnWidth + infoTextWidth) * 2 + col_gap;
         const instrumentBlockStartX = cx - instrumentBlockWidth / 2;
         const col1_x = instrumentBlockStartX;
         const col2_x = instrumentBlockStartX + btnWidth + infoTextWidth + col_gap;
 
-        const y1 = cy - btnHeight - row_margin - 100;
-        const y2 = cy - 10;
-        const y3 = cy + btnHeight + row_margin + 80;
+        // 見出し下端〜戻るボタン上端の範囲の縦中央に、楽器ボタン3行分のブロックを配置する
+        const areaTop = 150;
+        const areaBottom = this.game.baseHeight - 100 - 60;
+        const rowsBlockHeight = btnHeight * 3 + row_margin * 2;
+        const blockStartY = areaTop + (areaBottom - areaTop - rowsBlockHeight) / 2;
+
+        const y1 = blockStartY;
+        const y2 = blockStartY + btnHeight + row_margin;
+        const y3 = blockStartY + (btnHeight + row_margin) * 2;
 
         this.instrumentButtons = {};
         INSTRUMENT_ORDER.forEach((name, i) => {
@@ -40,33 +45,43 @@ export class InstrumentSelectScene {
                 clickSoundKey: `${name}_track01`,
                 clickSoundType: 'instrumentSound',
             });
+            button.el.style.fontSize = '50px';
             button.onClick = () => this.selectInstrument(name);
             button.mount(sceneEl);
             this.instrumentButtons[name] = button;
 
             const config = KEYBOARD_INSTRUMENT_CONFIG[name];
-            let infoText = `キー: ${config.keys.length}種`;
-            if (config.maxSimultaneousKeys > 1) infoText += ` / 最大${config.maxSimultaneousKeys}音同時`;
+            const infoLines = [`キー: ${config.keys.length}種`];
+            if (config.maxSimultaneousKeys > 1) infoLines.push(`最大${config.maxSimultaneousKeys}音同時`);
 
             const infoEl = document.createElement('div');
-            infoEl.textContent = infoText;
             infoEl.style.position = 'absolute';
             infoEl.style.left = `${x + btnWidth + 20}px`;
             infoEl.style.top = `${y}px`;
             infoEl.style.height = `${btnHeight}px`;
             infoEl.style.display = 'flex';
-            infoEl.style.alignItems = 'center';
+            infoEl.style.flexDirection = 'column';
+            infoEl.style.justifyContent = 'center';
             infoEl.style.fontSize = '40px';
+            infoEl.style.lineHeight = '1.3';
             infoEl.style.color = '#555';
+            infoLines.forEach(line => {
+                const lineEl = document.createElement('div');
+                lineEl.textContent = line;
+                infoEl.appendChild(lineEl);
+            });
             sceneEl.appendChild(infoEl);
         });
 
-        const bottomButtonY = y3 + btnHeight + 50;
-        const buttonGroupWidth = btnWidth * 2 + col_gap;
+        const bottomBtnWidth = 400;
+        const bottomBtnHeight = 100;
+        // 他の画面（あそびかた・設定・ランキング）の「戻る」ボタンとサイズ・縦位置を揃える
+        const bottomButtonY = this.game.baseHeight - bottomBtnHeight - 60;
+        const buttonGroupWidth = bottomBtnWidth * 2 + col_gap;
         const buttonGroupStartX = cx - buttonGroupWidth / 2;
 
-        this.backButton = new Button(buttonGroupStartX, bottomButtonY, btnWidth, btnHeight, '戻る');
-        this.startButton = new Button(buttonGroupStartX + btnWidth + col_gap, bottomButtonY, btnWidth, btnHeight, 'スタート');
+        this.backButton = new Button(buttonGroupStartX, bottomButtonY, bottomBtnWidth, bottomBtnHeight, '戻る');
+        this.startButton = new Button(buttonGroupStartX + bottomBtnWidth + col_gap, bottomButtonY, bottomBtnWidth, bottomBtnHeight, 'スタート');
         this.startButton.onClick = () => {
             this.game.selectedInstrument = this.selectedInstrument;
             this.game.changeScene(SCENE.GAME);
