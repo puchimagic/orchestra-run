@@ -65,8 +65,8 @@ export class InstrumentSelectScene {
         const buttonGroupWidth = btnWidth * 2 + col_gap;
         const buttonGroupStartX = cx - buttonGroupWidth / 2;
 
-        this.startButton = new Button(buttonGroupStartX, bottomButtonY, btnWidth, btnHeight, 'スタート');
-        this.backButton = new Button(buttonGroupStartX + btnWidth + col_gap, bottomButtonY, btnWidth, btnHeight, '戻る');
+        this.backButton = new Button(buttonGroupStartX, bottomButtonY, btnWidth, btnHeight, '戻る');
+        this.startButton = new Button(buttonGroupStartX + btnWidth + col_gap, bottomButtonY, btnWidth, btnHeight, 'スタート');
         this.startButton.onClick = () => {
             this.game.selectedInstrument = this.selectedInstrument;
             this.game.changeScene(SCENE.GAME);
