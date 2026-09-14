@@ -65,8 +65,8 @@ const INSTRUMENT_BASE_CONFIG = {
     'タンバリン':   { name: 'タンバリン',   maxChord: 1, multiplier: 1.1, volumeMultiplier: 3.0 },
     '太鼓':         { name: '太鼓',         maxChord: 1, multiplier: 1.2, volumeMultiplier: 2.0 },
     'ドラム':       { name: 'ドラム',       maxChord: 1, multiplier: 1.4, volumeMultiplier: 3.0 },
-    'ピアノ':       { name: 'ピアノ',       maxChord: 1, multiplier: 1.6, volumeMultiplier: 1.0 },
-    'ギター':       { name: 'ギター',       maxChord: 4, multiplier: 1.9, volumeMultiplier: 1.0 },
+    'ギター':       { name: 'ギター',       maxChord: 4, multiplier: 1.6, volumeMultiplier: 1.0 },
+    'ピアノ':       { name: 'ピアノ',       maxChord: 1, multiplier: 1.9, volumeMultiplier: 1.0 },
 };
 
 // キーボード演奏時のキー割り当て
@@ -107,7 +107,8 @@ export const KEYBOARD_INSTRUMENT_CONFIG = mergeConfigs(INSTRUMENT_BASE_CONFIG, K
 export const GAMEPAD_INSTRUMENT_CONFIG = mergeConfigs(INSTRUMENT_BASE_CONFIG, GAMEPAD_KEYS);
 
 
-export const INSTRUMENT_ORDER = ['トライアングル', 'タンバリン', '太鼓', 'ドラム', 'ピアノ', 'ギター'];
+// 左列(上→下)・右列(上→下)の順に、難易度が上がっていくよう並べる
+export const INSTRUMENT_ORDER = ['トライアングル', 'タンバリン', '太鼓', 'ドラム', 'ギター', 'ピアノ'];
 
 // 日本語の楽器名とフォルダ名のマッピング
 export const INSTRUMENT_FOLDER_MAP = {
