@@ -9,14 +9,9 @@ export class InputHandler {
         window.addEventListener('keydown', this.handleKeyDown.bind(this));
         window.addEventListener('keyup', this.handleKeyUp.bind(this));
 
-        window.addEventListener('gamepadconnected', e => {
-            this.gamepads[e.gamepad.index] = e.gamepad;
-        });
-
-        window.addEventListener('gamepaddisconnected', e => {
-            delete this.gamepads[e.gamepad.index];
-        });
-
+        // ゲームパッドの接続状態はupdateGamepads()がnavigator.getGamepads()から
+        // 毎フレーム直接同期するため、gamepadconnected/disconnectedイベントの
+        // 個別ハンドリングは不要
         this.pollGamepads();
     }
 
@@ -62,13 +57,11 @@ export class InputHandler {
     }
 
     updateGamepads() {
+        // navigator.getGamepads()を直接ソースオブトゥルースとして毎フレーム同期する。
+        // gamepad.indexは0とは限らないため、gamepadconnectedイベント経由の
+        // 個別追跡はせず、常に配列全体をそのまま反映する。
         const gamepadsFromAPI = navigator.getGamepads();
-        for (let i = 0; i < this.gamepads.length; i++) {
-            if (this.gamepads[i]) {
-                const currentApiState = gamepadsFromAPI[this.gamepads[i].index];
-                if (currentApiState) this.gamepads[i] = currentApiState;
-            }
-        }
+        this.gamepads = Array.from(gamepadsFromAPI).map(gp => gp || undefined);
 
         this.processGamepadButtons();
     }
@@ -94,12 +87,20 @@ export class InputHandler {
         });
     }
 
+    // ブラウザが割り当てるgamepad.indexは0とは限らない（他のゲームパッドが
+    // 過去に接続された形跡が残っている等の理由で1以上になることがある）。
+    // このゲームは1台のゲームパッドしか想定していないため、接続されている
+    // 最初の有効なゲームパッドを使う。
+    getFirstConnectedGamepad() {
+        return this.gamepads.find(gp => gp);
+    }
+
     isGamepadButtonPressed(playerIndex, buttonIndex) {
-        return this.gamepads[playerIndex]?.buttons[buttonIndex]?.pressed || false;
+        return this.getFirstConnectedGamepad()?.buttons[buttonIndex]?.pressed || false;
     }
 
     getGamepadAxis(playerIndex, axisIndex) {
-        const axisValue = this.gamepads[playerIndex]?.axes[axisIndex];
+        const axisValue = this.getFirstConnectedGamepad()?.axes[axisIndex];
         if (axisValue !== undefined && Math.abs(axisValue) > 0.1) {
             return axisValue;
         }
