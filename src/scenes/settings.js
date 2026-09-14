@@ -37,21 +37,18 @@ export class SettingsScene {
 
         this.bgmSlider = new VolumeSlider(leftSectionStartX, currentYLeft, sliderWidth, 'BGM音量', soundPlayer.bgmVolume, (v) => {
             soundPlayer.setBgmVolume(v);
-            this.game.saveSettings();
         });
         currentYLeft += 40 + elementPadding;
 
         this.instrumentSlider = new VolumeSlider(leftSectionStartX, currentYLeft, sliderWidth, '楽器音量', soundPlayer.instrumentVolume, (v) => {
             soundPlayer.setInstrumentVolume(v);
             soundPlayer.playSound('ギター_track01');
-            this.game.saveSettings();
         });
         currentYLeft += 40 + elementPadding;
 
         this.gameSoundSlider = new VolumeSlider(leftSectionStartX, currentYLeft, sliderWidth, '効果音量', soundPlayer.gameSoundVolume, (v) => {
             soundPlayer.setGameSoundVolume(v);
             soundPlayer.playGameSound('jump');
-            this.game.saveSettings();
         });
 
         this.bgmSlider.mount(sceneEl);
@@ -74,12 +71,10 @@ export class SettingsScene {
 
         this.keyboardButton.onClick = () => {
             this.game.inputMethod = 'keyboard';
-            this.game.saveSettings();
             this.updateInputMethodHighlight();
         };
         this.gamepadButton.onClick = () => {
             this.game.inputMethod = 'gamepad';
-            this.game.saveSettings();
             this.updateInputMethodHighlight();
         };
         this.keyboardButton.mount(sceneEl);
@@ -120,18 +115,44 @@ export class SettingsScene {
         this.usernameNoteEl.style.color = 'var(--color-ink-soft)';
         sceneEl.appendChild(this.usernameNoteEl);
 
-        // --- 戻るボタン ---
+        // --- 戻るボタン・保存ボタン ---
         const backButtonWidth = 450;
         const backButtonHeight = 100;
-        this.backButton = new Button(
-            width / 2 - backButtonWidth / 2,
-            height - backButtonHeight - 60,
-            backButtonWidth,
-            backButtonHeight,
-            '戻る'
-        );
+        const bottomButtonGap = 60;
+        const bottomButtonGroupWidth = backButtonWidth * 2 + bottomButtonGap;
+        const bottomButtonY = height - backButtonHeight - 60;
+        const backButtonX = width / 2 - bottomButtonGroupWidth / 2;
+        const saveButtonX = backButtonX + backButtonWidth + bottomButtonGap;
+
+        this.backButton = new Button(backButtonX, bottomButtonY, backButtonWidth, backButtonHeight, '戻る');
         this.backButton.onClick = () => this.game.changeScene(SCENE.MAIN);
         this.backButton.mount(sceneEl);
+
+        this.saveButton = new Button(saveButtonX, bottomButtonY, backButtonWidth, backButtonHeight, '保存');
+        this.saveButton.onClick = () => this.handleSave();
+        this.saveButton.mount(sceneEl);
+
+        this.saveNoteEl = document.createElement('div');
+        this.saveNoteEl.style.position = 'absolute';
+        this.saveNoteEl.style.left = `${backButtonX}px`;
+        this.saveNoteEl.style.top = `${bottomButtonY - 50}px`;
+        this.saveNoteEl.style.width = `${bottomButtonGroupWidth}px`;
+        this.saveNoteEl.style.textAlign = 'center';
+        this.saveNoteEl.style.fontSize = '28px';
+        this.saveNoteEl.style.color = 'var(--color-sky-deep)';
+        this.saveNoteEl.style.opacity = '0';
+        this.saveNoteEl.style.transition = 'opacity 0.2s ease';
+        this.saveNoteEl.textContent = '保存しました';
+        sceneEl.appendChild(this.saveNoteEl);
+    }
+
+    handleSave() {
+        this.game.saveSettings();
+        if (this.saveNoteTimeout) clearTimeout(this.saveNoteTimeout);
+        this.saveNoteEl.style.opacity = '1';
+        this.saveNoteTimeout = setTimeout(() => {
+            this.saveNoteEl.style.opacity = '0';
+        }, 1200);
     }
 
     updateInputMethodHighlight() {
@@ -145,18 +166,17 @@ export class SettingsScene {
             this.usernameInput.value = this.usernameInput.value.slice(0, 7);
         }
         this.game.username = this.usernameInput.value;
-        this.game.saveSettings();
     }
 
     handleUsernameBlur() {
         if (this.usernameInput.value.trim() === '') {
             this.usernameInput.value = 'guest';
             this.game.username = 'guest';
-            this.game.saveSettings();
         }
     }
 
     destroy() {
+        if (this.saveNoteTimeout) clearTimeout(this.saveNoteTimeout);
         this.usernameInput.removeEventListener('input', this.handleUsernameInput);
         this.usernameInput.removeEventListener('blur', this.handleUsernameBlur);
         this.game.sceneElements[SCENE.SETTINGS].innerHTML = '';
