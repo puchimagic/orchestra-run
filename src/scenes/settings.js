@@ -98,15 +98,27 @@ export class SettingsScene {
 
         this.usernameInput = document.createElement('input');
         this.usernameInput.type = 'text';
+        this.usernameInput.maxLength = 7;
         this.usernameInput.className = 'text-input';
         this.usernameInput.style.left = `${rightSectionStartX}px`;
         this.usernameInput.style.top = `${currentYRight}px`;
         this.usernameInput.style.width = `${usernameInputWidth}px`;
         this.usernameInput.style.height = `${usernameInputHeight}px`;
-        this.usernameInput.value = this.game.username;
+        this.usernameInput.value = (this.game.username || '').slice(0, 7);
         this.usernameInput.addEventListener('input', this.handleUsernameInput);
         this.usernameInput.addEventListener('blur', this.handleUsernameBlur);
         sceneEl.appendChild(this.usernameInput);
+
+        this.usernameNoteEl = document.createElement('div');
+        this.usernameNoteEl.textContent = '※ユーザー名は7文字まで';
+        this.usernameNoteEl.style.position = 'absolute';
+        this.usernameNoteEl.style.left = `${rightSectionStartX}px`;
+        this.usernameNoteEl.style.top = `${currentYRight + usernameInputHeight + 16}px`;
+        this.usernameNoteEl.style.width = `${usernameInputWidth}px`;
+        this.usernameNoteEl.style.textAlign = 'center';
+        this.usernameNoteEl.style.fontSize = '26px';
+        this.usernameNoteEl.style.color = 'var(--color-ink-soft)';
+        sceneEl.appendChild(this.usernameNoteEl);
 
         // --- 戻るボタン ---
         const backButtonWidth = 450;
@@ -128,6 +140,10 @@ export class SettingsScene {
     }
 
     handleUsernameInput() {
+        // maxLength属性はIME変換確定時の一括挿入では効かないことがあるため、ここでも切り詰める
+        if (this.usernameInput.value.length > 7) {
+            this.usernameInput.value = this.usernameInput.value.slice(0, 7);
+        }
         this.game.username = this.usernameInput.value;
         this.game.saveSettings();
     }
