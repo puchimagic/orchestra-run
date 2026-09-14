@@ -35,7 +35,7 @@ export class MainScene {
         const logoAspectRatio = 374 / 666; // assets/img/logo.png の height/width
         const logoHeight = logoWidth * logoAspectRatio;
         const logoBottom = logoTop + logoHeight;
-        const buttonsStartY = logoBottom - 130;
+        const buttonsStartY = logoBottom - 220;
 
         const leftColX = cx - btnWidth - gapX / 2;
         const rightColX = cx + gapX / 2;
