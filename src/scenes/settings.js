@@ -66,7 +66,7 @@ export class SettingsScene {
 
         let currentYCenter = 200 + mainTitleLineHeight + elementPadding / 2;
         createCenteredText(sceneEl, '入力方法', { top: currentYCenter, fontSize: FONT_SIZE.MEDIUM, width: 500, centerX: centerColumnCenterX });
-        currentYCenter += sectionTitleLineHeight + elementPadding;
+        currentYCenter += sectionTitleLineHeight + elementPadding + sliderTextSpacing;
 
         this.keyboardButton = new Button(centerSectionStartX, currentYCenter, buttonWidth, buttonHeight, 'キーボード');
         currentYCenter += buttonHeight + elementPadding;
@@ -89,12 +89,12 @@ export class SettingsScene {
         // --- 右セクション (ユーザー名入力欄) ---
         const rightColumnCenterX = columnWidth * 2.5;
         const usernameInputWidth = 450;
-        const usernameInputHeight = 60;
+        const usernameInputHeight = 76;
         const rightSectionStartX = rightColumnCenterX - usernameInputWidth / 2;
 
         let currentYRight = 200 + mainTitleLineHeight + elementPadding / 2;
         createCenteredText(sceneEl, 'ユーザー名', { top: currentYRight, fontSize: FONT_SIZE.MEDIUM, width: 500, centerX: rightColumnCenterX });
-        currentYRight += sectionTitleLineHeight + elementPadding;
+        currentYRight += sectionTitleLineHeight + elementPadding + sliderTextSpacing;
 
         this.usernameInput = document.createElement('input');
         this.usernameInput.type = 'text';
