@@ -21,16 +21,25 @@ export class VolumeSlider {
         this.input.addEventListener('input', () => {
             const value = Number(this.input.value) / 100;
             this.updateValueLabel(value);
+            this.updateTrackFill(value);
             onChange(value);
         });
 
         this.el.append(this.labelEl, this.valueEl, this.input);
         this.updateValueLabel(initialValue);
+        this.updateTrackFill(initialValue);
         this.setRect(x, y, width);
     }
 
     updateValueLabel(value) {
         this.valueEl.textContent = `${Math.round(value * 100)}%`;
+    }
+
+    // ::-webkit-slider-runnable-trackはCSSからしか塗り分けられないため、
+    // CSS変数--fill-percentを更新して、つまみの位置までを色分けする
+    updateTrackFill(value) {
+        const percent = Math.round(value * 100);
+        this.input.style.setProperty('--fill-percent', `${percent}%`);
     }
 
     setRect(x, y, width) {

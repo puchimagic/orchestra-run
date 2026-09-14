@@ -122,6 +122,7 @@ body {
 }
 
 .volume-slider input[type="range"] {
+    --fill-percent: 0%;
     width: 100%;
     height: 40px;
     margin: 0;
@@ -130,16 +131,23 @@ body {
     background: transparent;
 }
 
+/* つまみより左側（現在値まで）を塗り分ける。--fill-percentはJS側(updateTrackFill)が更新する */
 .volume-slider input[type="range"]::-webkit-slider-runnable-track {
     height: 16px;
     border-radius: 8px;
-    background: #ccc;
+    background: linear-gradient(to right, #007bff var(--fill-percent), #ccc var(--fill-percent));
 }
 
 .volume-slider input[type="range"]::-moz-range-track {
     height: 16px;
     border-radius: 8px;
     background: #ccc;
+}
+
+.volume-slider input[type="range"]::-moz-range-progress {
+    height: 16px;
+    border-radius: 8px 0 0 8px;
+    background: #007bff;
 }
 
 .volume-slider input[type="range"]::-webkit-slider-thumb {
