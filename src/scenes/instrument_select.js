@@ -61,7 +61,7 @@ export class InstrumentSelectScene {
             sceneEl.appendChild(infoEl);
         });
 
-        const bottomButtonY = y3 + btnHeight + 100;
+        const bottomButtonY = y3 + btnHeight + 50;
         const buttonGroupWidth = btnWidth * 2 + col_gap;
         const buttonGroupStartX = cx - buttonGroupWidth / 2;
 
