@@ -109,7 +109,7 @@ export class SettingsScene {
         sceneEl.appendChild(this.usernameInput);
 
         // --- 戻るボタン ---
-        const backButtonWidth = 400;
+        const backButtonWidth = 450;
         const backButtonHeight = 100;
         this.backButton = new Button(
             width / 2 - backButtonWidth / 2,

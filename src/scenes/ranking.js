@@ -17,7 +17,7 @@ export class RankingScene {
 
         createCenteredText(sceneEl, 'ランキング', { top: 70, fontSize: FONT_SIZE.MEDIUM });
 
-        const btnWidth = 400;
+        const btnWidth = 450;
         const btnHeight = 100;
         const backBtnX = (this.game.baseWidth - btnWidth) / 2;
         const backBtnY = this.game.baseHeight - btnHeight - 60;

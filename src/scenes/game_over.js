@@ -46,7 +46,7 @@ export class GameOverScene {
         scoreEl.style.webkitTextStroke = '3px black';
         sceneEl.appendChild(scoreEl);
 
-        const btnWidth = 500;
+        const btnWidth = 450;
         const btnHeight = 100;
         this.continueButton = new Button(cx - btnWidth / 2, cy + 80, btnWidth, btnHeight, 'コンティニュー');
         this.backButton = new Button(cx - btnWidth / 2, cy + 200, btnWidth, btnHeight, 'メインに戻る');

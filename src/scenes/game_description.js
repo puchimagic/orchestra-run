@@ -121,7 +121,7 @@ export class GameDescriptionScene {
         this.pageIndicator.style.color = '#555';
         sceneEl.appendChild(this.pageIndicator);
 
-        const btnWidth = 400;
+        const btnWidth = 450;
         const btnHeight = 100;
         const bottomBtnY = this.game.baseHeight - btnHeight - 60;
         const sideMargin = 320;

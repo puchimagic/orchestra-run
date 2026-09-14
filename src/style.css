@@ -92,9 +92,9 @@ body {
 .game-button::before {
     content: '\266A';
     position: absolute;
-    left: 95px;
+    left: 55px;
     top: 50%;
-    transform: translateY(-55%) rotate(-12deg);
+    transform: translate(-50%, -55%) rotate(-12deg);
     font-size: 1.5em;
     color: var(--color-sky-deep);
     opacity: 0.85;

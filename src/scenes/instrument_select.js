@@ -73,7 +73,7 @@ export class InstrumentSelectScene {
             sceneEl.appendChild(infoEl);
         });
 
-        const bottomBtnWidth = 400;
+        const bottomBtnWidth = 450;
         const bottomBtnHeight = 100;
         // 他の画面（あそびかた・設定・ランキング）の「戻る」ボタンとサイズ・縦位置を揃える
         const bottomButtonY = this.game.baseHeight - bottomBtnHeight - 60;
