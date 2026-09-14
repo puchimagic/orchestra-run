@@ -6,6 +6,7 @@ export class VolumeSlider {
         this.el.className = 'volume-slider';
 
         this.labelEl = document.createElement('span');
+        this.labelEl.className = 'volume-label';
         this.labelEl.textContent = label;
 
         this.valueEl = document.createElement('span');

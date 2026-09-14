@@ -12,12 +12,15 @@ export class MainScene {
         sceneEl.innerHTML = '';
         setSceneBackground(sceneEl, 'assets/img/bg_title.png');
 
+        const logoWidth = this.game.baseWidth * 0.5;
+        const logoTop = this.game.baseHeight * 0.05;
+
         const logo = document.createElement('img');
         logo.src = 'assets/img/logo.png';
         logo.style.position = 'absolute';
-        logo.style.left = '10%';
-        logo.style.top = '5%';
-        logo.style.width = '80%';
+        logo.style.left = `${(this.game.baseWidth - logoWidth) / 2}px`;
+        logo.style.top = `${logoTop}px`;
+        logo.style.width = `${logoWidth}px`;
         sceneEl.appendChild(logo);
         this.logo = logo;
 
@@ -26,7 +29,14 @@ export class MainScene {
         const gapX = 100;
         const gapY = 50;
         const cx = this.game.baseWidth / 2;
-        const buttonsStartY = this.game.baseHeight * 0.55;
+
+        // ボタン開始位置は常にロゴの実際の下端を基準にする（固定割合だと
+        // ロゴとの間に余計な空白ができたり、逆に重なったりするため）
+        const logoAspectRatio = 374 / 666; // assets/img/logo.png の height/width
+        const logoHeight = logoWidth * logoAspectRatio;
+        const logoBottom = logoTop + logoHeight;
+        const buttonsStartY = logoBottom + 80;
+
         const leftColX = cx - btnWidth - gapX / 2;
         const rightColX = cx + gapX / 2;
 
