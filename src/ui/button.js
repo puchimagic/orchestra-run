@@ -7,6 +7,9 @@ export class Button {
         this.el.className = compact ? 'game-button game-button--compact' : 'game-button';
         this.el.type = 'button';
         this.el.textContent = text;
+        // マウス/タッチでの操作のみを想定しており、Tabキーでのフォーカス移動時に
+        // 表示されるフォーカスリングが世界観に合わないため、タブ移動の対象から外す
+        this.el.tabIndex = -1;
         this.setRect(x, y, width, height);
 
         this.el.addEventListener('click', () => {

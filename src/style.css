@@ -81,17 +81,23 @@ body {
     box-shadow: var(--shadow-soft);
     transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
     transform: translateY(0);
+    outline: none;
+}
+
+.game-button:focus,
+.game-button:focus-visible {
+    outline: none;
 }
 
 .game-button::before {
     content: '\266A';
     position: absolute;
-    left: 22px;
+    left: 20px;
     top: 50%;
-    transform: translateY(-60%) rotate(-12deg);
-    font-size: 0.55em;
+    transform: translateY(-58%) rotate(-12deg);
+    font-size: 0.85em;
     color: var(--color-sky-deep);
-    opacity: 0.75;
+    opacity: 0.8;
     pointer-events: none;
 }
 
@@ -231,13 +237,14 @@ body {
     -webkit-appearance: none;
     appearance: none;
     background: transparent;
+    outline: none;
 }
 
 /* つまみより左側（現在値まで）を塗り分ける。--fill-percentはJS側(updateTrackFill)が更新する */
 .volume-slider input[type="range"]::-webkit-slider-runnable-track {
     height: 20px;
     border-radius: 999px;
-    background: linear-gradient(180deg, var(--color-sky) 0%, var(--color-sky-deep) var(--fill-percent), #eee0c8 var(--fill-percent), #eee0c8 100%);
+    background: linear-gradient(90deg, var(--color-sky) 0%, var(--color-sky-deep) var(--fill-percent), #eee0c8 var(--fill-percent), #eee0c8 100%);
     border: 3px solid var(--color-ink);
 }
 
