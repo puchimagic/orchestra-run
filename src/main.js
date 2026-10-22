@@ -1,11 +1,12 @@
 import { SCENE } from './config.js';
-import { MainScene } from './scenes/main.js';
+import { TitleScene } from './scenes/title.js';
 import { GameDescriptionScene } from './scenes/game_description.js';
 import { RankingScene } from './scenes/ranking.js';
 import { InstrumentSelectScene } from './scenes/instrument_select.js';
 import { GameScene } from './scenes/game.js';
 import { GameOverScene } from './scenes/game_over.js';
 import { SettingsScene } from './scenes/settings.js';
+import { CreditsScene } from './scenes/credits.js';
 import { ScoreManager } from './score_manager.js';
 import { InputHandler } from './input_handler.js';
 import { soundPlayer } from './soundPlayer.js';
@@ -25,6 +26,7 @@ const SCENE_BGM_MAP = {
     [SCENE.RANKING]: 'home_bgm',
     [SCENE.GAME_DESCRIPTION]: 'home_bgm',
     [SCENE.SETTINGS]: 'home_bgm',
+    [SCENE.CREDITS]: 'home_bgm',
     [SCENE.GAME]: 'game_bgm',
     [SCENE.GAME_OVER]: 'gameover_bgm',
 };
@@ -120,11 +122,12 @@ class Game {
 
     init() {
         this.playerInput = new InputHandler();
-        this.scenes[SCENE.MAIN] = new MainScene(this);
+        this.scenes[SCENE.MAIN] = new TitleScene(this);
         this.scenes[SCENE.GAME_DESCRIPTION] = new GameDescriptionScene(this);
         this.scenes[SCENE.INSTRUMENT_SELECT] = new InstrumentSelectScene(this);
         this.scenes[SCENE.GAME_OVER] = new GameOverScene(this);
         this.scenes[SCENE.SETTINGS] = new SettingsScene(this);
+        this.scenes[SCENE.CREDITS] = new CreditsScene(this);
 
         this.changeScene(SCENE.MAIN);
         this.gameLoop();

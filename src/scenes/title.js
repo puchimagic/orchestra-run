@@ -2,7 +2,7 @@ import { SCENE } from '../config.js';
 import { Button } from '../ui/button.js';
 import { setSceneBackground } from '../ui/scene_utils.js';
 
-export class MainScene {
+export class TitleScene {
     constructor(game) {
         this.game = game;
     }
@@ -24,40 +24,45 @@ export class MainScene {
         sceneEl.appendChild(logo);
         this.logo = logo;
 
-        const btnWidth = 550;
-        const btnHeight = 150;
-        const gapX = 100;
-        const gapY = 50;
+        const btnWidth = 520;
+        const btnHeight = 125;
+        const gapX = 80;
+        const gapY = 24;
         const cx = this.game.baseWidth / 2;
 
-        // ボタン開始位置は常にロゴの実際の下端を基準にする（固定割合だと
-        // ロゴとの間に余計な空白ができたり、逆に重なったりするため）
-        const logoAspectRatio = 374 / 666; // assets/img/logo.png の height/width
+        const logoAspectRatio = 374 / 666;
         const logoHeight = logoWidth * logoAspectRatio;
         const logoBottom = logoTop + logoHeight;
-        const buttonsStartY = logoBottom - 220;
+        const buttonsStartY = logoBottom - 235;
 
         const leftColX = cx - btnWidth - gapX / 2;
         const rightColX = cx + gapX / 2;
 
         this.startButton = new Button(leftColX, buttonsStartY, btnWidth, btnHeight, '楽器選択');
-        this.descButton = new Button(leftColX, buttonsStartY + btnHeight + gapY, btnWidth, btnHeight, 'あそびかた');
         this.rankingButton = new Button(rightColX, buttonsStartY, btnWidth, btnHeight, 'ランキング');
-        this.settingsButton = new Button(rightColX, buttonsStartY + btnHeight + gapY, btnWidth, btnHeight, '設定');
+
+        const row2Y = buttonsStartY + btnHeight + gapY;
+        this.descButton = new Button(leftColX, row2Y, btnWidth, btnHeight, 'あそびかた');
+        this.settingsButton = new Button(rightColX, row2Y, btnWidth, btnHeight, '設定');
+
+        const row3Y = row2Y + btnHeight + gapY;
+        const creditBtnWidth = 480;
+        const creditBtnHeight = 105;
+        const creditBtnX = cx - creditBtnWidth / 2;
+        this.creditsButton = new Button(creditBtnX, row3Y, creditBtnWidth, creditBtnHeight, 'クレジット');
 
         this.startButton.onClick = () => this.game.changeScene(SCENE.INSTRUMENT_SELECT);
         this.descButton.onClick = () => this.game.changeScene(SCENE.GAME_DESCRIPTION);
         this.rankingButton.onClick = () => this.game.changeScene(SCENE.RANKING);
         this.settingsButton.onClick = () => this.game.changeScene(SCENE.SETTINGS);
+        this.creditsButton.onClick = () => this.game.changeScene(SCENE.CREDITS);
 
         this.startButton.mount(sceneEl);
         this.descButton.mount(sceneEl);
         this.rankingButton.mount(sceneEl);
         this.settingsButton.mount(sceneEl);
+        this.creditsButton.mount(sceneEl);
 
-        // BGM再生に必要な最初のユーザー操作待ちオーバーレイ。
-        // isGameActiveの切り替え自体はGame.setupActivationHandler(main.js)が
-        // window全体のpointerdownで一元管理しており、ここでは表示/非表示のみ担当する。
         this.overlay = document.createElement('div');
         this.overlay.style.position = 'absolute';
         this.overlay.style.left = '0';
@@ -93,3 +98,6 @@ export class MainScene {
         sceneEl.innerHTML = '';
     }
 }
+
+// 後方互換エイリアス
+export const MainScene = TitleScene;

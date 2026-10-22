@@ -6,6 +6,7 @@ export const SCENE = {
     GAME: 'game',
     GAME_OVER: 'game_over',
     SETTINGS: 'settings',
+    CREDITS: 'credits',
 };
 
 export const FONT_FAMILY = "'M PLUS Rounded 1c', sans-serif";
