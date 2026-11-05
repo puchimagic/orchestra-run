@@ -124,6 +124,23 @@ class TemporaryAnimation {
     }
 }
 
+// 木・切り株の当たり判定の形。画像(tree.png / stump.png)の不透明な部分を
+// 横帯ごとに測り、帯ごとの左右の端を長方形にしたもの。
+// 値は [左, 右, 上, 下] を描画サイズに対する割合で持つ（測定時の描画サイズ: 木 528x660, 切り株 204x264）。
+const TREE_HITBOX_SHAPE = [
+    // 葉の部分
+    [107, 392, 0, 30], [79, 410, 30, 60], [53, 459, 60, 90], [41, 477, 90, 120], [24, 491, 120, 150],
+    [17, 510, 150, 180], [22, 510, 180, 210], [76, 499, 210, 240], [113, 429, 240, 270],
+    // 幹と根元
+    [218, 308, 270, 300], [225, 300, 300, 570], [209, 313, 570, 600], [161, 363, 600, 660],
+].map(([l, r, t, b]) => [l / 528, r / 528, t / 660, b / 660]);
+const STUMP_HITBOX_SHAPE = [
+    // 画像の上36pxは透明なので、切り株の上面はそこから
+    [70, 136, 36, 48], [66, 140, 48, 156], [60, 140, 156, 180], [49, 156, 180, 204],
+    // 根の広がり
+    [31, 176, 204, 216], [6, 199, 216, 228], [1, 204, 228, 240], [56, 136, 240, 264],
+].map(([l, r, t, b]) => [l / 204, r / 204, t / 264, b / 264]);
+
 export class Tree {
     constructor(x, y, width, height, image, isBreakable = false, stumpImage = null) {
         this.x = x;
@@ -150,6 +167,17 @@ export class Tree {
 
     destroy() {
         if (this.el.parentNode) this.el.parentNode.removeChild(this.el);
+    }
+
+    // 現在の見た目（木 or 切り株）に合わせた当たり判定の長方形をワールド座標で返す
+    getHitboxes() {
+        const shape = this.image === this.stumpImage ? STUMP_HITBOX_SHAPE : TREE_HITBOX_SHAPE;
+        return shape.map(([l, r, t, b]) => ({
+            x: this.x + l * this.width,
+            y: this.y + t * this.height,
+            width: (r - l) * this.width,
+            height: (b - t) * this.height,
+        }));
     }
 
     break() {

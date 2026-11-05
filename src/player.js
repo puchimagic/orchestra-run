@@ -1,4 +1,4 @@
-import { BLOCK_SIZE, STUMP_WIDTH_IN_BLOCKS, PLATFORM_HEIGHT_IN_BLOCKS, PLAYER_INITIAL_SPEED, PLAYER_SPEED_INCREASE_RATE, INITIAL_SCROLL_SPEED } from './config.js'; // STUMP_WIDTH_IN_BLOCKSをインポート
+import { BLOCK_SIZE, PLATFORM_HEIGHT_IN_BLOCKS, PLAYER_INITIAL_SPEED, PLAYER_SPEED_INCREASE_RATE, INITIAL_SCROLL_SPEED } from './config.js';
 import { soundPlayer } from "./soundPlayer.js";
 
 const PLAYER_WIDTH_IN_BLOCKS = 2.0;
@@ -120,45 +120,27 @@ export class Player {
             }
         }
 
-        // ここから新しい衝突判定ロジック
-        let canMoveRight = true;
-        let canMoveLeft = true;
-
         // ステージ左端との衝突チェック
         if (this.x + this.vx < cameraX) {
-            canMoveLeft = false;
             this.vx = 0; // 左端にいる場合は左への移動をキャンセル
             this.x = cameraX; // 左端に固定
         }
 
-        // 木との衝突を予測して移動を制限
-        trees.forEach(tree => {
-            let cbox = { x: tree.x, width: tree.width };
-            if (tree.isBreakable) {
-                cbox.width = STUMP_WIDTH_IN_BLOCKS * BLOCK_SIZE;
-                cbox.x = tree.x + (tree.width - cbox.width) / 2;
-            }
+        // 木・切り株の当たり判定は、画像の見た目の形に合わせた長方形の集まり(Tree.getHitboxes)で行う
+        const treeBoxes = trees.flatMap(tree => tree.getHitboxes());
+        const overlapsX = (b) => this.x < b.x + b.width && this.x + this.width > b.x;
+        const overlapsY = (b) => this.y < b.y + b.height && this.y + this.height > b.y;
 
-            // プレイヤーが木とY軸方向で重なっているか
-            if (this.y < tree.y + tree.height && this.y + this.height > tree.y) {
-                // 右に移動しようとしていて、右側に木がある場合
-                if (this.vx > 0 && this.x + this.width + this.vx > cbox.x && this.x + this.width <= cbox.x) {
-                    canMoveRight = false;
-                }
-                // 左に移動しようとしていて、左側に木がある場合
-                if (this.vx < 0 && this.x + this.vx < cbox.x + cbox.width && this.x >= cbox.x + cbox.width) {
-                    canMoveLeft = false;
-                }
+        // 左右の移動: 木の形にめり込む手前でぴったり止める
+        treeBoxes.forEach(b => {
+            if (!overlapsY(b)) return;
+            if (this.vx > 0 && this.x + this.width <= b.x && this.x + this.width + this.vx > b.x) {
+                this.vx = b.x - (this.x + this.width);
+            }
+            if (this.vx < 0 && this.x >= b.x + b.width && this.x + this.vx < b.x + b.width) {
+                this.vx = (b.x + b.width) - this.x;
             }
         });
-
-        if (this.vx > 0 && !canMoveRight) {
-            this.vx = 0;
-        }
-        if (this.vx < 0 && !canMoveLeft) {
-            this.vx = 0;
-        }
-        // ここまで新しい衝突判定ロジック
 
         this.x += this.vx; // 調整されたvxでx座標を更新
 
@@ -167,26 +149,8 @@ export class Player {
         this.isMoving = this.vx !== 0;
 
         // isCrushed の判定は、ステージ左端と右側の木に挟まれた場合にのみ行う
-        let leftTreeCollision = false;
-        let rightTreeCollision = false;
-
-        // ステージ左端との衝突
-        if (this.x <= cameraX) {
-            leftTreeCollision = true;
-        }
-
-        // 右側の木との衝突
-        trees.forEach(tree => {
-            let cbox = { x: tree.x, width: tree.width };
-            if (tree.isBreakable) {
-                cbox.width = STUMP_WIDTH_IN_BLOCKS * BLOCK_SIZE;
-                cbox.x = tree.x + (tree.width - cbox.width) / 2;
-            }
-            if (this.x + this.width > cbox.x && this.x < cbox.x + cbox.width &&
-                this.y < tree.y + tree.height && this.y + this.height > tree.y) {
-                rightTreeCollision = true;
-            }
-        });
+        const leftTreeCollision = this.x <= cameraX;
+        const rightTreeCollision = treeBoxes.some(b => overlapsX(b) && overlapsY(b));
 
         if (leftTreeCollision && rightTreeCollision) {
             this.isCrushed = true;
@@ -194,18 +158,14 @@ export class Player {
             return;
         }
 
+        const prevTop = this.y;
+        const prevBottom = this.y + this.height;
         this.vy += GRAVITY;
         this.y += this.vy;
         this.onGround = false;
-        const allGrounds = [...platforms, ...trees];
-        allGrounds.forEach(ground => {
-            let cbox = { x: ground.x, width: ground.width };
-            if (ground.isBreakable) { // 木なら当たり判定を幹の幅に
-                cbox.width = STUMP_WIDTH_IN_BLOCKS * BLOCK_SIZE;
-                cbox.x = ground.x + (ground.width - cbox.width) / 2;
-            }
-            if (this.x < cbox.x + cbox.width &&
-                this.x + this.width > cbox.x &&
+        platforms.forEach(ground => {
+            if (this.x < ground.x + ground.width &&
+                this.x + this.width > ground.x &&
                 this.y + this.height > ground.y &&
                 this.y + this.height < ground.y + ground.height &&
                 this.vy >= 0) {
@@ -214,6 +174,34 @@ export class Player {
                 this.onGround = true;
             }
         });
+
+        // 木・切り株: 上から乗る（このフレームで上面を通り過ぎたもののうち一番高い面に着地）
+        if (this.vy >= 0) {
+            let landY = null;
+            treeBoxes.forEach(b => {
+                if (overlapsX(b) && prevBottom <= b.y + 0.01 && this.y + this.height >= b.y) {
+                    if (landY === null || b.y < landY) landY = b.y;
+                }
+            });
+            if (landY !== null) {
+                this.y = landY - this.height;
+                this.vy = 0;
+                this.onGround = true;
+            }
+        } else {
+            // 下からぶつかった場合（木の葉の下でジャンプした時など）は頭を止める
+            let ceilY = null;
+            treeBoxes.forEach(b => {
+                const bottom = b.y + b.height;
+                if (overlapsX(b) && prevTop >= bottom - 0.01 && this.y < bottom) {
+                    if (ceilY === null || bottom > ceilY) ceilY = bottom;
+                }
+            });
+            if (ceilY !== null) {
+                this.y = ceilY;
+                this.vy = 0;
+            }
+        }
 
         this.isJumping = !this.onGround;
 
