@@ -160,10 +160,6 @@ export class CreditsScene {
                             {
                                 name: 'ゲームオーバー警告音（「警告音・ビープ音1」）',
                                 pageUrl: 'https://soundeffect-lab.info/sound/battle/'
-                            },
-                            {
-                                name: 'ジャンプアクション音（「アニメジャンプ1」）',
-                                pageUrl: 'https://soundeffect-lab.info/sound/anime/'
                             }
                         ]
                     },

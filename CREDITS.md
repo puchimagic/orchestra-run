@@ -112,7 +112,6 @@
   | :--- | :--- | :--- |
   | `assets/sound/game/click.wav` | ボタン押下音 (決定・ボタン押下3) | [効果音ラボ ボタン・システム音ページ](https://soundeffect-lab.info/sound/button/) |
   | `assets/sound/game/gameOver.wav` | ゲームオーバー警告音 (警告音・ビープ音1) | [効果音ラボ 戦闘効果音ページ](https://soundeffect-lab.info/sound/battle/) |
-  | `assets/sound/game/jump.wav` | アクション (アニメジャンプ1) | [効果音ラボ 演出・アニメ効果音ページ](https://soundeffect-lab.info/sound/anime/) |
 
 ### 効果音G
 - **公式サイト**: [https://sfx-g.net/](https://sfx-g.net/)
@@ -121,6 +120,11 @@
   | ファイルパス | 用途 / 素材名 | 公式素材掲載ページURL |
   | :--- | :--- | :--- |
   | `assets/sound/game/tree_fall.wav` | 木が倒れる音 | [効果音G 木が倒れる音ページ](https://sfx-g.net/sound/%e6%9c%a8%e3%81%8c%e5%80%92%e3%82%8c%e3%82%8b%e9%9f%b3-3/) |
+
+### 出典確認中
+- `assets/sound/game/jump.wav`（ジャンプ音「ポンッ」）
+  - 2026/10/22 のコミットで効果音ラボ「アニメジャンプ1」に差し替えられていたが、もとのジャンプ音に戻した。
+  - 配布元・利用規約が未記載のため、Web公開前に出典を確認してこの一覧へ記載すること。
 
 ---
 
