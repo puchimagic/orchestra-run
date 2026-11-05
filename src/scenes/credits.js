@@ -68,10 +68,6 @@ export class CreditsScene {
                                 pageUrl: 'https://musmus.main.jp/bgm_13.html'
                             },
                             {
-                                name: 'ゲームプレイBGM: 「ひまわり森のだいぼうけん」 (BGM-058)',
-                                pageUrl: 'https://musmus.main.jp/bgm_14.html'
-                            },
-                            {
                                 name: 'ゲームオーバーBGM: 「ジングル002」 (JGL-002)',
                                 pageUrl: 'https://musmus.main.jp/jingle_03.html'
                             }
@@ -100,36 +96,6 @@ export class CreditsScene {
                         ]
                     },
                     {
-                        site: 'MMT STUDIO',
-                        author: 'MMT38',
-                        url: 'https://mmt38.info/',
-                        termsUrl: 'https://mmt38.info/',
-                        note: '商用・非商用問わずフリー利用可能。クレジット任意。',
-                        tracks: [
-                            {
-                                name: 'アコースティックギター コード音（Am, C, Em, F 全4コード）',
-                                pageUrl: 'https://mmt38.info/se/guitar/'
-                            },
-                            {
-                                name: 'トライアングル単音',
-                                pageUrl: 'https://mmt38.info/se/instrumental/'
-                            }
-                        ]
-                    },
-                    {
-                        site: '効果音ラボ',
-                        author: '',
-                        url: 'https://soundeffect-lab.info/',
-                        termsUrl: 'https://soundeffect-lab.info/agreement/',
-                        note: '完全無料・商用利用可能・クレジット不要。ゲーム組み込み規約準拠。',
-                        tracks: [
-                            {
-                                name: '和太鼓音源（「和太鼓でドン」「和太鼓でドドン」「和太鼓でカカッ」全3音）',
-                                pageUrl: 'https://soundeffect-lab.info/sound/anime/'
-                            }
-                        ]
-                    },
-                    {
                         site: 'Zvukogram',
                         author: '',
                         url: 'https://zvukogram.com/',
@@ -139,41 +105,6 @@ export class CreditsScene {
                             {
                                 name: 'タンバリン・パーカッション音（「Короткий хлопок」クラップ音、タンバリン単音）',
                                 pageUrl: 'https://zvukogram.com/category/zvuki-tamburina/'
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                title: '■ 効果音（システム・アクション）',
-                items: [
-                    {
-                        site: '効果音ラボ',
-                        author: '',
-                        url: 'https://soundeffect-lab.info/',
-                        termsUrl: 'https://soundeffect-lab.info/agreement/',
-                        note: '完全無料・商用利用可能・クレジット不要。',
-                        tracks: [
-                            {
-                                name: 'UI決定音（「決定・ボタン押下3」）',
-                                pageUrl: 'https://soundeffect-lab.info/sound/button/'
-                            },
-                            {
-                                name: 'ゲームオーバー警告音（「警告音・ビープ音1」）',
-                                pageUrl: 'https://soundeffect-lab.info/sound/battle/'
-                            }
-                        ]
-                    },
-                    {
-                        site: '効果音G',
-                        author: '',
-                        url: 'https://sfx-g.net/',
-                        termsUrl: 'https://sfx-g.net/',
-                        note: '商用・非商用問わずフリー利用可能。クレジット不要。',
-                        tracks: [
-                            {
-                                name: '木が倒れる音',
-                                pageUrl: 'https://sfx-g.net/sound/%e6%9c%a8%e3%81%8c%e5%80%92%e3%82%8c%e3%82%8b%e9%9f%b3-3/'
                             }
                         ]
                     }
