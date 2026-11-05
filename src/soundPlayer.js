@@ -8,10 +8,19 @@ export class SoundPool {
     this.volume = volume;
   }
 
-  loadSound(name, path, volumeMultiplier = 1.0) {
+  // playbackRate を1以外にすると、その分だけ音の高さを変えて再生する（ギターの移調用）
+  loadSound(name, path, volumeMultiplier = 1.0, playbackRate = 1.0) {
     const audio = new Audio(path);
     audio.customMultiplier = volumeMultiplier;
     audio.volume = Math.min(1.0, this.volume * volumeMultiplier);
+    if (playbackRate !== 1.0) {
+      // 速さを変えたときに音の高さも一緒に変わるようにする
+      audio.preservesPitch = false;
+      audio.mozPreservesPitch = false;
+      audio.webkitPreservesPitch = false;
+      audio.defaultPlaybackRate = playbackRate;
+      audio.playbackRate = playbackRate;
+    }
     this.sounds[name] = audio;
   }
 

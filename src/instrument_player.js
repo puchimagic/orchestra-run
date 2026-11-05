@@ -2,6 +2,19 @@ import { KEYBOARD_INSTRUMENT_CONFIG, INSTRUMENT_FOLDER_MAP } from './config.js';
 import { InputHandler } from './input_handler.js';
 import { SoundPool } from './soundPlayer.js';
 
+// ギターは、押したキーごとに決まったコードを鳴らす（ピアノの「キーごとに決まった音」と同じ考え方）。
+// 以前は4つのコードからランダムに選んでいたため、違うキーで同じ音・同じキーで違う音が鳴っていた。
+// 録音は Am / C / Em / F の4つ(track01〜04)なので、足りない Dm と G は録音の音の高さを変えて作る。
+// キーの並び U I O P J K → C Dm Em F G Am（ハ長調の基本の和音を、ピアノと同じく U=ド から順に）
+const GUITAR_KEY_CHORDS = {
+    U: { track: 2, semitones: 0 },   // C
+    I: { track: 1, semitones: 5 },   // Dm（Amを4度上げる）
+    O: { track: 3, semitones: 0 },   // Em
+    P: { track: 4, semitones: 0 },   // F
+    J: { track: 2, semitones: -5 },  // G（Cを4度下げる）
+    K: { track: 1, semitones: 0 },   // Am
+};
+
 // 楽器演奏サブシステム: キー入力の判定・和音一致判定・音源ロード/再生を担当する。
 export class InstrumentPlayer {
     constructor() {
@@ -44,12 +57,14 @@ export class InstrumentPlayer {
         const volumeMultiplier = instrumentConfig.volumeMultiplier || 1.0;
 
         if (this.instrumentName === 'ギター') {
-            // ギターの場合、maxChordの数だけ音源をロード
-            for (let i = 0; i < instrumentConfig.maxChord; i++) {
-                const soundName = `${this.instrumentDirName}_track${i + 1}`;
-                const soundPath = `assets/sound/${this.instrumentDirName}/track0${i + 1}.wav`;
-                this.sounds.loadSound(soundName, soundPath, volumeMultiplier);
-            }
+            // ギターの場合、キーごとに割り当てたコードを（必要なら音の高さを変えて）ロード
+            instrumentConfig.keys.forEach(key => {
+                const chord = GUITAR_KEY_CHORDS[key];
+                if (!chord) return;
+                const soundName = `${this.instrumentDirName}_${key}`;
+                const soundPath = `assets/sound/${this.instrumentDirName}/track0${chord.track}.wav`;
+                this.sounds.loadSound(soundName, soundPath, volumeMultiplier, Math.pow(2, chord.semitones / 12));
+            });
         } else {
             // その他の楽器の場合 (既存のロジック)
             instrumentConfig.keys.forEach((key, index) => {
@@ -89,11 +104,8 @@ export class InstrumentPlayer {
     // 一致成功時の効果音再生
     playSuccessSound(requiredKeys) {
         if (this.instrumentName === 'ギター') {
-            const trackNumber = Math.floor(Math.random() * this.instrument.maxChord);
-            if (trackNumber >= 0 && trackNumber < this.instrument.maxChord) {
-                const soundName = `${this.instrumentDirName}_track${trackNumber + 1}`;
-                this.sounds.playSound(soundName);
-            }
+            // 押したキーそれぞれのコードを鳴らす（2つ同時押しなら2つのコード）
+            requiredKeys.forEach(key => this.sounds.playSound(`${this.instrumentDirName}_${key}`));
         } else {
             // 押されたキーのインデックスに対応するトラックを再生（ピアノ含む全楽器共通）
             requiredKeys.forEach(key => {

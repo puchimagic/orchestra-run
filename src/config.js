@@ -59,7 +59,7 @@ export const TREE_TEXT_BACKGROUND_PADDING = 10; // 木に表示されるキー�
 const INSTRUMENT_BASE_CONFIG = {
     'トライアングル': {
         name: 'トライアングル',      // 画面に表示される楽器名
-        maxChord: 1,             // ギター演奏時に読み込む音声トラック数
+        maxChord: 1,             // （未使用）以前ギターのランダム再生に使っていたトラック数
         maxSimultaneousKeys: 1,  // 演奏時に同時押しが要求されるキーの最大数
         multiplier: 1.0,         // 獲得スコアの倍率
         volumeMultiplier: 1.0    // 音量の補正倍率 (1.0が基準)
