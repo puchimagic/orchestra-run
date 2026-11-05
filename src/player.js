@@ -6,6 +6,18 @@ const PLAYER_HEIGHT_IN_BLOCKS = 2.5;
 const JUMP_POWER = 34;
 const GRAVITY = 1.7;
 
+// 木・切り株との当たり判定に使うキャラの範囲（幅120pxの枠の中の位置。右向きのとき）。
+// 枠の端まで突き出たトランペットまで含めると、体が木から離れたところで止まって見えるため、内側で判定する。
+// - 左右にぶつかる判定: 枠の左右を TREE_SIDE_INSET ずつ内側に（向きを変えても位置がずれないよう左右対称）
+// - 上に乗る・頭をぶつける判定: 脚と体がある範囲 TREE_BODY_SPAN（向きに合わせて左右反転）
+const TREE_SIDE_INSET = 18;
+const TREE_BODY_SPAN = [8, 78];
+// キャラの絵は枠の下端にそろえて描く（足元が地面や切り株にぴったり付くように）。
+// そのぶん帽子の上と枠の上の間にすき間があるので、木との判定は見えている帽子の高さから行う。
+const HAT_TOP_STANDING = 16;  // 立ち・歩きの絵の帽子の上端（枠の上からのpx）
+const HAT_TOP_JUMPING = 36;   // ジャンプの絵の帽子の上端（ジャンプの絵は背が低い）
+const HAT_SPAN_JUMPING = [25, 63];  // ジャンプの絵の帽子の左右の範囲（右向きのとき）。葉に頭をぶつける判定に使う
+
 const WAIT_IMG = 'assets/img/character_wait.png';
 const JUMP_IMG = 'assets/img/character_jump.png';
 const WALK_IMG = 'assets/img/character_woke.png';
@@ -43,6 +55,8 @@ export class Player {
         this.el.style.top = '0';
         this.el.style.width = `${this.width}px`;
         this.el.style.height = `${this.height}px`;
+        // 木に近づいたとき、トランペットや体が木の手前に描かれるようにする
+        this.el.style.zIndex = '10';
 
         // background-imageの都度差し替えは、切り替え時にブラウザが
         // 一瞬デコードし直すことがあり歩行アニメーション中にキャラが
@@ -61,6 +75,7 @@ export class Player {
             img.style.width = '100%';
             img.style.height = '100%';
             img.style.objectFit = 'contain';
+            img.style.objectPosition = 'center bottom';
             img.style.display = 'none';
             this.el.appendChild(img);
             this.imageEls[key] = img;
@@ -128,17 +143,32 @@ export class Player {
 
         // 木・切り株の当たり判定は、画像の見た目の形に合わせた長方形の集まり(Tree.getHitboxes)で行う
         const treeBoxes = trees.flatMap(tree => tree.getHitboxes());
-        const overlapsX = (b) => this.x < b.x + b.width && this.x + this.width > b.x;
-        const overlapsY = (b) => this.y < b.y + b.height && this.y + this.height > b.y;
+        const sideLeft = () => this.x + TREE_SIDE_INSET;
+        const sideRight = () => this.x + this.width - TREE_SIDE_INSET;
+        const overlapsSideX = (b) => sideLeft() < b.x + b.width && sideRight() > b.x;
+        const overlapsBodyX = (b) => {
+            const [l, r] = this.facingDirection === -1
+                ? [this.x + this.width - TREE_BODY_SPAN[1], this.x + this.width - TREE_BODY_SPAN[0]]
+                : [this.x + TREE_BODY_SPAN[0], this.x + TREE_BODY_SPAN[1]];
+            return l < b.x + b.width && r > b.x;
+        };
+        const hatTop = () => this.y + (this.onGround ? HAT_TOP_STANDING : HAT_TOP_JUMPING);
+        const overlapsY = (b) => hatTop() < b.y + b.height && this.y + this.height > b.y;
+        const overlapsHatX = (b) => {
+            const [l, r] = this.facingDirection === -1
+                ? [this.x + this.width - HAT_SPAN_JUMPING[1], this.x + this.width - HAT_SPAN_JUMPING[0]]
+                : [this.x + HAT_SPAN_JUMPING[0], this.x + HAT_SPAN_JUMPING[1]];
+            return l < b.x + b.width && r > b.x;
+        };
 
         // 左右の移動: 木の形にめり込む手前でぴったり止める
         treeBoxes.forEach(b => {
             if (!overlapsY(b)) return;
-            if (this.vx > 0 && this.x + this.width <= b.x && this.x + this.width + this.vx > b.x) {
-                this.vx = b.x - (this.x + this.width);
+            if (this.vx > 0 && sideRight() <= b.x && sideRight() + this.vx > b.x) {
+                this.vx = b.x - sideRight();
             }
-            if (this.vx < 0 && this.x >= b.x + b.width && this.x + this.vx < b.x + b.width) {
-                this.vx = (b.x + b.width) - this.x;
+            if (this.vx < 0 && sideLeft() >= b.x + b.width && sideLeft() + this.vx < b.x + b.width) {
+                this.vx = (b.x + b.width) - sideLeft();
             }
         });
 
@@ -150,7 +180,7 @@ export class Player {
 
         // isCrushed の判定は、ステージ左端と右側の木に挟まれた場合にのみ行う
         const leftTreeCollision = this.x <= cameraX;
-        const rightTreeCollision = treeBoxes.some(b => overlapsX(b) && overlapsY(b));
+        const rightTreeCollision = treeBoxes.some(b => overlapsSideX(b) && overlapsY(b));
 
         if (leftTreeCollision && rightTreeCollision) {
             this.isCrushed = true;
@@ -158,7 +188,7 @@ export class Player {
             return;
         }
 
-        const prevTop = this.y;
+        const prevHatTop = this.y + HAT_TOP_JUMPING;   // 頭をぶつけるのは空中（ジャンプの絵）のときだけ
         const prevBottom = this.y + this.height;
         this.vy += GRAVITY;
         this.y += this.vy;
@@ -179,7 +209,7 @@ export class Player {
         if (this.vy >= 0) {
             let landY = null;
             treeBoxes.forEach(b => {
-                if (overlapsX(b) && prevBottom <= b.y + 0.01 && this.y + this.height >= b.y) {
+                if (overlapsBodyX(b) && prevBottom <= b.y + 0.01 && this.y + this.height >= b.y) {
                     if (landY === null || b.y < landY) landY = b.y;
                 }
             });
@@ -193,12 +223,12 @@ export class Player {
             let ceilY = null;
             treeBoxes.forEach(b => {
                 const bottom = b.y + b.height;
-                if (overlapsX(b) && prevTop >= bottom - 0.01 && this.y < bottom) {
+                if (overlapsHatX(b) && prevHatTop >= bottom - 0.01 && this.y + HAT_TOP_JUMPING < bottom) {
                     if (ceilY === null || bottom > ceilY) ceilY = bottom;
                 }
             });
             if (ceilY !== null) {
-                this.y = ceilY;
+                this.y = ceilY - HAT_TOP_JUMPING;
                 this.vy = 0;
             }
         }

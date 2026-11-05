@@ -331,6 +331,8 @@ body {
 
 .tree-key-text {
     position: absolute;
+    /* キャラ(z-index:10)が木の手前に描かれても、押すキーの表示は隠れないようにする */
+    z-index: 20;
     left: 0;
     top: 0;
     display: flex;
