@@ -2,7 +2,7 @@ import { SCENE, FONT_SIZE } from '../config.js';
 import { Button } from '../ui/button.js';
 import { VolumeSlider } from '../ui/volume_slider.js';
 import { soundPlayer } from '../soundPlayer.js';
-import { setSceneBackground, createCenteredText } from '../ui/scene_utils.js';
+import { setSceneBackground, addFloatingNotes, createCenteredText } from '../ui/scene_utils.js';
 
 export class SettingsScene {
     constructor(game) {
@@ -15,6 +15,7 @@ export class SettingsScene {
         const sceneEl = this.game.sceneElements[SCENE.SETTINGS];
         sceneEl.innerHTML = '';
         setSceneBackground(sceneEl, 'assets/img/bg_title.png');
+        addFloatingNotes(sceneEl);
 
         const width = this.game.baseWidth;
         const height = this.game.baseHeight;

@@ -1,6 +1,6 @@
 import { SCENE } from '../config.js';
 import { Button } from '../ui/button.js';
-import { setSceneBackground } from '../ui/scene_utils.js';
+import { setSceneBackground, addFloatingNotes } from '../ui/scene_utils.js';
 
 export class TitleScene {
     constructor(game) {
@@ -11,6 +11,7 @@ export class TitleScene {
         const sceneEl = this.game.sceneElements[SCENE.MAIN];
         sceneEl.innerHTML = '';
         setSceneBackground(sceneEl, 'assets/img/bg_title.png');
+        addFloatingNotes(sceneEl);
 
         const logoWidth = this.game.baseWidth * 0.8;
         const logoTop = 0;

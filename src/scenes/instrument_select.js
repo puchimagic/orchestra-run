@@ -1,6 +1,6 @@
 import { SCENE, FONT_SIZE, KEYBOARD_INSTRUMENT_CONFIG, INSTRUMENT_ORDER } from '../config.js';
 import { Button } from '../ui/button.js';
-import { setSceneBackground, createCenteredText } from '../ui/scene_utils.js';
+import { setSceneBackground, addFloatingNotes, createCenteredText } from '../ui/scene_utils.js';
 
 export class InstrumentSelectScene {
     constructor(game) {
@@ -12,6 +12,7 @@ export class InstrumentSelectScene {
         const sceneEl = this.game.sceneElements[SCENE.INSTRUMENT_SELECT];
         sceneEl.innerHTML = '';
         setSceneBackground(sceneEl, 'assets/img/bg_title.png');
+        addFloatingNotes(sceneEl);
 
         createCenteredText(sceneEl, '楽器をえらんでね', { top: 70, fontSize: FONT_SIZE.MEDIUM });
 

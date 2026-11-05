@@ -1,6 +1,6 @@
 import { SCENE, FONT_SIZE } from '../config.js';
 import { Button } from '../ui/button.js';
-import { setSceneBackground, createCenteredText } from '../ui/scene_utils.js';
+import { setSceneBackground, addFloatingNotes, createCenteredText } from '../ui/scene_utils.js';
 
 export class CreditsScene {
     constructor(game) {
@@ -11,6 +11,7 @@ export class CreditsScene {
         const sceneEl = this.game.sceneElements[SCENE.CREDITS];
         sceneEl.innerHTML = '';
         setSceneBackground(sceneEl, 'assets/img/bg_title.png');
+        addFloatingNotes(sceneEl);
 
         createCenteredText(sceneEl, 'クレジット（音声出典・権利情報）', { top: 60, fontSize: FONT_SIZE.MEDIUM });
 
